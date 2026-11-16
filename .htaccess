@@ -1,0 +1,24 @@
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # 1. Force HTTPS (Optional but Recommended)
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Reverse Proxy untuk API
+  # Mengarahkan semua request yang diawali /api ke Node.js server (localhost:3000)
+  # Pastikan modul proxy_http aktif di server Apache Anda
+  RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+
+  # 3. Reverse Proxy untuk CDN (File Statis dari Backend)
+  # Mengarahkan request /cdn ke Node.js static handler
+  RewriteRule ^cdn/(.*)$ http://127.0.0.1:3000/cdn/$1 [P,L]
+
+  # 4. Handle React Frontend (SPA Routing)
+  # Jika request bukan file fisik atau folder fisik, arahkan ke index.html
+  # Ini agar refresh page di halaman dalam (misal /dashboard) tidak 404
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>

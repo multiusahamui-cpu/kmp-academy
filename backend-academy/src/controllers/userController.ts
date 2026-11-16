@@ -1,0 +1,270 @@
+
+import { Request, Response } from "express";
+import { successResponse, errorResponse } from "../utils/response";
+import { db } from "../db";
+import { enrollments, wishlists, courses, users, transactions, bankAccounts } from "../schema/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
+
+// --- ENROLLMENT ---
+export const enrollCourse = async (req: any, res: any) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+
+    // 1. Get Course Price
+    const course = await db.query.courses.findFirst({
+        where: (courses, { eq }) => eq(courses.id, courseId)
+    });
+
+    if (!course) return errorResponse(res, "Course not found", 404);
+
+    // 2. Check Balance
+    const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId)
+    });
+
+    if ((user?.walletBalance || 0) < course.price) {
+        return errorResponse(res, "Saldo tidak mencukupi. Silakan Top Up.", 400);
+    }
+
+    // 3. Transaction Logic (Debit User)
+    await db.transaction(async (tx) => {
+        // Create Enrollment
+        await tx.insert(enrollments).values({
+            userId,
+            courseId
+        }).onConflictDoNothing();
+
+        // Deduct Balance
+        await tx.update(users)
+            .set({ walletBalance: (user?.walletBalance || 0) - course.price })
+            .where(eq(users.id, userId));
+
+        // Create Transaction Record
+        await tx.insert(transactions).values({
+            userId,
+            amount: course.price,
+            type: "DEBIT",
+            status: "SUCCESS",
+            description: `Pembelian Kursus: ${course.title}`,
+            referenceId: course.id
+        });
+    });
+
+    successResponse(res, null, "Enrolled successfully");
+  } catch (error) {
+    errorResponse(res, "Failed to enroll", 500, error);
+  }
+};
+
+export const getMyCourses = async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    // Join Enrollment with Course
+    const myCourses = await db.select({
+        enrollment: enrollments,
+        course: courses
+    })
+    .from(enrollments)
+    .innerJoin(courses, eq(enrollments.courseId, courses.id))
+    .where(eq(enrollments.userId, userId));
+
+    successResponse(res, myCourses, "My courses");
+  } catch (error) {
+    errorResponse(res, "Failed to fetch enrolled courses", 500, error);
+  }
+};
+
+// --- WISHLIST ---
+export const getMyWishlist = async (req: any, res: any) => {
+    try {
+        const userId = req.user.id;
+        const myWishlist = await db.select({
+            id: wishlists.id,
+            addedAt: wishlists.createdAt,
+            course: courses
+        })
+        .from(wishlists)
+        .innerJoin(courses, eq(wishlists.courseId, courses.id))
+        .where(eq(wishlists.userId, userId))
+        .orderBy(desc(wishlists.createdAt));
+
+        successResponse(res, myWishlist, "User Wishlist");
+    } catch (error) {
+        errorResponse(res, "Failed to fetch wishlist", 500, error);
+    }
+};
+
+export const toggleWishlist = async (req: any, res: any) => {
+    try {
+        const { courseId } = req.params;
+        const userId = req.user.id;
+
+        const existing = await db.select().from(wishlists)
+            .where(and(eq(wishlists.userId, userId), eq(wishlists.courseId, courseId)))
+            .limit(1);
+
+        if (existing.length > 0) {
+            // Remove
+            await db.delete(wishlists)
+                .where(and(eq(wishlists.userId, userId), eq(wishlists.courseId, courseId)));
+            return successResponse(res, { status: 'REMOVED' }, "Removed from wishlist");
+        } else {
+            // Add
+            await db.insert(wishlists).values({
+                userId,
+                courseId
+            });
+            return successResponse(res, { status: 'ADDED' }, "Added to wishlist");
+        }
+    } catch (error) {
+        errorResponse(res, "Failed to update wishlist", 500, error);
+    }
+};
+
+// --- CONTENT & LEARNING ---
+export const getCourseContent = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    // TODO: Check enrollment logic here
+    successResponse(res, { modules: [] }, "Course Content");
+  } catch (error) {
+    errorResponse(res, "Access denied", 403, error);
+  }
+};
+
+export const updateProgress = async (req: any, res: any) => {
+  successResponse(res, null, "Progress updated");
+};
+
+// --- EXAMS & CERTIFICATES ---
+export const startExam = async (req: any, res: any) => {
+  try {
+    const { courseId } = req.params;
+    successResponse(res, { questions: [], timer: 60 }, "Exam started");
+  } catch (error) {
+    errorResponse(res, "Failed to start exam", 500, error);
+  }
+};
+
+export const submitExam = async (req: any, res: any) => {
+  successResponse(res, { score: 85, passed: true }, "Exam submitted");
+};
+
+export const getCertificates = async (req: any, res: any) => {
+  successResponse(res, [], "My Certificates");
+};
+
+export const downloadCertificate = async (req: any, res: any) => {
+  res.setHeader("Content-Type", "application/pdf");
+  res.send("PDF_BUFFER_MOCK");
+};
+
+// --- REAL WALLET IMPLEMENTATION ---
+
+export const getWallet = async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    
+    // 1. Get Balance
+    const user = await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+        columns: { walletBalance: true }
+    });
+
+    // 2. Get Transactions
+    const history = await db.select().from(transactions)
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.createdAt));
+
+    // 3. Get Bank Accounts
+    const banks = await db.select().from(bankAccounts)
+        .where(eq(bankAccounts.userId, userId));
+
+    successResponse(res, { 
+        balance: user?.walletBalance || 0, 
+        history, 
+        banks 
+    }, "Wallet data retrieved");
+  } catch (error) {
+    errorResponse(res, "Failed to fetch wallet", 500, error);
+  }
+};
+
+export const topUpWallet = async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    const { amount, method } = req.body;
+
+    // In a real scenario, this initiates a PG request.
+    // For now, we simulate an INSTANT SUCCESS TopUp for the MVP to function.
+    
+    await db.transaction(async (tx) => {
+       // Update User Balance
+       await tx.execute(sql`UPDATE academy.users SET wallet_balance = wallet_balance + ${amount} WHERE id = ${userId}`);
+       
+       // Record Transaction
+       await tx.insert(transactions).values({
+          userId,
+          amount,
+          type: "CREDIT",
+          status: "SUCCESS",
+          description: `Top Up Saldo via ${method || 'Virtual Account'}`,
+          paymentMethod: method || 'VA'
+       });
+    });
+
+    successResponse(res, { status: "SUCCESS" }, "Top up successful");
+  } catch (error) {
+    errorResponse(res, "Top up failed", 500, error);
+  }
+};
+
+export const withdrawWallet = async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    const { amount, bankId } = req.body;
+
+    const user = await db.query.users.findFirst({ where: (users, { eq }) => eq(users.id, userId) });
+    if ((user?.walletBalance || 0) < amount) {
+        return errorResponse(res, "Insufficient balance", 400);
+    }
+
+    await db.transaction(async (tx) => {
+        // Deduct Balance
+        await tx.execute(sql`UPDATE academy.users SET wallet_balance = wallet_balance - ${amount} WHERE id = ${userId}`);
+        
+        // Record Transaction
+        await tx.insert(transactions).values({
+           userId,
+           amount,
+           type: "DEBIT",
+           status: "PENDING", // Withdrawals usually need approval or batch processing
+           description: "Penarikan Dana (Withdrawal)",
+           referenceId: bankId
+        });
+    });
+
+    successResponse(res, null, "Withdrawal requested");
+  } catch (error) {
+    errorResponse(res, "Withdraw failed", 500, error);
+  }
+};
+
+export const addBankAccount = async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    const { bankName, accountNumber, holderName } = req.body;
+    
+    await db.insert(bankAccounts).values({
+        userId,
+        bankName,
+        accountNumber,
+        holderName
+    });
+
+    successResponse(res, null, "Bank account added");
+  } catch (error) {
+    errorResponse(res, "Failed to add bank", 500, error);
+  }
+};

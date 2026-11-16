@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KMP - ADNG ACADEMY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Plus Jakarta Sans (Headings) & JetBrains Mono (Content) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class", // Enable manual dark mode toggle
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "sans-serif"], // Used for Headings/UI Titles
+              mono: ['"JetBrains Mono"', "monospace"], // Used for Content/Materi
+            },
+            colors: {
+              kodman: {
+                50: "#f0f9ff",
+                100: "#e0f2fe",
+                200: "#bae6fd",
+                300: "#7dd3fc",
+                400: "#38bdf8",
+                500: "#0ea5e9", // Sky blue-ish
+                600: "#0284c7",
+                700: "#0369a1",
+                800: "#075985",
+                900: "#0c4a6e", // Deep Navy
+                950: "#082f49",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Base styles for smooth transition */
+      body {
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@^19.2.4",
+          "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+          "react/": "https://esm.sh/react@^19.2.4/",
+          "lucide-react": "https://esm.sh/lucide-react@^0.564.0",
+          "axios": "https://esm.sh/axios@^1.13.5",
+          "express": "https://esm.sh/express@^5.2.1",
+          "cors": "https://esm.sh/cors@^2.8.6",
+          "dotenv": "https://esm.sh/dotenv@^17.3.1",
+          "helmet": "https://esm.sh/helmet@^8.1.0",
+          "jsonwebtoken": "https://esm.sh/jsonwebtoken@^9.0.3",
+          "pg": "https://esm.sh/pg@^8.18.0",
+          "morgan": "https://esm.sh/morgan@^1.10.1",
+          "drizzle-orm/": "https://esm.sh/drizzle-orm@^0.45.1/",
+          "drizzle-kit": "https://esm.sh/drizzle-kit@^0.31.9",
+          "path": "https://esm.sh/path@^0.12.7",
+          "multer": "https://esm.sh/multer@^2.0.2",
+          "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
+          "vite": "https://esm.sh/vite@^7.3.1",
+          "drizzle-orm": "https://esm.sh/drizzle-orm@^0.45.1",
+          "bcryptjs": "https://esm.sh/bcryptjs@^3.0.3",
+          "fs": "https://esm.sh/fs@^0.0.1-security"
+        }
+      }
+    </script>
+  </head>
+  <body
+    class="bg-gray-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-mono"
+  >
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

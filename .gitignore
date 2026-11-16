@@ -1,0 +1,67 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.env
+.env.example
+.env.production.template
+*.zip
+7z*
+repo
+locations
+training-data
+.claude/
+backups/
+.backup_sys/
+*.stackdump
+
+# ── Kertas kerja konversi data (CSV/XLSX di AKAR folder) ────────────────
+# Berkas konversi dari aplikasi lama ditaruh di akar folder dan TIDAK boleh
+# masuk repositori, dengan tiga alasan:
+#   1. Ukuran — pelanggan.csv 279 MB & pelanggan-sakti.xlsx 46 MB melewati
+#      batas 100 MB per berkas di GitHub; push akan ditolak mentah-mentah.
+#   2. Data pribadi — migrasi-anggota-ditolak.csv memuat nama & nomor HP
+#      17.455 anggota. Repositori kode bukan tempat menyimpan data anggota.
+#   3. Sifatnya sekali pakai — hasil kerja konversi, bukan bagian aplikasi.
+#
+# Pola /*.csv hanya mengenai AKAR folder, bukan subfolder, sehingga CSV yang
+# memang bagian aplikasi (mis. di scripts/adhoc/data/) tetap ikut ter-commit.
+/*.csv
+/*.xlsx
+/*.xls
+
+# PENGECUALIAN — locations.csv BUKAN kertas kerja.
+# Dibaca server/seed.ts (baris ~873) dan scripts/import-locations.ts untuk
+# mengisi tabel `locations` (data wilayah Indonesia). Tanpa berkas ini, clone
+# bersih tidak bisa di-seed. JANGAN dipindahkan ke daftar abaikan.
+!/locations.csv
+
+migrasi-anggota-ringkasan.json
+backfill-referral-ewallet-ringkasan.json
+
+# Keluaran skrip diagnosa (sementara, tidak perlu diarsipkan)
+diagnose-*.png
+preview-sk.pdf
+preview-*.png
+
+# Proyek ini memakai pnpm (pnpm-lock.yaml). package-lock.json yang lahir dari
+# `npm install` di lokal bisa membuat versi dependensi lokal berbeda dari
+# produksi — sumber klasik "jalan di lokal, rusak di server".
+package-lock.json
+
+scripts/adhoc/data/
+
+_to_delete/
+Claude outputs/
+
+*.bak-*
+pnpm-workspace.yaml
+portal-pengurus/dist/
+portal-personalia/dist/
+portal-keuangan/dist/
+portal-operasional/dist/
+portal-admin/dist/
+portal-loker/dist/
+portal-finance/dist/
