@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import * as schema from "../schema/schema";
 import * as dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 if (!process.env.DATABASE_URL) {
   console.error("❌ FATAL: DATABASE_URL is missing in environment variables.");

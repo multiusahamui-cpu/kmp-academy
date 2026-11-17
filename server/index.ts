@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const PORT = Number(process.env.PORT) || 5100;
 const HOST = process.env.HOST || "127.0.0.1";
