@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserRole, User, UserStatus } from '../../types';
+import RoleApplications from './RoleApplications';
 import { Search, Filter, Edit, Trash2, Shield, User as UserIcon, Star, GraduationCap, Plus, Save, X } from 'lucide-react';
 
 const MOCK_USERS: User[] = [
@@ -14,7 +15,7 @@ const MOCK_USERS: User[] = [
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
-  const [activeTab, setActiveTab] = useState<'INTERNAL' | 'MENTOR' | 'CREATOR' | 'STUDENT'>('STUDENT');
+  const [activeTab, setActiveTab] = useState<'INTERNAL' | 'MENTOR' | 'CREATOR' | 'STUDENT' | 'DAFTAR_TUNGGU'>('STUDENT');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Edit State
@@ -90,7 +91,7 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-4 gap-2 mb-6 p-1 bg-gray-100 dark:bg-slate-800 rounded-lg">
+      <div className="grid grid-cols-5 gap-2 mb-6 p-1 bg-gray-100 dark:bg-slate-800 rounded-lg">
          <button 
             onClick={() => setActiveTab('INTERNAL')}
             className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'INTERNAL' ? 'bg-white dark:bg-slate-700 shadow-sm text-kodman-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
@@ -115,8 +116,15 @@ const UserManagement: React.FC = () => {
          >
             <UserIcon size={16} className="mr-2 hidden md:block" /> Student <span className="ml-1 hidden md:inline text-[10px] bg-gray-200 dark:bg-slate-600 px-1.5 rounded-full text-gray-600 dark:text-slate-300">S</span>
          </button>
+         <button 
+            onClick={() => setActiveTab('DAFTAR_TUNGGU')}
+            className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'DAFTAR_TUNGGU' ? 'bg-white dark:bg-slate-700 shadow-sm text-green-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
+         >
+            Daftar Tunggu
+         </button>
       </div>
 
+      {activeTab === 'DAFTAR_TUNGGU' ? <RoleApplications /> : (
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex gap-4">
@@ -196,6 +204,7 @@ const UserManagement: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
       {/* Edit Modal */}
       {editingUser && (

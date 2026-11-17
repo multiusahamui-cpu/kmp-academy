@@ -28,12 +28,15 @@ interface WalletBank {
 // Interface for API Data
 interface WalletData {
    balance: number;
+   isMember: boolean;
+   mode: 'SIMPANAN_SUKARELA' | 'VA_INFO';
+   paymentsEnabled: boolean;
    history: WalletHistoryItem[]; // Raw DB transaction objects
    banks: WalletBank[];
 }
 
 const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
-  const [walletData, setWalletData] = useState<WalletData>({ balance: 0, history: [], banks: [] });
+  const [walletData, setWalletData] = useState<WalletData>({ balance: 0, isMember: false, mode: 'VA_INFO', paymentsEnabled: false, history: [], banks: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(false);
   
@@ -147,7 +150,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                
                <div className="relative z-10">
                   <p className="text-kodman-100 text-xs font-bold uppercase tracking-wider mb-2">
-                     Saldo Efektif
+                     {walletData.mode === 'SIMPANAN_SUKARELA' ? 'Simpanan Sukarela' : 'Saldo Efektif'}
                   </p>
                   <div className="flex items-center justify-between mb-4">
                      <h3 className="text-3xl font-bold tracking-tight font-mono">
@@ -167,11 +170,18 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                      </button>
                   </div>
 
+                  <p className="mb-4 text-xs text-kodman-100 leading-relaxed">
+                     {walletData.mode === 'SIMPANAN_SUKARELA'
+                        ? 'Dompet Academy Anda adalah Simpanan Sukarela di digitalcoop.id dan disinkronkan dari saldo asli Anda di sana.'
+                        : 'Pembayaran kursus dilakukan langsung lewat Virtual Account setelah payment gateway aktif.'}
+                     {!walletData.paymentsEnabled && ' Top up dan penarikan belum tersedia.'}
+                  </p>
+
                   <div className="grid grid-cols-2 gap-3">
                      {role === UserRole.STUDENT ? (
                         <button 
                            onClick={() => setIsTopUpOpen(true)}
-                           disabled={isProcessing}
+                           disabled={isProcessing || !walletData.paymentsEnabled}
                            className="py-2.5 bg-white text-kodman-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
                         >
                            <Plus size={16} className="mr-2" /> Top Up
@@ -179,7 +189,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                      ) : (
                         <button 
                            onClick={handleWithdraw}
-                           disabled={isProcessing}
+                           disabled={isProcessing || !walletData.paymentsEnabled}
                            className="py-2.5 bg-white text-kodman-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
                         >
                            <RefreshCw size={16} className="mr-2" /> Withdraw

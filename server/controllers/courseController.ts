@@ -1,13 +1,21 @@
 
 import { successResponse, errorResponse } from "../utils/response";
+import { db } from "../db";
+import { courses } from "../schema/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 // --- PUBLIC / STUDENT ---
 
-export const getCourses = async (req: any, res: any) => {
+export const getCourses = async (_req: any, res: any) => {
   try {
-    const { category: _category, search: _search, sort: _sort } = req.query;
-    // TODO: Implementation filtering with Drizzle
-    successResponse(res, [], "List of courses");
+    const rows = await db.select({
+        course: courses,
+        studentsEnrolled: sql<number>`(SELECT count(*)::int FROM academy.enrollments e WHERE e.course_id = ${courses.id})`,
+    })
+    .from(courses)
+    .where(eq(courses.status, "PUBLISHED"))
+    .orderBy(desc(courses.createdAt));
+    successResponse(res, rows.map((r) => ({ ...r.course, studentsEnrolled: r.studentsEnrolled })), "List of courses");
   } catch (error) {
     errorResponse(res, "Failed to fetch courses", 500, error);
   }

@@ -1,10 +1,13 @@
 
-import React, { useState } from 'react';
-import { MOCK_COURSES, MOCK_CATEGORIES } from '../../constants';
-import { Play, ShoppingBag, Heart, Filter, X, Award, Ticket, Key, CheckCircle, Info } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { MOCK_CATEGORIES } from '../../constants';
+import { Play, Heart, Filter, X, Award, Ticket, Key, CheckCircle, Info } from 'lucide-react';
 import { CourseType, Course, WishlistItem } from '../../types';
 import ExamRoom from './ExamRoom';
 import CourseDetailModal from '../../components/CourseDetailModal';
+import { courseApi, userApi } from '../../services/api';
+import { ApiCourse, mapApiCourse } from '../../services/mappers';
+import { notifyProfileChanged, useProfile } from '../../services/profile';
 
 interface StudentCatalogProps {
   enrolledOnly?: boolean;
@@ -17,7 +20,6 @@ interface StudentCatalogProps {
 
 const StudentCatalog: React.FC<StudentCatalogProps> = ({ 
    enrolledOnly = false, 
-   addToCart, 
    onOpenLearning = (_: string) => {},
    wishlistItems = [],
    onToggleWishlist = (_: Course) => {}
@@ -26,6 +28,38 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeExamCourseId, setActiveExamCourseId] = useState<string | null>(null);
   
+  const { profile } = useProfile();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [progressById, setProgressById] = useState<Record<string, number>>({});
+  const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [notice, setNotice] = useState('');
+
+  const loadCourses = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const mine = await userApi.getMyCourses();
+      const rows: { enrollment: { progress?: number | null }; course: ApiCourse }[] = mine.data?.data ?? [];
+      setEnrolledIds(new Set(rows.map((r) => r.course.id)));
+      setProgressById(Object.fromEntries(rows.map((r) => [r.course.id, r.enrollment.progress ?? 0])));
+      if (enrolledOnly) {
+        setCourses(rows.map((r) => mapApiCourse(r.course)));
+      } else {
+        const all = await courseApi.getAll();
+        setCourses(((all.data?.data ?? []) as ApiCourse[]).map(mapApiCourse));
+      }
+    } catch {
+      setCourses([]);
+      setNotice('Gagal memuat kursus. Coba muat ulang halaman.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [enrolledOnly]);
+
+  useEffect(() => {
+    loadCourses();
+  }, [loadCourses]);
+
   // Detail Modal State
   const [selectedCourseForDetail, setSelectedCourseForDetail] = useState<Course | null>(null);
 
@@ -35,14 +69,9 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   const [redeemSuccessMsg, setRedeemSuccessMsg] = useState('');
 
   // Filter Logic
-  const filteredCourses = MOCK_COURSES.filter(c => {
-    // 1. Basic Status Filter
-    if (enrolledOnly) {
-       // Mock logic: assuming first course is enrolled and course 6
-       if (c.id !== '1' && c.id !== '6') return false; 
-    } else {
-       if (c.status !== 'PUBLISHED') return false;
-    }
+  const filteredCourses = courses.filter(c => {
+    // 1. Basic Status Filter (daftar dari server sudah hanya kursus terbit)
+    if (!enrolledOnly && c.status !== 'PUBLISHED') return false;
 
     // 2. Category Filter
     if (selectedCategory) {
@@ -52,10 +81,23 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
     return true;
   });
 
-  const handleAddToCart = (e: React.MouseEvent | null, course: Course) => {
+  // Sebelum payment gateway aktif hanya kursus gratis yang bisa diikuti.
+  const handleEnroll = async (e: React.MouseEvent | null, course: Course) => {
     if (e) e.stopPropagation();
-    if (addToCart) {
-       addToCart(course);
+    if (course.price > 0) {
+       setNotice('Kursus berbayar segera hadir. Pembayaran akan dilakukan lewat Virtual Account setelah payment gateway aktif.');
+       return;
+    }
+    try {
+       const res = await userApi.enroll(course.id);
+       const card: string | null = res.data?.data?.cardNumber ?? null;
+       setNotice(card ? `Berhasil mengikuti kursus. Kartu Student Anda terbit: ${card}` : 'Berhasil mengikuti kursus.');
+       setSelectedCourseForDetail(null);
+       notifyProfileChanged();
+       loadCourses();
+    } catch (err: unknown) {
+       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+       setNotice(msg || 'Gagal mengikuti kursus.');
     }
   };
 
@@ -82,7 +124,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   };
 
   if (activeExamCourseId) {
-     return <ExamRoom courseId={activeExamCourseId} studentName="User Kodman" onExit={() => setActiveExamCourseId(null)} />;
+     return <ExamRoom courseId={activeExamCourseId} studentName={profile?.name ?? ""} onExit={() => setActiveExamCourseId(null)} />;
   }
 
   return (
@@ -93,10 +135,17 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
             course={selectedCourseForDetail}
             isOpen={!!selectedCourseForDetail}
             onClose={() => setSelectedCourseForDetail(null)}
-            onAddToCart={(c) => handleAddToCart(null, c)}
+            onAddToCart={(c) => handleEnroll(null, c)}
             onToggleWishlist={(c) => handleWishlist(null, c)}
             isInWishlist={wishlistItems.some(item => item.courseId === selectedCourseForDetail.id)}
          />
+      )}
+
+      {notice && (
+         <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+            <span>{notice}</span>
+            <button onClick={() => setNotice('')} aria-label="Tutup"><X size={16} /></button>
+         </div>
       )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -194,10 +243,16 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                </div>
             )}
 
-            {filteredCourses.length === 0 ? (
+            {isLoading ? (
+               <div className="text-center py-12 text-gray-500 dark:text-slate-400">Memuat kursus...</div>
+            ) : filteredCourses.length === 0 ? (
                <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-lg border border-dashed border-gray-300 dark:border-slate-700">
-                  <p className="text-gray-500 dark:text-slate-400">Tidak ada kursus ditemukan untuk kategori ini.</p>
-                  <button onClick={() => setSelectedCategory(null)} className="mt-2 text-kodman-600 font-medium hover:underline">Lihat Semua Kursus</button>
+                  <p className="text-gray-500 dark:text-slate-400">
+                     {enrolledOnly ? 'Anda belum mengikuti kursus apa pun.' : 'Tidak ada kursus ditemukan.'}
+                  </p>
+                  {selectedCategory && (
+                     <button onClick={() => setSelectedCategory(null)} className="mt-2 text-kodman-600 font-medium hover:underline">Lihat Semua Kursus</button>
+                  )}
                </div>
             ) : (
                <div className={`grid grid-cols-1 ${enrolledOnly ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
@@ -227,12 +282,14 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                        >
                                           <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
                                        </button>
-                                       <button 
-                                       onClick={(e) => handleAddToCart(e, course)}
-                                       className="p-2 bg-kodman-600 rounded-full text-white hover:bg-kodman-700 hover:scale-110 transition" title="Tambah ke Keranjang"
-                                       >
-                                          <ShoppingBag size={20} />
-                                       </button>
+                                       {course.price === 0 && !enrolledIds.has(course.id) && (
+                                          <button 
+                                          onClick={(e) => handleEnroll(e, course)}
+                                          className="p-2 bg-kodman-600 rounded-full text-white hover:bg-kodman-700 hover:scale-110 transition" title="Ikuti Kursus Gratis"
+                                          >
+                                             <Play size={20} />
+                                          </button>
+                                       )}
                                     </>
                                  ) : (
                                     <button 
@@ -248,7 +305,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                            <div className="p-5 flex-1 flex flex-col">
                               <div className="flex justify-between mb-2">
                                  <span className={`text-xs font-bold uppercase tracking-wider ${course.type === CourseType.CERTIFICATION ? 'text-amber-600' : 'text-gray-500 dark:text-slate-400'}`}>{course.type}</span>
-                                 {enrolledOnly && <span className="text-xs text-green-600 font-bold">In Progress</span>}
+                                 {enrolledOnly && <span className="text-xs text-green-600 font-bold">Sedang Berjalan</span>}
                               </div>
                               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-tight">{course.title}</h3>
                               
@@ -274,11 +331,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                     ) : (
                                        <div>
                                           <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
-                                             <div className="bg-kodman-500 h-1.5 rounded-full" style={{width: '95%'}}></div>
+                                             <div className="bg-kodman-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
                                           </div>
                                           <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400">
-                                             <span>95% Complete</span>
-                                             <span>Sesi Akhir</span>
+                                             <span>{progressById[course.id] ?? 0}% Selesai</span>
                                           </div>
                                        </div>
                                     )}
@@ -307,7 +363,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                               ) : (
                                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
                                     <span className="font-bold text-gray-900 dark:text-white">
-                                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}
+                                       {course.price === 0
+                                          ? 'Gratis'
+                                          : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}
+                                       {course.price > 0 && <span className="ml-2 text-[10px] font-medium text-gray-400">Segera hadir</span>}
                                     </span>
                                     <button 
                                        onClick={(e) => openDetailModal(e, course)}

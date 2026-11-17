@@ -15,6 +15,11 @@ router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getAllUs
 router.put("/users/:id/role", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.updateUserRole);
 router.delete("/users/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.deleteUser);
 
+// Daftar tunggu calon mentor/creator & kartu
+router.get("/applications", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listRoleApplications);
+router.post("/applications/:id/decision", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.decideRoleApplication);
+router.post("/users/:id/card", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.issueUserCard);
+
 // Approvals
 router.get("/approvals/:type", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getApprovals);
 router.post("/approvals/:type/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.processApproval);

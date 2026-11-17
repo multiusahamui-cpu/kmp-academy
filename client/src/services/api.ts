@@ -92,7 +92,17 @@ export const userApi = {
   getWallet: () => api.get('/users/wallet'),
   topUpWallet: (data: { amount: number, method: string }) => api.post('/users/wallet/topup', data),
   withdrawWallet: (data: { amount: number, bankId: string }) => api.post('/users/wallet/withdraw', data),
+  getNotifications: () => api.get('/users/notifications'),
+  markNotificationRead: (id: string) => api.post(`/users/notifications/${id}/read`),
   addBankAccount: (data: { bankName: string, accountNumber: string, holderName: string }) => api.post('/users/wallet/bank-account', data),
+};
+
+export const adminApi = {
+  // Daftar tunggu calon mentor/creator (Admin/Superadmin)
+  listApplications: (status = 'PENDING') => api.get('/admin/applications', { params: { status } }),
+  decideApplication: (id: string, action: 'APPROVE' | 'REJECT', note?: string) =>
+    api.post(`/admin/applications/${id}/decision`, { action, note }),
+  issueCard: (userId: string) => api.post(`/admin/users/${userId}/card`),
 };
 
 export const reviewApi = {

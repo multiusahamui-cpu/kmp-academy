@@ -15,6 +15,13 @@
       "when": 1794883396371,
       "tag": "0001_eager_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794887789700,
+      "tag": "0002_useful_barracuda",
+      "breakpoints": true
     }
   ]
 }

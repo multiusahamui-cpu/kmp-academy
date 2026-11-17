@@ -14,6 +14,7 @@ import {
 import { MOCK_COURSES } from "../../constants";
 import { ManagementReport, UserRole } from "../../types";
 import IdentityCard from "../../components/IdentityCard";
+import { useProfile } from "../../services/profile";
 
 // Mock Reports (Usually fetched from API)
 const MOCK_REPORTS: ManagementReport[] = [
@@ -35,6 +36,7 @@ const MOCK_REPORTS: ManagementReport[] = [
 ];
 
 const DirectorDashboard: React.FC = () => {
+  const { profile } = useProfile();
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [reports, setReports] = useState(MOCK_REPORTS);
 
@@ -61,7 +63,7 @@ const DirectorDashboard: React.FC = () => {
             Panel Eksekutif Direktur
           </h1>
           <p className="text-gray-500 dark:text-slate-400 text-lg leading-relaxed">
-            Selamat datang, Bapak <strong>Ulpermadi Ibrahim</strong>. Sistem
+            Selamat datang{profile?.name ? <>, <strong>{profile.name}</strong></> : null}. Sistem
             operasional berjalan optimal. Silakan tinjau laporan manajemen dan
             performa partner di bawah ini.
           </p>
@@ -80,12 +82,10 @@ const DirectorDashboard: React.FC = () => {
         <div className="order-1 md:order-2 md:col-span-3 lg:col-span-1 flex justify-center w-full">
           <IdentityCard
             role={UserRole.DIRECTOR}
-            name="Ulpermadi Ibrahim"
-            avatarUrl="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            joinDate={new Date("2023-01-01")}
-            isActive={true}
-            hasPurchased={true}
-            sequence={1}
+            name={profile?.name ?? ""}
+            avatarUrl={profile?.avatar ?? undefined}
+            cardNumber={profile?.cardNumber}
+            issuedAt={profile?.cardIssuedAt ? new Date(profile.cardIssuedAt) : null}
           />
         </div>
       </div>

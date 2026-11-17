@@ -1,5 +1,5 @@
 
-import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique } from "drizzle-orm/pg-core";
 
 // --- 1. Define Custom Schema 'academy' ---
 export const academySchema = pgSchema("academy");
@@ -34,6 +34,12 @@ export const courseStatusEnum = academySchema.enum("course_status", [
   "REJECTED"
 ]);
 
+export const applicationStatusEnum = academySchema.enum("application_status", [
+  "PENDING",
+  "APPROVED",
+  "REJECTED"
+]);
+
 export const transactionTypeEnum = academySchema.enum("transaction_type", [
   "DEBIT", // Uang Keluar (Beli Kursus, Withdraw)
   "CREDIT" // Uang Masuk (Topup, Royalti, Fee)
@@ -60,6 +66,18 @@ export const users = academySchema.table("users", {
   bio: text("bio"),
   memberSequence: integer("member_sequence").generatedAlwaysAsIdentity(),
   walletBalance: integer("wallet_balance").default(0).notNull(), // Real Wallet Balance
+  // Kartu identitas: nomor dibekukan saat terbit (lihat shared/card.ts). Kosong = belum terbit.
+  cardNumber: varchar("card_number", { length: 24 }).unique(),
+  cardIssuedAt: timestamp("card_issued_at"),
+  // Tautan ke digitalcoop.id (diisi jembatan Fase C/D). Terisi = anggota resmi.
+  digitalcoopUserId: varchar("digitalcoop_user_id", { length: 64 }).unique(),
+  memberNumber: varchar("member_number", { length: 32 }),
+  kycStatus: varchar("kyc_status", { length: 20 }),
+  wilayah: varchar("wilayah", { length: 100 }),
+  consentAt: timestamp("consent_at"),
+  consentVersion: varchar("consent_version", { length: 20 }),
+  linkedAt: timestamp("linked_at"),
+  lastSyncedAt: timestamp("last_synced_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -104,7 +122,7 @@ export const enrollments = academySchema.table("enrollments", {
   enrolledAt: timestamp("enrolled_at").defaultNow(),
   completedAt: timestamp("completed_at"),
   lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
-});
+}, (t) => [unique("enrollments_user_course_unique").on(t.userId, t.courseId)]);
 
 // Wishlists Table
 export const wishlists = academySchema.table("wishlists", {
@@ -186,4 +204,50 @@ export const systemConfigHistory = academySchema.table("system_config_history", 
   changedBy: uuid("changed_by").references(() => users.id, { onDelete: "set null" }),
   changedByName: varchar("changed_by_name", { length: 255 }),
   changedAt: timestamp("changed_at").defaultNow().notNull(),
+});
+
+// --- KARTU, DAFTAR TUNGGU, NOTIFIKASI, PREFERENSI ---
+
+// Riwayat penerbitan kartu (tidak pernah diubah/dihapus oleh aplikasi).
+export const cardHistory = academySchema.table("card_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  cardNumber: varchar("card_number", { length: 24 }).notNull(),
+  prefix: varchar("prefix", { length: 1 }).notNull(),
+  event: varchar("event", { length: 20 }).notNull(), // ISSUED | REPLACED
+  issuedBy: uuid("issued_by").references(() => users.id, { onDelete: "set null" }), // kosong = otomatis (student)
+  issuedByName: varchar("issued_by_name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Daftar tunggu calon mentor/creator (diisi dari digitalcoop.id, diputuskan Admin/Superadmin).
+export const roleApplications = academySchema.table("role_applications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  requestedRole: varchar("requested_role", { length: 20 }).notNull(), // CREATOR | MENTOR
+  profile: text("profile").notNull(),
+  experience: text("experience").notNull(),
+  status: applicationStatusEnum("status").default("PENDING").notNull(),
+  decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at"),
+  decisionNote: text("decision_note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notifications = academySchema.table("notifications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userPreferences = academySchema.table("user_preferences", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).primaryKey(),
+  theme: varchar("theme", { length: 10 }).default("light").notNull(),
+  language: varchar("language", { length: 5 }).default("id").notNull(),
+  notifyEmail: boolean("notify_email").default(true).notNull(),
+  notifyInApp: boolean("notify_in_app").default(true).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -27,6 +27,10 @@ router.post("/wallet/topup", user.topUpWallet);
 router.post("/wallet/withdraw", user.withdrawWallet);
 router.post("/wallet/bank-account", user.addBankAccount);
 
+// Notifikasi
+router.get("/notifications", user.getNotifications);
+router.post("/notifications/:id/read", user.markNotificationRead);
+
 // Certificate
 router.get("/certificates", user.getCertificates);
 router.get("/certificates/:id/download", user.downloadCertificate);

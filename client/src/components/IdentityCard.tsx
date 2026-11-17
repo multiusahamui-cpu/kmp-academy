@@ -2,30 +2,23 @@ import React from 'react';
 import { UserRole } from '../types';
 import { GraduationCap, Volume2, ShieldCheck, Star } from 'lucide-react';
 import { APP_NAME } from '../constants';
+import { CARD_PENDING_TOOLTIP, cardPrefixFor, shadowCardNumber } from '@shared/card';
 
 interface IdentityCardProps {
   role: UserRole;
   name: string;
   avatarUrl?: string;
-  joinDate: Date; // Member Since
-  isActive: boolean; // For Mentor/Creator approval check
-  hasPurchased: boolean; // For Student purchase check
-  sequence?: number; // Optional sequence number from DB
+  cardNumber?: string | null; // Nomor kartu beku dari server; kosong = belum terbit
+  issuedAt?: Date | null; // Tanggal terbit kartu
 }
 
 const IdentityCard: React.FC<IdentityCardProps> = ({ 
   role, 
   name, 
   avatarUrl, 
-  joinDate, 
-  isActive, 
-  hasPurchased,
-  sequence = 1
+  cardNumber,
+  issuedAt
 }) => {
-  
-  // 1. Visibility Logic
-  if (role === UserRole.STUDENT && !hasPurchased) return null;
-  if ((role === UserRole.MENTOR || role === UserRole.CREATOR) && !isActive) return null;
 
   // 2. Style & Prefix Configuration based on A, C, M, S Requirement
   const getCardStyle = () => {
@@ -96,16 +89,21 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
   };
 
   const style = getCardStyle();
-  const year = joinDate.getFullYear().toString().slice(-2);
-  const month = (joinDate.getMonth() + 1).toString().padStart(2, '0');
-  
-  // Format Sequence: Pad with zeros based on role type importance? Or just standard 5-6 digits.
-  // Standard format: PREFIX.YY.MM.SEQUENCE (e.g., A.23.10.00001)
-  const sequenceStr = sequence.toString().padStart(6, '0');
-  const cardNumber = `${style.prefix}.${year}.${month}.${sequenceStr}`;
+
+  // Kartu belum terbit: tampil sebagai bayangan dengan nomor urut bertanda bintang.
+  const isPending = !cardNumber;
+  const displayNumber = cardNumber ?? shadowCardNumber(cardPrefixFor(role) ?? style.prefix, new Date());
+  const issued = issuedAt ?? null;
+  const sinceLabel = issued
+    ? `${(issued.getMonth() + 1).toString().padStart(2, '0')}/${issued.getFullYear().toString().slice(-2)}`
+    : '--/--';
+  const pendingHint = role === UserRole.STUDENT
+    ? CARD_PENDING_TOOLTIP
+    : 'Kartu Anda belum tersedia. Kartu diterbitkan oleh Admin setelah pengajuan Anda disetujui.';
 
   return (
-    <div className="w-full max-w-[420px] aspect-[1.586/1] rounded-2xl shadow-2xl relative overflow-hidden transition-transform hover:scale-105 duration-300 mx-auto font-sans group">
+    <div className="relative w-full max-w-[420px] mx-auto group">
+    <div className={`w-full aspect-[1.586/1] rounded-2xl shadow-2xl relative overflow-hidden transition-transform hover:scale-105 duration-300 font-sans ${isPending ? 'grayscale opacity-70' : ''}`}>
        {/* Background */}
        <div className={`absolute inset-0 ${style.bg} transition-all duration-500`}></div>
        
@@ -157,17 +155,23 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
           {/* BOTTOM ROW: Footer */}
           <div className="flex justify-between items-end z-10">
              <div className="flex flex-col gap-1">
-                <p className={`font-mono text-xl sm:text-2xl font-bold tracking-widest drop-shadow-md shadow-black/10 ${style.isPremium ? 'text-yellow-100' : ''}`}>{cardNumber}</p>
+                <p className={`font-mono text-xl sm:text-2xl font-bold tracking-widest drop-shadow-md shadow-black/10 ${style.isPremium ? 'text-yellow-100' : ''}`}>{displayNumber}</p>
                 <p className={`font-sans text-xs font-bold uppercase tracking-wider opacity-90 truncate max-w-[200px] ${style.isPremium ? 'text-yellow-500' : ''}`}>{name}</p>
              </div>
 
              <div className="text-right flex flex-col items-end">
-                <p className="text-[7px] uppercase font-bold opacity-75 mb-0.5">Member Sejak</p>
-                <p className="font-mono text-sm font-bold tracking-wide">{month}/{year}</p>
+                <p className="text-[7px] uppercase font-bold opacity-75 mb-0.5">Terbit</p>
+                <p className="font-mono text-sm font-bold tracking-wide">{sinceLabel}</p>
              </div>
           </div>
 
        </div>
+    </div>
+    {isPending && (
+      <div role="tooltip" className="pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-2 translate-y-full z-20 w-64 rounded-lg bg-gray-900 px-3 py-2 text-center text-xs text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+        {pendingHint}
+      </div>
+    )}
     </div>
   );
 };

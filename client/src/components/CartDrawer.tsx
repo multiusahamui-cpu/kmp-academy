@@ -214,9 +214,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                 </span>
               </div>
               
-              <button className="w-full py-3 bg-kodman-600 text-white rounded-lg font-bold flex items-center justify-center hover:bg-kodman-700 transition shadow-lg">
-                Checkout Sekarang <ArrowRight size={18} className="ml-2" />
+              <button disabled className="w-full py-3 bg-gray-300 dark:bg-slate-700 text-gray-600 dark:text-slate-400 rounded-lg font-bold flex items-center justify-center cursor-not-allowed">
+                Pembayaran segera hadir <ArrowRight size={18} className="ml-2" />
               </button>
+              <p className="text-[11px] text-center text-gray-500 dark:text-slate-400">Kursus berbayar dibayar lewat Virtual Account setelah payment gateway aktif.</p>
             </div>
           )}
         </div>

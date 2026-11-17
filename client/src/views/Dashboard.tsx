@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { MOCK_COURSES } from "../constants";
 import IdentityCard from "../components/IdentityCard";
+import { useProfile } from "../services/profile";
 
 interface DashboardProps {
   role: UserRole;
@@ -32,19 +33,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   onOpenLearning = () => {},
   wishlistItems = [],
 }) => {
-  // --- MOCK USER DATA FOR IDENTITY CARD ---
-  // In a real app, this comes from Global State / Context / API
-  const mockUser = {
-    name: role === UserRole.DIRECTOR ? "Ulpermadi Ibrahim" : "User Kodman",
-    avatarUrl:
-      role === UserRole.DIRECTOR
-        ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-        : undefined,
-    joinDate: new Date("2024-01-15"), // Example Join Date
-    // Simulation Logic:
-    isActive: true, // For Mentor/Creator
-    hasPurchased: true, // For Student (Set to true to show card for demo)
-  };
+  const { profile } = useProfile();
+  const displayName = profile?.name ?? "";
+  const cardIssuedAt = profile?.cardIssuedAt ? new Date(profile.cardIssuedAt) : null;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -83,15 +74,21 @@ const Dashboard: React.FC<DashboardProps> = ({
         {/* Welcome Text Section */}
         <div className="order-2 md:order-1 md:col-span-2 lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 h-full flex flex-col justify-center min-h-[180px]">
           <h1 className="font-sans text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {getGreeting()}, {role}!
+            {getGreeting()}{displayName ? `, ${displayName}` : ""}!
           </h1>
           <p className="text-gray-500 dark:text-slate-400 text-lg leading-relaxed">
             {role === UserRole.STUDENT &&
-              "Kartu Member Anda aktif! Terus belajar untuk meningkatkan skill."}
+              (profile?.cardNumber
+                ? "Kartu Student Anda aktif! Terus belajar untuk meningkatkan skill."
+                : "Ikuti kursus pertama Anda untuk mendapatkan Kartu Student.")}
             {role === UserRole.MENTOR &&
-              "Identitas Profesional Mentor Anda telah aktif. Selamat mengajar!"}
+              (profile?.cardNumber
+                ? "Identitas Profesional Mentor Anda telah aktif. Selamat mengajar!"
+                : "Kartu Mentor Anda menunggu diterbitkan oleh Admin.")}
             {role === UserRole.CREATOR &&
-              "Kartu Creator Gold Anda siap. Terus berkarya!"}
+              (profile?.cardNumber
+                ? "Kartu Creator Anda siap. Terus berkarya!"
+                : "Kartu Creator Anda menunggu diterbitkan oleh Admin.")}
             {role === UserRole.DIRECTOR &&
               "Selamat datang di Panel Eksekutif, Pak Direktur."}
             {(role === UserRole.ADMIN_SYSTEM || role === UserRole.SUPERADMIN) &&
@@ -112,11 +109,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="order-1 md:order-2 md:col-span-3 lg:col-span-1 flex justify-center w-full">
           <IdentityCard
             role={role}
-            name={mockUser.name}
-            avatarUrl={mockUser.avatarUrl}
-            joinDate={mockUser.joinDate}
-            isActive={mockUser.isActive}
-            hasPurchased={mockUser.hasPurchased}
+            name={displayName}
+            avatarUrl={profile?.avatar ?? undefined}
+            cardNumber={profile?.cardNumber}
+            issuedAt={cardIssuedAt}
           />
         </div>
       </div>

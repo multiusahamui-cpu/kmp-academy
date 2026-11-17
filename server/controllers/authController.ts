@@ -136,7 +136,11 @@ export const getProfile = async (req: any, res: any) => {
         name: user.name, 
         email: user.email, 
         role: user.role, 
-        avatar: user.avatar 
+        avatar: user.avatar,
+        joinedAt: user.createdAt,
+        cardNumber: user.cardNumber,
+        cardIssuedAt: user.cardIssuedAt,
+        isMember: Boolean(user.digitalcoopUserId),
     }, "Profile data");
   } catch (error) {
     errorResponse(res, "Failed to fetch profile", 500);
