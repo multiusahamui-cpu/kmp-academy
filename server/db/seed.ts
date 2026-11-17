@@ -30,21 +30,21 @@ const seedDatabase = async () => {
     console.log("Creating Users...");
     
     // Check if superadmin exists to avoid duplicates
-    const superAdminExists = await db.select().from(users).where(sql`${users.email} = 'superadmin@kodman.id'`);
+    const superAdminExists = await db.select().from(users).where(sql`${users.email} = 'superadmin@digitalcoop.id'`);
     
     if (superAdminExists.length === 0) {
         const newUsers = await db.insert(users).values([
         // Internal Management
         { 
             name: 'Super Admin', 
-            email: 'superadmin@kodman.id', 
+            email: 'superadmin@digitalcoop.id', 
             password: hashedPassword, 
             role: 'SUPERADMIN', 
             status: 'ACTIVE' 
         },
         { 
             name: 'Ulpermadi Ibrahim', 
-            email: 'ulpermadi@kodman.id', 
+            email: 'ulpermadi@digitalcoop.id', 
             password: hashedPassword, 
             role: 'DIRECTOR', 
             status: 'ACTIVE',
@@ -52,7 +52,7 @@ const seedDatabase = async () => {
         },
         { 
             name: 'System Admin', 
-            email: 'admin@kodman.id', 
+            email: 'admin@digitalcoop.id', 
             password: hashedPassword, 
             role: 'ADMIN_SYSTEM', 
             status: 'ACTIVE' 
@@ -60,14 +60,14 @@ const seedDatabase = async () => {
         // Providers
         { 
             name: 'Budi Santoso', 
-            email: 'budi@creator.kodman.id', 
+            email: 'budi.creator@digitalcoop.id', 
             password: hashedPassword, 
             role: 'CREATOR', 
             status: 'ACTIVE' 
         },
         { 
             name: 'Siti Aminah', 
-            email: 'siti@mentor.kodman.id', 
+            email: 'siti.mentor@digitalcoop.id', 
             password: hashedPassword, 
             role: 'MENTOR', 
             status: 'ACTIVE' 
@@ -75,7 +75,7 @@ const seedDatabase = async () => {
         // Students
         { 
             name: 'Andi Pratama', 
-            email: 'student@kodman.id', 
+            email: 'student@digitalcoop.id', 
             password: hashedPassword, 
             role: 'STUDENT', 
             status: 'ACTIVE' 

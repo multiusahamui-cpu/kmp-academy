@@ -161,7 +161,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
                   </label>
                   <input
                     type="email"
-                    defaultValue="user@kodman.id"
+                    defaultValue="user@digitalcoop.id"
                     disabled
                     className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400 rounded bg-gray-50"
                   />

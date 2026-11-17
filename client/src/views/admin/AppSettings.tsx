@@ -23,7 +23,7 @@ const MOCK_AVAILABLE_STUDENTS: User[] = [
   {
     id: "s1",
     name: "Ahmad Calon",
-    email: "ahmad@kodman.id",
+    email: "ahmad@digitalcoop.id",
     role: UserRole.STUDENT,
     memberSequence: 501,
     status: UserStatus.ACTIVE,
@@ -31,7 +31,7 @@ const MOCK_AVAILABLE_STUDENTS: User[] = [
   {
     id: "s2",
     name: "Dewi Admina",
-    email: "dewi@kodman.id",
+    email: "dewi@digitalcoop.id",
     role: UserRole.STUDENT,
     memberSequence: 502,
     status: UserStatus.ACTIVE,
@@ -39,7 +39,7 @@ const MOCK_AVAILABLE_STUDENTS: User[] = [
   {
     id: "s3",
     name: "Budi Manajemen",
-    email: "budi.m@kodman.id",
+    email: "budi.m@digitalcoop.id",
     role: UserRole.STUDENT,
     memberSequence: 503,
     status: UserStatus.ACTIVE,
@@ -270,7 +270,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({ isPolicyMode = false }) => {
               <div className="flex items-center bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded px-3 py-2 text-gray-600 dark:text-slate-400">
                 <Lock size={12} className="mr-2" />
                 <span className="truncate">
-                  postgres://kodman_user:*****@ep-aged-wood.aws.neon.tech/kodman_db
+                  postgres://academy:*****@ep-aged-wood.aws.neon.tech/garuda_academy
                 </span>
               </div>
             </div>
@@ -390,7 +390,7 @@ const AppSettings: React.FC<AppSettingsProps> = ({ isPolicyMode = false }) => {
               Public Access URL
             </span>
             <span className="font-mono text-sm bg-white dark:bg-slate-900 px-2 py-1 rounded border dark:border-slate-600 text-gray-600 dark:text-slate-300">
-              https://cdn.kodman.id/files/
+              https://academy.digitalcoop.id/cdn/
             </span>
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700">

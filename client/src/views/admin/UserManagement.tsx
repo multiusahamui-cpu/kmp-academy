@@ -7,9 +7,9 @@ const MOCK_USERS: User[] = [
   { id: '2', name: 'Siti Aminah', email: 'siti@example.com', role: UserRole.MENTOR, status: UserStatus.ACTIVE, memberSequence: 2 },
   { id: '3', name: 'John Doe', email: 'john@gmail.com', role: UserRole.STUDENT, status: UserStatus.SUSPENDED, memberSequence: 105 },
   { id: '4', name: 'Jane Smith', email: 'jane@yahoo.com', role: UserRole.STUDENT, status: UserStatus.ACTIVE, memberSequence: 106 },
-  { id: '5', name: 'Super Admin', email: 'root@kodman.id', role: UserRole.SUPERADMIN, status: UserStatus.ACTIVE, memberSequence: 1 },
-  { id: '6', name: 'System Admin', email: 'admin@kodman.id', role: UserRole.ADMIN_SYSTEM, status: UserStatus.ACTIVE, memberSequence: 2 },
-  { id: '7', name: 'Ulpermadi Ibrahim', email: 'ulpermadi@kodman.id', role: UserRole.DIRECTOR, status: UserStatus.ACTIVE, memberSequence: 1 },
+  { id: '5', name: 'Super Admin', email: 'root@digitalcoop.id', role: UserRole.SUPERADMIN, status: UserStatus.ACTIVE, memberSequence: 1 },
+  { id: '6', name: 'System Admin', email: 'admin@digitalcoop.id', role: UserRole.ADMIN_SYSTEM, status: UserStatus.ACTIVE, memberSequence: 2 },
+  { id: '7', name: 'Ulpermadi Ibrahim', email: 'ulpermadi@digitalcoop.id', role: UserRole.DIRECTOR, status: UserStatus.ACTIVE, memberSequence: 1 },
 ];
 
 const UserManagement: React.FC = () => {

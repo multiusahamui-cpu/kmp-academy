@@ -166,7 +166,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
 
             <div className="absolute bottom-4 right-4 text-[10px] text-gray-400 font-mono">
               Certificate ID: {data.id} • Type: {data.courseType} • Verify at
-              kodman.academy/verify
+              academy.digitalcoop.id/verify
             </div>
           </div>
         </div>

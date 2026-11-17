@@ -16,10 +16,10 @@ export const APP_NAME = "KMP - ADNG ACADEMY";
 
 export const CONTACT_INFO = {
   lead: "Ulpermadi Ibrahim",
-  emailLead: "ulpermadi@kodman.id",
+  emailLead: "ulpermadi@digitalcoop.id",
   wa: "+628128089916",
-  emailSupport: "support.academy@kodman.id",
-  emailAdmin: "admin.academy@kodman.id",
+  emailSupport: "support.academy@digitalcoop.id",
+  emailAdmin: "admin.academy@digitalcoop.id",
   address:
     "Jl. Talang Betutu No. 7A, Kelurahan Kebon Melati, Kecamatan Tanah Abang, Jakarta Pusat",
 };
@@ -55,7 +55,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "u1",
     name: "Budi Santoso",
-    email: "budi@creator.kodman.id",
+    email: "budi.creator@digitalcoop.id",
     role: UserRole.CREATOR,
     status: UserStatus.ACTIVE,
     memberSequence: 1,
@@ -65,7 +65,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "u2",
     name: "Siti Aminah",
-    email: "siti@mentor.kodman.id",
+    email: "siti.mentor@digitalcoop.id",
     role: UserRole.MENTOR,
     status: UserStatus.ACTIVE,
     memberSequence: 2,
@@ -85,7 +85,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "u9",
     name: "Ulpermadi Ibrahim",
-    email: "ulpermadi@kodman.id",
+    email: "ulpermadi@digitalcoop.id",
     role: UserRole.DIRECTOR,
     status: UserStatus.ACTIVE,
     memberSequence: 1,
@@ -98,7 +98,7 @@ export const MOCK_USERS: User[] = [
   {
     id: "u3",
     name: "Andi Pratama",
-    email: "andi@student.kodman.id",
+    email: "andi.student@digitalcoop.id",
     role: UserRole.STUDENT,
     status: UserStatus.ACTIVE,
     memberSequence: 101,

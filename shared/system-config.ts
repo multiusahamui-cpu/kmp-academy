@@ -47,7 +47,7 @@ export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
     key: "support_email", group: "umum", type: "email", isPublic: true,
     label: "Email bantuan",
     description: "Alamat email yang ditampilkan kepada pengguna untuk bantuan.",
-    defaultValue: "support.academy@kodman.id", maxLength: 120,
+    defaultValue: "support.academy@digitalcoop.id", maxLength: 120,
   },
   {
     key: "support_whatsapp", group: "umum", type: "phone", isPublic: true,
