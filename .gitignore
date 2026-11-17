@@ -5,7 +5,7 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
-.env.example
+!.env.example
 .env.production.template
 *.zip
 7z*
@@ -65,3 +65,12 @@ portal-operasional/dist/
 portal-admin/dist/
 portal-loker/dist/
 portal-finance/dist/
+
+# Artefak build/typecheck lokal
+*.tsbuildinfo
+/vite.config.js
+/vite.config.d.ts
+
+# Log & backup deploy di VPS
+logs/
+.backups/
