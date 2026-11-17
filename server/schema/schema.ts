@@ -167,3 +167,23 @@ export type User = typeof users.$inferSelect;
 export type UserRole = User['role'];
 export type Transaction = typeof transactions.$inferSelect;
 export type BankAccount = typeof bankAccounts.$inferSelect;
+
+// --- KONFIGURASI SISTEM (Superadmin) ---
+// Hanya menyimpan nilai yang sudah diubah; daftar parameter & nilai bawaan ada di shared/system-config.ts.
+export const systemConfig = academySchema.table("system_config", {
+  key: varchar("key", { length: 64 }).primaryKey(),
+  value: text("value").notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Jejak audit setiap perubahan konfigurasi (tidak pernah diubah/dihapus oleh aplikasi).
+export const systemConfigHistory = academySchema.table("system_config_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: varchar("key", { length: 64 }).notNull(),
+  oldValue: text("old_value"),
+  newValue: text("new_value").notNull(),
+  changedBy: uuid("changed_by").references(() => users.id, { onDelete: "set null" }),
+  changedByName: varchar("changed_by_name", { length: 255 }),
+  changedAt: timestamp("changed_at").defaultNow().notNull(),
+});

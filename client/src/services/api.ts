@@ -50,9 +50,18 @@ api.interceptors.response.use(
 // --- API SERVICES ---
 
 export const authApi = {
-  login: (credentials: Record<string, unknown>) => api.post('/auth/login', credentials),
-  register: (data: Record<string, unknown>) => api.post('/auth/register', data),
+  login: (credentials: { email: string; password: string }) => api.post('/auth/login', credentials),
+  register: (data: { name: string; email: string; password: string }) => api.post('/auth/register', data),
   getProfile: () => api.get('/auth/me'),
+};
+
+export const configApi = {
+  // Publik (tanpa login)
+  getPublic: () => api.get('/config/public'),
+  // Khusus Superadmin
+  list: () => api.get('/superadmin/config'),
+  update: (key: string, value: string) => api.put(`/superadmin/config/${encodeURIComponent(key)}`, { value }),
+  history: () => api.get('/superadmin/config/history'),
 };
 
 export const courseApi = {

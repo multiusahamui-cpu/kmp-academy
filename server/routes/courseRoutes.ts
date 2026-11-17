@@ -3,6 +3,8 @@ import multer from "multer";
 import path from "path";
 import * as course from "../controllers/courseController";
 import { authenticateToken, requireRole } from "../middleware/auth";
+import { errorResponse } from "../utils/response";
+import { getConfigInt } from "../lib/system-config";
 
 const router = Router();
 
@@ -16,7 +18,22 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-const upload = multer({ storage });
+// Batas ukuran mengikuti Konfigurasi Sistem (max_upload_mb), dibaca per unggahan.
+const uploadSingleFile = async (req: any, res: any, next: any) => {
+  try {
+    const maxMb = await getConfigInt("max_upload_mb");
+    const upload = multer({ storage, limits: { fileSize: maxMb * 1024 * 1024 } });
+    upload.single("file")(req, res, (err: any) => {
+      if (err?.code === "LIMIT_FILE_SIZE") {
+        return errorResponse(res, `Ukuran berkas melebihi batas ${maxMb} MB`, 413);
+      }
+      if (err) return next(err);
+      next();
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Public
 router.get("/", course.getCourses);
@@ -31,6 +48,6 @@ router.post("/:id/modules", authenticateToken, requireRole(["CREATOR", "ADMIN_SY
 router.post("/:id/publish", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.requestPublish); // New
 
 // Upload (General for Creators/Mentors)
-router.post("/upload", authenticateToken, requireRole(["CREATOR", "MENTOR", "ADMIN_SYSTEM"]), upload.single("file") as any, course.uploadContent);
+router.post("/upload", authenticateToken, requireRole(["CREATOR", "MENTOR", "ADMIN_SYSTEM"]), uploadSingleFile, course.uploadContent);
 
-export default router;
+export default router;

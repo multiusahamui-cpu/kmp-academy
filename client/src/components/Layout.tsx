@@ -26,10 +26,12 @@ import {
   Gavel,
   LogIn,
   Info,
+  SlidersHorizontal,
 } from "lucide-react";
-import { APP_NAME, CONTACT_INFO } from "../constants";
+import { CONTACT_INFO } from "../constants";
 import CartDrawer from "./CartDrawer";
 import InformationCenterModal from "./InformationCenterModal";
+import { usePublicConfig } from "../services/publicConfig";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -118,6 +120,9 @@ export const Layout: React.FC<LayoutProps> = ({
     }
   };
 
+  // Nama situs & kontak bantuan mengikuti Konfigurasi Sistem
+  const publicConfig = usePublicConfig();
+
   const getMenuItems = (role: UserRole): MenuItem[] => {
     // --- Common Items ---
     const dashboardItem = {
@@ -143,6 +148,7 @@ export const Layout: React.FC<LayoutProps> = ({
         return [
           dashboardItem,
           { isDivider: true, sectionTitle: "System Control" },
+          { id: "system-config", label: "Konfigurasi Sistem", icon: SlidersHorizontal },
           { id: "settings", label: "App Settings", icon: Settings },
           { id: "policy", label: "Kebijakan Utama", icon: ShieldAlert },
           { isDivider: true },
@@ -254,7 +260,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 <GraduationCap size={24} />
               </div>
               <span className="font-sans font-extrabold text-xl text-kodman-900 dark:text-white tracking-tight">
-                {APP_NAME}
+                {publicConfig.siteName}
               </span>
             </div>
 
@@ -455,7 +461,7 @@ export const Layout: React.FC<LayoutProps> = ({
               <Menu size={24} />
             </button>
             <span className="font-sans font-bold text-gray-900 dark:text-white text-lg tracking-tight hidden sm:block">
-              {APP_NAME}
+              {publicConfig.siteName}
             </span>
           </div>
 
@@ -512,14 +518,16 @@ export const Layout: React.FC<LayoutProps> = ({
   );
 };
 
-const Footer = () => (
+const Footer = () => {
+  const publicConfig = usePublicConfig();
+  return (
   <footer className="bg-kodman-900 dark:bg-slate-900 text-white pt-16 pb-8 border-t border-kodman-800 dark:border-slate-800">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
       <div>
         <div className="flex items-center gap-2 mb-6">
           <GraduationCap size={32} className="text-kodman-400" />
           <span className="font-sans font-bold text-2xl tracking-tight">
-            KMP - ADNG ACADEMY
+            {publicConfig.siteName}
           </span>
         </div>
         <p className="text-kodman-100 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">
@@ -543,13 +551,13 @@ const Footer = () => (
             <span className="block text-kodman-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
               WhatsApp
             </span>
-            <span className="font-mono">{CONTACT_INFO.wa}</span>
+            <span className="font-mono">{publicConfig.supportWhatsapp}</span>
           </li>
           <li>
             <span className="block text-kodman-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
               Email Support
             </span>
-            {CONTACT_INFO.emailSupport}
+            {publicConfig.supportEmail}
           </li>
         </ul>
       </div>
@@ -568,3 +576,4 @@ const Footer = () => (
     </div>
   </footer>
 );
+};

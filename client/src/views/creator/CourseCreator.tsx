@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { MOCK_COURSES, MOCK_CATEGORIES } from "../../constants";
 import { ExamQuestion, Course, CourseType, CourseStatus } from "../../types";
+import { usePublicConfig } from "../../services/publicConfig";
 
 interface CourseCreatorProps {
   isCreateMode?: boolean;
@@ -21,6 +22,9 @@ interface CourseCreatorProps {
 const CourseCreator: React.FC<CourseCreatorProps> = ({
   isCreateMode = false,
 }) => {
+  // Nilai lulus bawaan mengikuti Konfigurasi Sistem (default_passing_grade)
+  const { defaultPassingGrade } = usePublicConfig();
+
   // View State
   const [viewMode, setViewMode] = useState<"LIST" | "FORM">(
     isCreateMode ? "FORM" : "LIST",
@@ -45,7 +49,7 @@ const CourseCreator: React.FC<CourseCreatorProps> = ({
 
   // Exam State
   const [examEnabled, setExamEnabled] = useState(false);
-  const [passingGrade, setPassingGrade] = useState(70);
+  const [passingGrade, setPassingGrade] = useState(defaultPassingGrade);
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
 
   // Licensing State
@@ -69,13 +73,13 @@ const CourseCreator: React.FC<CourseCreatorProps> = ({
     setType(CourseType.MANDIRI);
     setSelectedCategories([]);
     setExamEnabled(false);
-    setPassingGrade(70);
+    setPassingGrade(defaultPassingGrade);
     setQuestions([]);
     setLicenseAccepted(false);
     setActiveTab("DETAILS");
     setHasUploadedFile(false);
     setUploadProgress(0);
-  }, []);
+  }, [defaultPassingGrade]);
 
   const handleCreateNew = useCallback(() => {
     resetForm();
@@ -105,7 +109,7 @@ const CourseCreator: React.FC<CourseCreatorProps> = ({
       setQuestions(course.examConfig.questions);
     } else {
       setExamEnabled(false);
-      setPassingGrade(70);
+      setPassingGrade(defaultPassingGrade);
       setQuestions([]);
     }
 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { RoleSwitcher } from './components/RoleSwitcher';
-import { UserRole, CartItem, Course, CourseType, WishlistItem } from './types'; 
+import { UserRole, CartItem, Course, CourseType, WishlistItem, toUserRole } from './types'; 
 import LandingPage from './views/LandingPage';
 import Dashboard from './views/Dashboard';
 import AppSettings from './views/admin/AppSettings';
@@ -10,6 +10,7 @@ import UserManagement from './views/admin/UserManagement';
 import Moderation from './views/admin/Moderation';
 import CronManager from './views/admin/CronManager';
 import ProposalManager from './views/admin/ProposalManager';
+import SystemConfig from './views/admin/SystemConfig';
 import FinanceDashboard from './views/admin/FinanceDashboard';
 import CategoryManager from './views/admin/CategoryManager'; 
 import HelpdeskTickets from './views/admin/HelpdeskTickets'; 
@@ -25,14 +26,46 @@ import QualityControl from './views/director/QualityControl';
 import StrategicReport from './views/director/StrategicReport'; 
 import AuthModal from './components/AuthModal'; 
 import LearningRoom from './components/LearningRoom';
-import { userApi } from './services/api'; // Import API Service
+import { authApi, userApi } from './services/api'; // Import API Service
+import { usePublicConfig } from './services/publicConfig';
+
+const TOKEN_KEY = 'kodman_token';
+
+// Switcher role (alat pengembangan) dinonaktifkan sementara, tidak dibuang.
+// Aktifkan lagi di lokal dengan VITE_SHOW_ROLE_SWITCHER=true di .env lalu `pnpm dev:client`.
+// Tidak pernah aktif di build produksi (import.meta.env.DEV = false).
+const SHOW_ROLE_SWITCHER =
+  import.meta.env.DEV && import.meta.env.VITE_SHOW_ROLE_SWITCHER === 'true';
+
+const readToken = (): string | null => {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const clearToken = () => {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // penyimpanan browser tidak tersedia
+  }
+};
 
 const App: React.FC = () => {
   const [currentRole, setCurrentRole] = useState<UserRole>(UserRole.PUBLIC);
   const [currentView, setCurrentView] = useState<string>('dashboard');
   
+  // Konfigurasi publik dari server (pengumuman, maintenance, auto-logout, dll.)
+  const publicConfig = usePublicConfig();
+
   // Auth Modal State
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  // Pesan untuk form login (mis. setelah auto-logout)
+  const [authNotice, setAuthNotice] = useState('');
+  // Sesi tersimpan sedang diperiksa ke server (saat halaman dimuat ulang)
+  const [isRestoringSession, setIsRestoringSession] = useState<boolean>(() => Boolean(readToken()));
 
   // Global State (Cart & Wishlist)
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -41,6 +74,34 @@ const App: React.FC = () => {
   
   // Learning State
   const [activeLearningCourseId, setActiveLearningCourseId] = useState<string | null>(null);
+
+  // --- EFFECT: Pulihkan sesi dari token tersimpan; role selalu diambil dari server ---
+  useEffect(() => {
+    if (!readToken()) return;
+    let cancelled = false;
+    authApi.getProfile()
+      .then((res) => {
+        if (cancelled) return;
+        const role = toUserRole(res.data?.data?.role);
+        if (role) {
+          setCurrentRole(role);
+          setCurrentView('dashboard');
+        } else {
+          clearToken();
+        }
+      })
+      .catch((err) => {
+        const status = (err as { response?: { status?: number } }).response?.status;
+        // Token ditolak server (kedaluwarsa/tidak sah/akun hilang) -> buang; gangguan jaringan -> biarkan.
+        if (status === 401 || status === 403 || status === 404) clearToken();
+      })
+      .finally(() => {
+        if (!cancelled) setIsRestoringSession(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // --- EFFECT: Load Wishlist from DB when User logs in ---
   useEffect(() => {
@@ -66,11 +127,37 @@ const App: React.FC = () => {
       setCurrentView('landing');
       setCartItems([]);
       setWishlistItems([]);
-      localStorage.removeItem('kodman_token'); // Clear token
+      clearToken();
     } else {
       setCurrentView('dashboard');
     }
   };
+
+  // --- EFFECT: Auto-logout saat diam (Konfigurasi Sistem: auto_logout_minutes; 0 = nonaktif) ---
+  const autoLogoutMinutes = publicConfig.autoLogoutMinutes;
+  useEffect(() => {
+    if (currentRole === UserRole.PUBLIC || !(autoLogoutMinutes > 0)) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const logoutForIdle = () => {
+      clearToken();
+      setCurrentRole(UserRole.PUBLIC);
+      setCurrentView('landing');
+      setCartItems([]);
+      setAuthNotice(`Anda keluar otomatis karena tidak ada aktivitas selama ${autoLogoutMinutes} menit.`);
+      setAuthModalOpen(true);
+    };
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(logoutForIdle, autoLogoutMinutes * 60 * 1000);
+    };
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'] as const;
+    events.forEach((name) => window.addEventListener(name, resetTimer, { passive: true }));
+    resetTimer();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((name) => window.removeEventListener(name, resetTimer));
+    };
+  }, [currentRole, autoLogoutMinutes]);
 
   // Cart Functions (Local State for now, could be API based too)
   const addToCart = (course: Course) => {
@@ -184,14 +271,22 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (isRestoringSession) {
+      return <div className="p-8 text-center text-gray-500">Memuat sesi...</div>;
+    }
+
     if (currentRole === UserRole.PUBLIC) {
       return (
         <>
           <LandingPage onRegister={() => setAuthModalOpen(true)} />
           <AuthModal 
             isOpen={isAuthModalOpen} 
-            onClose={() => setAuthModalOpen(false)}
+            onClose={() => {
+              setAuthModalOpen(false);
+              setAuthNotice('');
+            }}
             onAuthSuccess={handleRoleChange}
+            notice={authNotice}
           />
         </>
       );
@@ -230,6 +325,10 @@ const App: React.FC = () => {
          return <DirectorDashboard />;
 
       // Admin
+      case 'system-config':
+        // Menu hanya ada untuk Superadmin; server juga menolak role lain.
+        if (currentRole !== UserRole.SUPERADMIN) return <Dashboard role={currentRole} />;
+        return <SystemConfig />;
       case 'settings':
         return <AppSettings />;
       case 'policy':
@@ -282,8 +381,22 @@ const App: React.FC = () => {
     }
   };
 
+  const showMaintenanceBanner = publicConfig.maintenanceMode;
+  const showAnnouncement = !showMaintenanceBanner && publicConfig.announcementText.trim() !== '';
+
   return (
     <>
+      {showMaintenanceBanner && (
+        <div role="status" className="bg-amber-500 text-amber-950 text-sm font-bold text-center px-4 py-2">
+          {currentRole === UserRole.SUPERADMIN ? 'Mode maintenance AKTIF. Pengguna lain melihat: ' : ''}
+          {publicConfig.maintenanceMessage}
+        </div>
+      )}
+      {showAnnouncement && (
+        <div role="status" className="bg-kodman-700 text-white text-sm text-center px-4 py-2">
+          {publicConfig.announcementText}
+        </div>
+      )}
       {currentView === 'learning-room' ? (
          renderContent()
       ) : (
@@ -308,7 +421,9 @@ const App: React.FC = () => {
           {renderContent()}
         </Layout>
       )}
-      <RoleSwitcher currentRole={currentRole} onChange={handleRoleChange} />
+      {SHOW_ROLE_SWITCHER && (
+        <RoleSwitcher currentRole={currentRole} onChange={handleRoleChange} />
+      )}
     </>
   );
 };

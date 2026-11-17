@@ -5,13 +5,43 @@ import { users } from "../schema/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
+import { JWT_SECRET } from "../lib/jwt-secret";
+import { getConfigBool, getConfigInt, getConfigValue } from "../lib/system-config";
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+// Masa berlaku token mengikuti Konfigurasi Sistem (login_session_hours).
+const tokenLifetime = async (): Promise<number> => (await getConfigInt("login_session_hours")) * 60 * 60;
+
+const registerSchema = z.object({
+  name: z.string().trim().min(2, "Nama minimal 2 karakter").max(255),
+  email: z.string().trim().toLowerCase().email("Format email tidak valid").max(255),
+  password: z.string().min(1, "Password wajib diisi").max(200),
+});
+
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().min(1).max(255),
+  password: z.string().min(1).max(200),
+});
 
 export const register = async (req: any, res: any) => {
   try {
-    const { name, email, password, role } = req.body;
-    
+    // `role` dari body sengaja diabaikan: pendaftaran publik selalu STUDENT.
+    // Peran lain hanya diberikan dari dalam Academy oleh admin.
+    if (!(await getConfigBool("registration_open"))) {
+      return errorResponse(res, "Pendaftaran akun baru sedang ditutup.", 403);
+    }
+
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return errorResponse(res, parsed.error.issues[0]?.message || "Data pendaftaran tidak valid", 400);
+    }
+    const { name, email, password } = parsed.data;
+
+    const minLength = await getConfigInt("password_min_length");
+    if (password.length < minLength) {
+      return errorResponse(res, `Password minimal ${minLength} karakter`, 400);
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -19,30 +49,34 @@ export const register = async (req: any, res: any) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "STUDENT"
+      role: "STUDENT"
     }).returning();
 
     // Generate Token
-    const token = jwt.sign({ id: newUser[0].id, role: newUser[0].role }, JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: newUser[0].id, role: newUser[0].role }, JWT_SECRET, { expiresIn: await tokenLifetime() });
 
-    successResponse(res, { token, user: { id: newUser[0].id, name: newUser[0].name, role: newUser[0].role } }, "Registration successful", 201);
+    successResponse(res, { token, user: { id: newUser[0].id, name: newUser[0].name, role: newUser[0].role } }, "Pendaftaran berhasil", 201);
   } catch (error: any) {
     if (error.code === '23505') { // Unique constraint violation (Email)
-       return errorResponse(res, "Email already exists", 400);
+       return errorResponse(res, "Email sudah terdaftar", 400);
     }
-    errorResponse(res, "Registration failed", 500, error);
+    errorResponse(res, "Pendaftaran gagal", 500, error);
   }
 };
 
 export const login = async (req: any, res: any) => {
   try {
-    const { email, password } = req.body;
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return errorResponse(res, "Email atau password salah", 401);
+    }
+    const { email, password } = parsed.data;
 
     // 1. Check DB for User
     const userResult = await db.select().from(users).where(eq(users.email, email)).limit(1);
     
     if (userResult.length === 0) {
-      return errorResponse(res, "Invalid email or password", 401);
+      return errorResponse(res, "Email atau password salah", 401);
     }
 
     const user = userResult[0];
@@ -50,18 +84,23 @@ export const login = async (req: any, res: any) => {
     // 2. Validate Password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return errorResponse(res, "Invalid email or password", 401);
+      return errorResponse(res, "Email atau password salah", 401);
     }
 
     if (user.status !== 'ACTIVE') {
-       return errorResponse(res, "Account is suspended or banned. Contact Admin.", 403);
+       return errorResponse(res, "Akun dibekukan atau diblokir. Hubungi Admin.", 403);
+    }
+
+    // Mode maintenance: hanya Superadmin yang boleh masuk.
+    if (user.role !== "SUPERADMIN" && (await getConfigBool("maintenance_mode"))) {
+      return errorResponse(res, await getConfigValue("maintenance_message"), 503);
     }
 
     // 3. Generate Token
     const token = jwt.sign(
       { id: user.id, role: user.role, email: user.email }, 
       JWT_SECRET, 
-      { expiresIn: '1d' }
+      { expiresIn: await tokenLifetime() }
     );
 
     successResponse(res, { 
@@ -73,10 +112,10 @@ export const login = async (req: any, res: any) => {
         role: user.role, 
         avatar: user.avatar 
       } 
-    }, "Login successful");
+    }, "Login berhasil");
 
   } catch (error) {
-    errorResponse(res, "Login failed", 500, error);
+    errorResponse(res, "Login gagal", 500, error);
   }
 };
 

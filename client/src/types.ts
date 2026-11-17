@@ -10,6 +10,14 @@ export enum UserRole {
   PARTNER_B2B = 'PARTNER_B2B' // External Provider (e.g. LRQA, BNSP)
 }
 
+// Mengubah nilai role dari server menjadi UserRole yang dikenal aplikasi.
+// PUBLIC bukan role akun, jadi tidak pernah diterima dari server.
+export const toUserRole = (value: unknown): UserRole | null => {
+  const roles = Object.values(UserRole) as string[];
+  if (typeof value !== 'string' || value === UserRole.PUBLIC || !roles.includes(value)) return null;
+  return value as UserRole;
+};
+
 export enum UserStatus {
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED', // Sementara

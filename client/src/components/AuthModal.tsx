@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { UserRole } from "../types";
+import { UserRole, toUserRole } from "../types";
+import { authApi } from "../services/api";
+import { usePublicConfig } from "../services/publicConfig";
 import {
   X,
   Mail,
@@ -9,7 +11,6 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Shield,
   Loader2,
 } from "lucide-react";
 
@@ -17,13 +18,17 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthSuccess: (role: UserRole) => void;
+  /** Pesan informasi di atas form (mis. setelah auto-logout). */
+  notice?: string;
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   onAuthSuccess,
+  notice,
 }) => {
+  const config = usePublicConfig();
   const [activeTab, setActiveTab] = useState<"LOGIN" | "REGISTER">("LOGIN");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,35 +37,48 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<UserRole>(UserRole.STUDENT);
+  const [errorMsg, setErrorMsg] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Pendaftaran ditutup lewat Konfigurasi Sistem: hanya form login yang tersedia.
+  const canRegister = config.registrationOpen;
+  const mode: "LOGIN" | "REGISTER" = canRegister ? activeTab : "LOGIN";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading
+    setErrorMsg("");
+    setIsLoading(true);
 
-    // Simulate Network Request Delay (1.5 seconds)
-    setTimeout(() => {
-      let targetRole = UserRole.STUDENT;
+    try {
+      const res =
+        mode === "LOGIN"
+          ? await authApi.login({ email, password })
+          : await authApi.register({ name, email, password });
 
-      if (activeTab === "LOGIN") {
-        // Mock Login Logic based on Email domain/keyword for demo purposes
-        if (email.includes("admin")) targetRole = UserRole.ADMIN_SYSTEM;
-        else if (email.includes("director")) targetRole = UserRole.DIRECTOR;
-        else if (email.includes("mentor")) targetRole = UserRole.MENTOR;
-        else if (email.includes("creator")) targetRole = UserRole.CREATOR;
-        else if (email.includes("super")) targetRole = UserRole.SUPERADMIN;
-        else targetRole = UserRole.STUDENT; // Default
-      } else {
-        // Register Logic
-        targetRole = role;
+      const token = res.data?.data?.token;
+      const userRole = toUserRole(res.data?.data?.user?.role);
+      if (typeof token !== "string" || !token || !userRole) {
+        throw new Error("Respons server tidak valid.");
       }
 
-      setIsLoading(false); // Stop loading
-      onAuthSuccess(targetRole);
+      try {
+        localStorage.setItem("kodman_token", token);
+      } catch {
+        // Penyimpanan browser tidak tersedia: sesi hanya berlaku sampai halaman dimuat ulang.
+      }
+      setPassword("");
+      onAuthSuccess(userRole);
       onClose();
-    }, 1500);
+    } catch (err) {
+      const serverMsg = (err as { response?: { data?: { message?: string } } })
+        .response?.data?.message;
+      setErrorMsg(
+        serverMsg || "Tidak dapat terhubung ke server. Coba lagi beberapa saat.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -86,23 +104,31 @@ const AuthModal: React.FC<AuthModalProps> = ({
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-slate-800">
           <button
-            className={`flex-1 py-4 text-sm font-bold transition ${activeTab === "LOGIN" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
-            onClick={() => setActiveTab("LOGIN")}
+            className={`flex-1 py-4 text-sm font-bold transition ${mode === "LOGIN" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
+            onClick={() => {
+              setActiveTab("LOGIN");
+              setErrorMsg("");
+            }}
           >
             Masuk (Login)
           </button>
-          <button
-            className={`flex-1 py-4 text-sm font-bold transition ${activeTab === "REGISTER" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
-            onClick={() => setActiveTab("REGISTER")}
-          >
-            Daftar Baru
-          </button>
+          {canRegister && (
+            <button
+              className={`flex-1 py-4 text-sm font-bold transition ${mode === "REGISTER" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
+              onClick={() => {
+                setActiveTab("REGISTER");
+                setErrorMsg("");
+              }}
+            >
+              Daftar Baru
+            </button>
+          )}
         </div>
 
         {/* Form */}
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {activeTab === "REGISTER" && (
+            {mode === "REGISTER" && (
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
                   Nama Lengkap
@@ -136,6 +162,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
                   placeholder="email@contoh.com"
                   value={email}
@@ -156,6 +183,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  minLength={mode === "REGISTER" ? config.passwordMinLength : undefined}
+                  autoComplete={
+                    mode === "LOGIN" ? "current-password" : "new-password"
+                  }
                   className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
                   placeholder="••••••••"
                   value={password}
@@ -171,29 +202,21 @@ const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
-            {activeTab === "REGISTER" && (
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                  Saya ingin mendaftar sebagai
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setRole(UserRole.STUDENT)}
-                    className={`p-3 border rounded-lg text-sm font-bold flex flex-col items-center justify-center transition ${role === UserRole.STUDENT ? "bg-kodman-50 border-kodman-500 text-kodman-700" : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"}`}
-                  >
-                    <GraduationCap size={20} className="mb-1" />
-                    Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole(UserRole.MENTOR)}
-                    className={`p-3 border rounded-lg text-sm font-bold flex flex-col items-center justify-center transition ${role === UserRole.MENTOR ? "bg-purple-50 border-purple-500 text-purple-700" : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"}`}
-                  >
-                    <Shield size={20} className="mb-1" />
-                    Mentor
-                  </button>
-                </div>
+            {notice && !errorMsg && (
+              <div
+                role="status"
+                className="text-sm text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300 rounded-lg px-3 py-2"
+              >
+                {notice}
+              </div>
+            )}
+
+            {errorMsg && (
+              <div
+                role="alert"
+                className="text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300 rounded-lg px-3 py-2"
+              >
+                {errorMsg}
               </div>
             )}
 
@@ -209,29 +232,17 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 </>
               ) : (
                 <>
-                  {activeTab === "LOGIN" ? "Masuk Sekarang" : "Buat Akun Baru"}{" "}
+                  {mode === "LOGIN" ? "Masuk Sekarang" : "Buat Akun Baru"}{" "}
                   <ArrowRight size={18} className="ml-2" />
                 </>
               )}
             </button>
           </form>
 
-          {activeTab === "LOGIN" && (
-            <div className="mt-6 text-center text-xs text-gray-500 dark:text-slate-400">
-              <p className="mb-2">Demo Tip: Gunakan email dengan kata kunci:</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                <span className="bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded border dark:border-slate-700">
-                  admin@...
-                </span>
-                <span className="bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded border dark:border-slate-700">
-                  director@...
-                </span>
-                <span className="bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded border dark:border-slate-700">
-                  mentor@...
-                </span>
-              </div>
-            </div>
-          )}
+          <p className="mt-6 text-center text-xs text-gray-500 dark:text-slate-400">
+            Butuh bantuan? {config.supportEmail} · WA {config.supportWhatsapp}
+          </p>
+
         </div>
       </div>
     </div>
