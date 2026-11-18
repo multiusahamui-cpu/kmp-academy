@@ -55,7 +55,9 @@ export const ssoDigitalcoop = async (req: any, res: any) => {
     if (!dasar.ok) return errorResponse(res, dasar.message, 403);
     const [linked] = await db.select().from(users).where(eq(users.digitalcoopUserId, profil.digitalcoopUserId)).limit(1);
     if (linked) {
-      if (linked.status !== "ACTIVE") return errorResponse(res, "Akun Academy Anda dibekukan atau diblokir. Hubungi Admin.", 403);
+      if (linked.status !== "ACTIVE") {
+        return errorResponse(res, linked.status === "ARCHIVED" ? "Akun Academy Anda telah ditutup." : "Akun Academy Anda dibekukan atau diblokir. Hubungi Admin.", 403);
+      }
       const rule = aturanMasuk(linked.role, profil);
       if (!rule.ok) return errorResponse(res, rule.message, 403);
       if (linked.role !== "SUPERADMIN" && (await getConfigBool("maintenance_mode"))) {

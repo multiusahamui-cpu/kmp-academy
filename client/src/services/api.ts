@@ -40,6 +40,18 @@ export const authApi = {
   register: (data: { name: string; email: string; password: string; phone?: string }) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   getProfile: () => api.get('/auth/me'),
+  updateProfile: (data: { name?: string; bio?: string; phone?: string }) => api.put('/auth/profile', data),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('avatar', file);
+    return api.post('/auth/profile/avatar', form);
+  },
+  deleteAvatar: () => api.delete('/auth/profile/avatar'),
+  getDeletion: () => api.get('/auth/account-deletion'),
+  requestDeletion: (data: { reason: string; password: string }) => api.post('/auth/account-deletion', data),
+  cancelDeletion: () => api.delete('/auth/account-deletion'),
+  requestEmailChange: (data: { newEmail: string; password: string }) => api.post('/auth/email/request', data),
+  confirmEmailChange: (data: { code: string }) => api.post('/auth/email/confirm', data),
   changePassword: (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => api.put('/auth/password', data),
 };
 
@@ -91,6 +103,13 @@ export const adminApi = {
   decideApplication: (id: string, action: 'APPROVE' | 'REJECT', note?: string) =>
     api.post(`/admin/applications/${id}/decision`, { action, note }),
   issueCard: (userId: string) => api.post(`/admin/users/${userId}/card`),
+  // Penghapusan akun individual (Admin/Direktur)
+  listDeletions: (status = 'PENDING') => api.get('/admin/account-deletions', { params: { status } }),
+  decideDeletion: (id: string, decision: 'APPROVE' | 'REJECT', note: string) =>
+    api.post(`/admin/account-deletions/${id}/decision`, { decision, note }),
+  settleDeletion: (id: string, form: FormData) => api.post(`/admin/account-deletions/${id}/settlement`, form),
+  proofUrl: (settlementId: string) => `${API_URL}/admin/settlements/${settlementId}/proof`,
+  listArchived: (q = '', page = 1) => api.get('/admin/archived-accounts', { params: { q, page } }),
 };
 
 export const reviewApi = {

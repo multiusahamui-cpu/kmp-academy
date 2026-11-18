@@ -9,6 +9,9 @@ import { startSession, endSession } from "../lib/session";
 import { normalizePhone, looksLikeEmail } from "@shared/phone";
 import { getConfigBool, getConfigInt, getConfigValue } from "../lib/system-config";
 import { cekAkunTertaut } from "./digitalcoopController";
+import multer from "multer";
+import { AVATAR_MAX_BYTES, detectImageType, validateBio, validateName } from "@shared/profile";
+import { avatarUrl, newAvatarFileName, removeOldAvatar, saveAvatarFile } from "../lib/avatar";
 
 // Masa berlaku sesi mengikuti Konfigurasi Sistem (login_session_hours).
 const sessionLifetimeMs = async (): Promise<number> => (await getConfigInt("login_session_hours")) * 60 * 60 * 1000;
@@ -107,7 +110,7 @@ export const login = async (req: any, res: any) => {
     }
 
     if (user.status !== 'ACTIVE') {
-       return errorResponse(res, "Akun dibekukan atau diblokir. Hubungi Admin.", 403);
+       return errorResponse(res, user.status === "ARCHIVED" ? "Akun ini telah ditutup." : "Akun dibekukan atau diblokir. Hubungi Admin.", 403);
     }
 
     // Mode maintenance: hanya Superadmin yang boleh masuk.
@@ -207,6 +210,8 @@ export const getProfile = async (req: any, res: any) => {
         cardNumber: user.cardNumber,
         cardIssuedAt: user.cardIssuedAt,
         isMember: Boolean(user.digitalcoopUserId),
+        phone: user.phone,
+        bio: user.bio,
     }, "Profile data");
   } catch (error) {
     errorResponse(res, "Failed to fetch profile", 500);
@@ -215,24 +220,95 @@ export const getProfile = async (req: any, res: any) => {
 
 export const updateProfile = async (req: any, res: any) => {
   try {
-    const { name, bio, avatar, phone: rawPhone } = req.body;
+    const { name, bio, phone: rawPhone } = req.body ?? {};
 
-    // No HP opsional; bila diisi harus valid dan dipakai sebagai alternatif login.
-    let phone: string | null | undefined;
-    if (rawPhone === "" || rawPhone === null) phone = null;
-    else if (typeof rawPhone === "string") {
-      phone = normalizePhone(rawPhone);
-      if (!phone) return errorResponse(res, "Format No HP tidak valid. Contoh: 0812 3456 789", 400);
+    const user = await db.query.users.findFirst({ where: (u, { eq: e }) => e(u.id, req.user.id) });
+    if (!user) return errorResponse(res, "User not found", 404);
+    // Akun tertaut digitalcoop.id: identitas (nama, No HP) dikelola di digitalcoop.id.
+    const linked = Boolean(user.digitalcoopUserId);
+
+    const patch: { name?: string; bio?: string | null; phone?: string | null } = {};
+
+    if (name !== undefined) {
+      const n = validateName(name);
+      if (!n.ok) return errorResponse(res, n.message, 400);
+      if (linked && n.value !== user.name) {
+        return errorResponse(res, "Nama akun tertaut hanya dapat diubah di digitalcoop.id.", 400);
+      }
+      patch.name = n.value;
     }
 
-    await db.update(users)
-      .set({ name, bio, avatar, ...(phone !== undefined ? { phone } : {}), updatedAt: new Date() })
-      .where(eq(users.id, req.user.id));
-      
+    if (bio !== undefined) {
+      const b = validateBio(bio);
+      if (!b.ok) return errorResponse(res, b.message, 400);
+      patch.bio = b.value;
+    }
+
+    // No HP opsional; bila diisi harus valid dan dipakai sebagai alternatif login.
+    if (rawPhone !== undefined) {
+      let phone: string | null;
+      if (rawPhone === "" || rawPhone === null) phone = null;
+      else if (typeof rawPhone === "string") {
+        phone = normalizePhone(rawPhone);
+        if (!phone) return errorResponse(res, "Format No HP tidak valid. Contoh: 0812 3456 789", 400);
+      } else return errorResponse(res, "Format No HP tidak valid.", 400);
+      if (linked && phone !== user.phone) {
+        return errorResponse(res, "No HP akun tertaut hanya dapat diubah di digitalcoop.id.", 400);
+      }
+      patch.phone = phone;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      await db.update(users).set({ ...patch, updatedAt: new Date() }).where(eq(users.id, req.user.id));
+    }
     successResponse(res, null, "Profile updated");
   } catch (error: any) {
     if (error?.code === "23505") return errorResponse(res, "No HP sudah dipakai akun lain", 400);
     errorResponse(res, "Failed to update profile", 500, error);
+  }
+};
+
+const avatarUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: AVATAR_MAX_BYTES, files: 1 } });
+
+/** Middleware multer dengan pesan galat yang ramah. */
+export const avatarUploadMiddleware = (req: any, res: any, next: any) => {
+  avatarUpload.single("avatar")(req, res, (err: any) => {
+    if (!err) return next();
+    if (err.code === "LIMIT_FILE_SIZE") return errorResponse(res, "Ukuran foto maksimal 2 MB.", 400);
+    return errorResponse(res, "Berkas foto tidak dapat diproses.", 400);
+  });
+};
+
+export const uploadAvatar = async (req: any, res: any) => {
+  try {
+    const file = req.file as { buffer: Buffer } | undefined;
+    if (!file || file.buffer.length === 0) return errorResponse(res, "Pilih berkas foto terlebih dahulu.", 400);
+    const type = detectImageType(file.buffer);
+    if (!type) return errorResponse(res, "Format foto harus JPG, PNG, atau WebP.", 400);
+
+    const user = await db.query.users.findFirst({ where: (u, { eq: e }) => e(u.id, req.user.id) });
+    if (!user) return errorResponse(res, "User not found", 404);
+
+    const fileName = newAvatarFileName(user.id, type.ext);
+    await saveAvatarFile(fileName, file.buffer);
+    const url = avatarUrl(fileName);
+    await db.update(users).set({ avatar: url, updatedAt: new Date() }).where(eq(users.id, user.id));
+    await removeOldAvatar(user.id, user.avatar);
+    successResponse(res, { avatar: url }, "Foto profil diperbarui");
+  } catch (error) {
+    errorResponse(res, "Gagal menyimpan foto profil", 500, error);
+  }
+};
+
+export const deleteAvatar = async (req: any, res: any) => {
+  try {
+    const user = await db.query.users.findFirst({ where: (u, { eq: e }) => e(u.id, req.user.id) });
+    if (!user) return errorResponse(res, "User not found", 404);
+    await db.update(users).set({ avatar: null, updatedAt: new Date() }).where(eq(users.id, user.id));
+    await removeOldAvatar(user.id, user.avatar);
+    successResponse(res, null, "Foto profil dihapus");
+  } catch (error) {
+    errorResponse(res, "Gagal menghapus foto profil", 500, error);
   }
 };
 

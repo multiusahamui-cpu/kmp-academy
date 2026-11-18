@@ -29,7 +29,10 @@ interface DbUserLike {
 export const evaluateSession = (sess: SessionLike | undefined, user: DbUserLike | undefined): SessionCheck => {
   if (!sess?.userId) return { ok: false, status: 401, message: "Silakan login." };
   if (!user) return { ok: false, status: 401, message: "Sesi tidak valid. Silakan login ulang." };
-  if (user.status !== "ACTIVE") return { ok: false, status: 403, message: "Akun dibekukan atau diblokir. Hubungi Admin." };
+  if (user.status !== "ACTIVE") {
+    const message = user.status === "ARCHIVED" ? "Akun ini telah ditutup." : "Akun dibekukan atau diblokir. Hubungi Admin.";
+    return { ok: false, status: 403, message };
+  }
   if (user.passwordChangedAt && (sess.loginAt ?? 0) < user.passwordChangedAt.getTime()) {
     return { ok: false, status: 401, message: "Password telah diganti. Silakan login ulang." };
   }

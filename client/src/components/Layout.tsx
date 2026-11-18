@@ -27,6 +27,8 @@ import {
   LogIn,
   Info,
   SlidersHorizontal,
+  UserMinus,
+  Archive,
 } from "lucide-react";
 import { CONTACT_INFO } from "../constants";
 import CartDrawer from "./CartDrawer";
@@ -148,6 +150,7 @@ export const Layout: React.FC<LayoutProps> = ({
         return [
           dashboardItem,
           { isDivider: true, sectionTitle: "System Control" },
+          { id: "users", label: "Manajemen User", icon: Users },
           { id: "system-config", label: "Konfigurasi Sistem", icon: SlidersHorizontal },
           { id: "settings", label: "App Settings", icon: Settings },
           { id: "policy", label: "Kebijakan Utama", icon: ShieldAlert },
@@ -169,7 +172,10 @@ export const Layout: React.FC<LayoutProps> = ({
             label: "Penjaminan Mutu",
             icon: ShieldCheck,
           },
+          { id: "users", label: "Manajemen User", icon: Users },
           { id: "communication", label: "Komunikasi Publik", icon: Megaphone },
+          { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
+          { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
           {
             id: "strategic-report",
             label: "Laporan Strategis",
@@ -187,6 +193,8 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "categories", label: "Manajemen Kategori", icon: Tags },
           { id: "proposals", label: "Approval Center", icon: FileCheck },
           { id: "users", label: "Manajemen User", icon: Users },
+          { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
+          { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
           { id: "moderation", label: "Moderasi Konten", icon: BookOpen },
           { id: "cron", label: "System Cron Jobs", icon: Activity },
           { id: "helpdesk", label: "Helpdesk Tickets", icon: LifeBuoy },

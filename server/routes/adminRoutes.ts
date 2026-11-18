@@ -2,6 +2,8 @@
 import { Router } from "express";
 import * as admin from "../controllers/adminController";
 import { authenticateToken, requireRole } from "../middleware/auth";
+import * as deletion from "../controllers/accountDeletionController";
+import { uploadLimiter } from "../lib/security";
 
 const router = Router();
 
@@ -19,6 +21,13 @@ router.delete("/users/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.d
 router.get("/applications", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listRoleApplications);
 router.post("/applications/:id/decision", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.decideRoleApplication);
 router.post("/users/:id/card", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.issueUserCard);
+
+// Penghapusan akun individual: diputuskan Admin atau Direktur; saldo diselesaikan Admin; arsip hanya baca
+router.get("/account-deletions", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listDeletions);
+router.post("/account-deletions/:id/decision", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.decideDeletion);
+router.post("/account-deletions/:id/settlement", requireRole(["ADMIN_SYSTEM"]), uploadLimiter, deletion.proofUploadMiddleware, deletion.settleBalance);
+router.get("/settlements/:id/proof", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.getSettlementProof);
+router.get("/archived-accounts", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listArchived);
 
 // Approvals
 router.get("/approvals/:type", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getApprovals);

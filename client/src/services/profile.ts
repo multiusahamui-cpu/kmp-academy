@@ -11,6 +11,8 @@ export interface Profile {
   cardNumber?: string | null;
   cardIssuedAt?: string | null;
   isMember: boolean;
+  phone?: string | null;
+  bio?: string | null;
 }
 
 export const PROFILE_CHANGED_EVENT = 'academy:profile-changed';

@@ -53,3 +53,7 @@ export const loginLimiter = limiter(15, 10, "Terlalu banyak percobaan login. Cob
 export const registerLimiter = limiter(60, 10, "Terlalu banyak pendaftaran dari alamat ini. Coba lagi nanti.");
 // Ganti password dibatasi agar tidak dipakai menebak password lama dengan token curian.
 export const passwordLimiter = limiter(15, 5, "Terlalu banyak percobaan ganti password. Coba lagi dalam 15 menit.");
+// Unggah/hapus foto profil dibatasi per IP.
+export const uploadLimiter = limiter(60, 20, "Terlalu banyak unggahan foto. Coba lagi nanti.");
+// Permintaan/konfirmasi kode ganti email dibatasi per IP.
+export const emailChangeLimiter = limiter(15, 10, "Terlalu banyak percobaan ganti email. Coba lagi dalam 15 menit.");

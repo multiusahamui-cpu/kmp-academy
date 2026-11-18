@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import CertificateTemplate from "../../components/CertificateTemplate";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
+import DeleteAccountPanel from "../../components/DeleteAccountPanel";
+import EmailChangeForm from "../../components/EmailChangeForm";
+import ProfileForm from "../../components/ProfileForm";
 
 interface ProfileSettingsProps {
   currentRole: UserRole;
@@ -136,59 +139,14 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
         </div>
 
         <div className="p-6">
-          {activeTab === "security" && <ChangePasswordForm />}
-          {activeTab === "profile" && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-6">
-                <div className="w-24 h-24 bg-gray-200 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-400">
-                  <User size={48} />
-                </div>
-                <div>
-                  <button className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">
-                    Ganti Foto
-                  </button>
-                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">
-                    Format JPG, GIF atau PNG. Max 2MB.
-                  </p>
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                    Nama Lengkap
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="User KMP - ADNG"
-                    className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    defaultValue="user@digitalcoop.id"
-                    disabled
-                    className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400 rounded bg-gray-50"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                    Bio Singkat
-                  </label>
-                  <textarea
-                    className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded h-24"
-                    placeholder="Ceritakan sedikit tentang diri Anda..."
-                  ></textarea>
-                </div>
-              </div>
-              <button className="px-6 py-2 bg-kodman-600 text-white rounded font-medium hover:bg-kodman-700">
-                Simpan Perubahan
-              </button>
+          {activeTab === "security" && (
+            <div className="space-y-10">
+              <ChangePasswordForm />
+              <EmailChangeForm />
+              <DeleteAccountPanel />
             </div>
           )}
+          {activeTab === "profile" && <ProfileForm />}
 
           {activeTab === "kyc" && (
             <div>

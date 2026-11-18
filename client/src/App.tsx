@@ -14,6 +14,8 @@ import SystemConfig from './views/admin/SystemConfig';
 import FinanceDashboard from './views/admin/FinanceDashboard';
 import CategoryManager from './views/admin/CategoryManager'; 
 import HelpdeskTickets from './views/admin/HelpdeskTickets'; 
+import AccountDeletions from './views/admin/AccountDeletions';
+import ArchivedAccounts from './views/admin/ArchivedAccounts';
 import CourseCreator from './views/creator/CourseCreator';
 import ClassRoom from './views/mentor/ClassRoom';
 import ContentExplorer from './views/mentor/ContentExplorer';
@@ -348,6 +350,10 @@ const App: React.FC = () => {
         return <AppSettings isPolicyMode />;
       case 'users':
         return <UserManagement />;
+      case 'account-deletions':
+        return <AccountDeletions />;
+      case 'archived-accounts':
+        return <ArchivedAccounts />;
       case 'moderation':
         return <Moderation />;
       case 'cron':

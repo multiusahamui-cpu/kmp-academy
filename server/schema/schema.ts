@@ -1,5 +1,6 @@
 
-import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique, uniqueIndex, date } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 // --- 1. Define Custom Schema 'academy' ---
 export const academySchema = pgSchema("academy");
@@ -18,7 +19,8 @@ export const userRoleEnum = academySchema.enum("user_role", [
 export const userStatusEnum = academySchema.enum("user_status", [
   "ACTIVE", 
   "SUSPENDED", 
-  "BANNED"
+  "BANNED",
+  "ARCHIVED" // akun ditutup atas permintaan pemilik dan disetujui Admin/Direktur
 ]);
 
 export const courseTypeEnum = academySchema.enum("course_type", [
@@ -79,6 +81,7 @@ export const users = academySchema.table("users", {
   consentVersion: varchar("consent_version", { length: 20 }),
   linkedAt: timestamp("linked_at"),
   lastSyncedAt: timestamp("last_synced_at"),
+  archivedAt: timestamp("archived_at"), // terisi bila status ARCHIVED
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -251,4 +254,44 @@ export const userPreferences = academySchema.table("user_preferences", {
   notifyEmail: boolean("notify_email").default(true).notNull(),
   notifyInApp: boolean("notify_in_app").default(true).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Permintaan ganti email yang menunggu kode OTP (satu per user; kode disimpan sebagai HMAC, bukan polos).
+export const emailChangeRequests = academySchema.table("email_change_requests", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).primaryKey(),
+  newEmail: varchar("new_email", { length: 255 }).notNull(),
+  codeHash: varchar("code_hash", { length: 64 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: integer("attempts").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Pengajuan penghapusan akun oleh pemilik; diputuskan Admin atau Direktur (salah satu).
+export const accountDeletionRequests = academySchema.table("account_deletion_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  reason: text("reason").notNull(),
+  status: varchar("status", { length: 12 }).default("PENDING").notNull(), // PENDING | APPROVED | REJECTED | CANCELLED
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedByName: varchar("decided_by_name", { length: 255 }),
+  decidedByRole: varchar("decided_by_role", { length: 20 }),
+  decidedAt: timestamp("decided_at"),
+  decisionNote: text("decision_note"),
+}, (t) => [uniqueIndex("account_deletion_one_pending").on(t.userId).where(sql`${t.status} = 'PENDING'`)]);
+
+// Penyelesaian saldo lewat transfer manual oleh Admin, dengan bukti transfer (berkas privat).
+export const balanceSettlements = academySchema.table("balance_settlements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  requestId: uuid("request_id").references(() => accountDeletionRequests.id).notNull(),
+  amount: integer("amount").notNull(),
+  transferDate: date("transfer_date").notNull(),
+  bankRef: varchar("bank_ref", { length: 100 }).notNull(),
+  note: text("note"),
+  proofFile: varchar("proof_file", { length: 100 }).notNull(),
+  proofMime: varchar("proof_mime", { length: 50 }).notNull(),
+  settledBy: uuid("settled_by").references(() => users.id, { onDelete: "set null" }),
+  settledByName: varchar("settled_by_name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
