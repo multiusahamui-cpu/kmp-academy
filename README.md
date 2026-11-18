@@ -22,7 +22,7 @@ Backend:
 - TypeScript
 - Drizzle ORM
 - PostgreSQL
-- JWT Authentication
+- Sesi login (cookie httpOnly, disimpan di Redis)
 
 Tooling:
 
@@ -57,7 +57,7 @@ Backend:
    `npm install`
 3. Siapkan environment backend (`.env`) minimal:
    - `DATABASE_URL`
-   - `JWT_SECRET`
+   - `SESSION_SECRET`, `REDIS_URL`
    - `PORT` (opsional)
 4. Jalankan backend:
    `npm run dev`

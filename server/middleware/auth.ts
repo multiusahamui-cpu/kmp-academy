@@ -1,22 +1,21 @@
-
-import jwt from "jsonwebtoken";
 import { errorResponse } from "../utils/response";
-import { JWT_SECRET } from "../lib/jwt-secret";
+import { checkSession } from "../lib/session-user";
+import { endSession } from "../lib/session";
 
-export const authenticateToken = (req: any, res: any, next: any) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    return errorResponse(res, "Access Denied. No token provided.", 401);
-  }
-
+// Nama dipertahankan agar semua rute tetap sama; autentikasi kini memakai sesi (cookie + Redis).
+// Role dan status akun dibaca dari database pada setiap permintaan.
+export const authenticateToken = async (req: any, res: any, next: any) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    req.user = decoded;
+    const result = await checkSession(req);
+    if (!result.ok) {
+      // Sesi yang tidak lagi sah dihapus dari Redis.
+      if (req.session?.userId) await endSession(req, res);
+      return errorResponse(res, result.message, result.status);
+    }
+    req.user = result.user;
     next();
   } catch (error) {
-    return errorResponse(res, "Invalid Token.", 403);
+    next(error);
   }
 };
 

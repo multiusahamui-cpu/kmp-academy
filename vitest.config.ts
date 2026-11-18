@@ -5,9 +5,9 @@ export default defineConfig({
     globals: true,
     environment: "node",
     isolate: true,
-    // Nilai khusus tes: server menolak start tanpa JWT_SECRET, dan db/index.ts tanpa DATABASE_URL.
+    // Nilai khusus tes: server menolak start tanpa SESSION_SECRET, dan db/index.ts tanpa DATABASE_URL.
     env: {
-      JWT_SECRET: "test-only-secret-bukan-untuk-produksi",
+      SESSION_SECRET: "test-only-secret-bukan-untuk-produksi",
     },
     include: ["tests/**/*.test.ts"],
   },

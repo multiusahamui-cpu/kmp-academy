@@ -25,11 +25,10 @@ import PartnerGovernance from './views/director/PartnerGovernance';
 import QualityControl from './views/director/QualityControl'; 
 import StrategicReport from './views/director/StrategicReport'; 
 import AuthModal from './components/AuthModal'; 
+import DigitalcoopSso from './views/DigitalcoopSso';
 import LearningRoom from './components/LearningRoom';
 import { authApi, userApi } from './services/api'; // Import API Service
 import { usePublicConfig } from './services/publicConfig';
-
-const TOKEN_KEY = 'kodman_token';
 
 // Switcher role (alat pengembangan) dinonaktifkan sementara, tidak dibuang.
 // Aktifkan lagi di lokal dengan VITE_SHOW_ROLE_SWITCHER=true di .env lalu `pnpm dev:client`.
@@ -37,21 +36,19 @@ const TOKEN_KEY = 'kodman_token';
 const SHOW_ROLE_SWITCHER =
   import.meta.env.DEV && import.meta.env.VITE_SHOW_ROLE_SWITCHER === 'true';
 
-const readToken = (): string | null => {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
+// Sesi disimpan di server (cookie httpOnly + Redis). Keluar = hapus sesi di server.
+const endServerSession = () => {
+  authApi.logout().catch(() => {
+    // gagal menghubungi server: cookie tetap kedaluwarsa sesuai masa berlakunya
+  });
 };
 
-const clearToken = () => {
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // penyimpanan browser tidak tersedia
-  }
-};
+// Token lama (versi sebelum sesi Redis) tidak dipakai lagi; bersihkan sisa di browser.
+try {
+  localStorage.removeItem('kodman_token');
+} catch {
+  // penyimpanan browser tidak tersedia
+}
 
 const App: React.FC = () => {
   const [currentRole, setCurrentRole] = useState<UserRole>(UserRole.PUBLIC);
@@ -65,7 +62,9 @@ const App: React.FC = () => {
   // Pesan untuk form login (mis. setelah auto-logout)
   const [authNotice, setAuthNotice] = useState('');
   // Sesi tersimpan sedang diperiksa ke server (saat halaman dimuat ulang)
-  const [isRestoringSession, setIsRestoringSession] = useState<boolean>(() => Boolean(readToken()));
+  const [isRestoringSession, setIsRestoringSession] = useState<boolean>(true);
+  // Masuk dari digitalcoop.id: academy.digitalcoop.id/sso#t=<tiket>
+  const [ssoMode, setSsoMode] = useState<boolean>(() => window.location.pathname === '/sso');
 
   // Global State (Cart & Wishlist)
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -75,9 +74,8 @@ const App: React.FC = () => {
   // Learning State
   const [activeLearningCourseId, setActiveLearningCourseId] = useState<string | null>(null);
 
-  // --- EFFECT: Pulihkan sesi dari token tersimpan; role selalu diambil dari server ---
+  // --- EFFECT: Pulihkan sesi dari cookie; role selalu diambil dari server ---
   useEffect(() => {
-    if (!readToken()) return;
     let cancelled = false;
     authApi.getProfile()
       .then((res) => {
@@ -86,14 +84,10 @@ const App: React.FC = () => {
         if (role) {
           setCurrentRole(role);
           setCurrentView('dashboard');
-        } else {
-          clearToken();
         }
       })
-      .catch((err) => {
-        const status = (err as { response?: { status?: number } }).response?.status;
-        // Token ditolak server (kedaluwarsa/tidak sah/akun hilang) -> buang; gangguan jaringan -> biarkan.
-        if (status === 401 || status === 403 || status === 404) clearToken();
+      .catch(() => {
+        // Tidak ada sesi (401) atau server tak terjangkau: tetap sebagai pengunjung.
       })
       .finally(() => {
         if (!cancelled) setIsRestoringSession(false);
@@ -127,7 +121,7 @@ const App: React.FC = () => {
       setCurrentView('landing');
       setCartItems([]);
       setWishlistItems([]);
-      clearToken();
+      endServerSession();
     } else {
       setCurrentView('dashboard');
     }
@@ -139,7 +133,7 @@ const App: React.FC = () => {
     if (currentRole === UserRole.PUBLIC || !(autoLogoutMinutes > 0)) return;
     let timer: ReturnType<typeof setTimeout>;
     const logoutForIdle = () => {
-      clearToken();
+      endServerSession();
       setCurrentRole(UserRole.PUBLIC);
       setCurrentView('landing');
       setCartItems([]);
@@ -271,6 +265,25 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (ssoMode) {
+      const selesai = () => {
+        window.history.replaceState(null, '', '/');
+        setSsoMode(false);
+      };
+      return (
+        <DigitalcoopSso
+          onDone={(role) => {
+            selesai();
+            handleRoleChange(role);
+          }}
+          onCancel={() => {
+            selesai();
+            setAuthModalOpen(true);
+          }}
+        />
+      );
+    }
+
     if (isRestoringSession) {
       return <div className="p-8 text-center text-gray-500">Memuat sesi...</div>;
     }

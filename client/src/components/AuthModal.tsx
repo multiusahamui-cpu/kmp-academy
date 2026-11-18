@@ -35,6 +35,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
   // Form State
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -53,19 +54,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
     try {
       const res =
         mode === "LOGIN"
-          ? await authApi.login({ email, password })
-          : await authApi.register({ name, email, password });
+          ? await authApi.login({ identifier: email, password })
+          : await authApi.register({ name, email, password, phone: phone || undefined });
 
-      const token = res.data?.data?.token;
       const userRole = toUserRole(res.data?.data?.user?.role);
-      if (typeof token !== "string" || !token || !userRole) {
+      if (!userRole) {
         throw new Error("Respons server tidak valid.");
-      }
-
-      try {
-        localStorage.setItem("kodman_token", token);
-      } catch {
-        // Penyimpanan browser tidak tersedia: sesi hanya berlaku sampai halaman dimuat ulang.
       }
       setPassword("");
       onAuthSuccess(userRole);
@@ -152,7 +146,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                Email Address
+                {mode === "LOGIN" ? "Email atau No HP" : "Email Address"}
               </label>
               <div className="relative">
                 <Mail
@@ -160,16 +154,32 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   size={18}
                 />
                 <input
-                  type="email"
+                  type={mode === "LOGIN" ? "text" : "email"}
                   required
-                  autoComplete="email"
+                  autoComplete={mode === "LOGIN" ? "username" : "email"}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
-                  placeholder="email@contoh.com"
+                  placeholder={mode === "LOGIN" ? "email@contoh.com atau 0812..." : "email@contoh.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
+
+            {mode === "REGISTER" && (
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
+                  No HP (opsional, bisa untuk login)
+                </label>
+                <input
+                  type="tel"
+                  autoComplete="tel"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
+                  placeholder="0812 3456 789"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
@@ -238,6 +248,16 @@ const AuthModal: React.FC<AuthModalProps> = ({
               )}
             </button>
           </form>
+
+          {mode === "LOGIN" && (
+            <a
+              href="https://digitalcoop.id/member/academy?masuk=1"
+              className="mt-4 block w-full rounded-lg border border-kodman-600 py-3 text-center text-sm font-bold text-kodman-600 hover:bg-kodman-50 dark:hover:bg-slate-800"
+              data-testid="btn-masuk-digitalcoop"
+            >
+              Masuk dengan akun digitalcoop.id
+            </a>
+          )}
 
           <p className="mt-6 text-center text-xs text-gray-500 dark:text-slate-400">
             Butuh bantuan? {config.supportEmail} · WA {config.supportWhatsapp}

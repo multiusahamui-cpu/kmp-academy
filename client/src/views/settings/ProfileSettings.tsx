@@ -14,6 +14,7 @@ import {
   Globe,
 } from "lucide-react";
 import CertificateTemplate from "../../components/CertificateTemplate";
+import ChangePasswordForm from "../../components/ChangePasswordForm";
 
 interface ProfileSettingsProps {
   currentRole: UserRole;
@@ -21,7 +22,7 @@ interface ProfileSettingsProps {
 
 const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
   const [activeTab, setActiveTab] = useState<
-    "profile" | "kyc" | "career" | "roles" | "certificates"
+    "profile" | "security" | "kyc" | "career" | "roles" | "certificates"
   >("profile");
   const [requestStatus, setRequestStatus] = useState<"NONE" | "PENDING">(
     "NONE",
@@ -102,6 +103,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
             Informasi Akun
           </button>
           <button
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "security" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            onClick={() => setActiveTab("security")}
+          >
+            <Lock size={16} /> Keamanan
+          </button>
+          <button
             className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "kyc" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("kyc")}
           >
@@ -129,6 +136,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
         </div>
 
         <div className="p-6">
+          {activeTab === "security" && <ChangePasswordForm />}
           {activeTab === "profile" && (
             <div className="space-y-6">
               <div className="flex items-center gap-6">

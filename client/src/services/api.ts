@@ -15,22 +15,9 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // withCredentials: true, // Uncomment if using cookies
+  // Sesi memakai cookie httpOnly (disimpan di Redis); tidak ada token di JavaScript/localStorage.
+  withCredentials: true,
 });
-
-// --- REQUEST INTERCEPTOR ---
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('kodman_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // --- RESPONSE INTERCEPTOR ---
 api.interceptors.response.use(
@@ -39,7 +26,6 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       // originalRequest._retry = true;
-      // localStorage.removeItem('kodman_token');
       // window.location.href = '/'; 
       console.warn("Session expired or invalid token");
     }
@@ -50,9 +36,11 @@ api.interceptors.response.use(
 // --- API SERVICES ---
 
 export const authApi = {
-  login: (credentials: { email: string; password: string }) => api.post('/auth/login', credentials),
-  register: (data: { name: string; email: string; password: string }) => api.post('/auth/register', data),
+  login: (credentials: { identifier: string; password: string }) => api.post('/auth/login', credentials),
+  register: (data: { name: string; email: string; password: string; phone?: string }) => api.post('/auth/register', data),
+  logout: () => api.post('/auth/logout'),
   getProfile: () => api.get('/auth/me'),
+  changePassword: (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => api.put('/auth/password', data),
 };
 
 export const configApi = {

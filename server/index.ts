@@ -1,5 +1,6 @@
 import app from "./App";
 import { checkConnection } from "./db";
+import { connectSessionStore } from "./lib/session";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -19,6 +20,14 @@ const startServer = async () => {
 
   // 1. Check Database Connection
   await checkConnection();
+
+  // 1b. Sambungkan Redis (sesi); produksi berhenti bila gagal
+  try {
+    await connectSessionStore();
+  } catch (err) {
+    console.error("FATAL: Redis tidak dapat dihubungi.", err);
+    process.exit(1);
+  }
 
   // 2. Start Express Server
   app.listen(PORT, HOST, () => {

@@ -57,12 +57,13 @@ export const transactionStatusEnum = academySchema.enum("transaction_status", [
 export const users = academySchema.table("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).unique(), // boleh kosong (akun tautan digitalcoop.id); unik bila ada
   password: text("password").notNull(), // Hashed
+  passwordChangedAt: timestamp("password_changed_at"), // sesi lebih lama dari ini ditolak
   role: userRoleEnum("role").default("STUDENT").notNull(),
   status: userStatusEnum("status").default("ACTIVE").notNull(),
   avatar: text("avatar"),
-  phone: varchar("phone", { length: 20 }),
+  phone: varchar("phone", { length: 20 }).unique(), // format 62xxxxxxxxxx (lihat shared/phone.ts); unik bila ada
   bio: text("bio"),
   memberSequence: integer("member_sequence").generatedAlwaysAsIdentity(),
   walletBalance: integer("wallet_balance").default(0).notNull(), // Real Wallet Balance

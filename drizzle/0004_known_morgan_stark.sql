@@ -1,0 +1,1 @@
+ALTER TABLE "academy"."users" ADD COLUMN "password_changed_at" timestamp;

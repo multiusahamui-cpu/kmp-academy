@@ -96,7 +96,7 @@ export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
   {
     key: "password_min_length", group: "keamanan", type: "integer", isPublic: true,
     label: "Panjang minimal password",
-    description: "Berlaku untuk pendaftaran akun baru.",
+    description: "Berlaku untuk pendaftaran akun baru dan ganti password.",
     defaultValue: "8", min: 8, max: 64, unit: "karakter",
   },
 
