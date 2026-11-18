@@ -12,9 +12,8 @@ const API_URL = (import.meta as unknown as { env?: Record<string, string | undef
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Content-Type sengaja tidak dipasang di sini: axios memilih application/json untuk objek biasa, dan multipart (dengan boundary)
+  // untuk FormData. Header JSON bawaan membuat FormData diserialisasi jadi JSON sehingga berkas unggahan tidak pernah terkirim.
   // Sesi memakai cookie httpOnly (disimpan di Redis); tidak ada token di JavaScript/localStorage.
   withCredentials: true,
 });
