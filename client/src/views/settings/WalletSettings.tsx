@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { UserRole } from '../../types';
 import { Plus, Trash2, RefreshCw, Eye, EyeOff, Landmark, History, ArrowDownLeft, ArrowUpRight, Search, Loader2 } from 'lucide-react';
 import { userApi } from '../../services/api';
+import TopUpModal from '../../components/TopUpModal';
+import MyOrdersCard from '../../components/MyOrdersCard';
 
 interface WalletSettingsProps {
   role: UserRole;
@@ -49,7 +51,8 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
   const [newBankName, setNewBankName] = useState('BCA');
   const [newBankNumber, setNewBankNumber] = useState('');
   const [newHolderName, setNewHolderName] = useState('');
-  const [topUpAmount, setTopUpAmount] = useState<number>(100000);
+  const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+  const [ordersKey, setOrdersKey] = useState(0);
 
   // --- Fetch Real Wallet Data ---
   useEffect(() => {
@@ -86,20 +89,6 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
         fetchWalletData(); // Refresh list
      } catch {
         alert("Gagal menambah rekening.");
-     } finally {
-        setIsProcessing(false);
-     }
-  };
-
-  const handleTopUp = async () => {
-     setIsProcessing(true);
-     try {
-        await userApi.topUpWallet({ amount: topUpAmount, method: 'Virtual Account' });
-        alert(`Top Up Rp ${topUpAmount.toLocaleString()} Berhasil! Saldo telah diperbarui.`);
-        setIsTopUpOpen(false);
-        fetchWalletData(); // Refresh balance & history
-     } catch {
-        alert("Top Up Gagal.");
      } finally {
         setIsProcessing(false);
      }
@@ -174,14 +163,14 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                      {walletData.mode === 'SIMPANAN_SUKARELA'
                         ? 'Dompet Academy Anda adalah Simpanan Sukarela di digitalcoop.id dan disinkronkan dari saldo asli Anda di sana.'
                         : 'Pembayaran kursus dilakukan langsung lewat Virtual Account setelah payment gateway aktif.'}
-                     {!walletData.paymentsEnabled && ' Top up dan penarikan belum tersedia.'}
+                     {!walletData.paymentsEnabled && ' Penarikan belum tersedia.'}
                   </p>
 
                   <div className="grid grid-cols-2 gap-3">
                      {role === UserRole.STUDENT ? (
                         <button 
                            onClick={() => setIsTopUpOpen(true)}
-                           disabled={isProcessing || !walletData.paymentsEnabled}
+                           disabled={isProcessing}
                            className="py-2.5 bg-white text-kodman-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
                         >
                            <Plus size={16} className="mr-2" /> Top Up
@@ -201,6 +190,8 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                   </div>
                </div>
             </div>
+
+            <MyOrdersCard refreshKey={ordersKey} onOpen={(o) => setOpenOrderId(o.id)} />
 
             {/* Bank Accounts (Outbound) */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-5 shadow-sm">
@@ -341,50 +332,13 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
          </div>
       </div>
 
-      {/* Top Up Modal (Real API) */}
-      {isTopUpOpen && (
-         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-800 animate-fade-in-up">
-               <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Top Up Saldo</h3>
-                     <button onClick={() => setIsTopUpOpen(false)} className="text-gray-400 hover:text-gray-600"><Trash2 className="rotate-45" size={20} /></button>
-                  </div>
-                  
-                  <div className="mb-6">
-                     <p className="text-sm text-gray-500 mb-2">Pilih Nominal</p>
-                     <div className="grid grid-cols-3 gap-2 mb-4">
-                        {[50000, 100000, 250000, 500000, 1000000].map(amt => (
-                           <button 
-                              key={amt}
-                              onClick={() => setTopUpAmount(amt)}
-                              className={`py-2 px-1 rounded border text-sm font-medium transition ${topUpAmount === amt ? 'bg-kodman-50 border-kodman-500 text-kodman-700 dark:bg-kodman-900/30 dark:text-kodman-400' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:border-kodman-300'}`}
-                           >
-                              {amt / 1000}k
-                           </button>
-                        ))}
-                     </div>
-                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Rp</span>
-                        <input 
-                           type="number" 
-                           value={topUpAmount}
-                           onChange={(e) => setTopUpAmount(Number(e.target.value))}
-                           className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg text-lg font-bold focus:ring-2 focus:ring-kodman-500 outline-none"
-                        />
-                     </div>
-                  </div>
-
-                  <button 
-                     onClick={handleTopUp}
-                     disabled={isProcessing}
-                     className="w-full py-3 bg-kodman-600 text-white rounded-lg font-bold hover:bg-kodman-700 shadow-lg flex items-center justify-center"
-                  >
-                     {isProcessing ? <Loader2 className="animate-spin mr-2" /> : 'Lanjut Pembayaran'}
-                  </button>
-               </div>
-            </div>
-         </div>
+      {/* Top Up (order pembayaran: Virtual Account atau transfer manual) */}
+      {(isTopUpOpen || openOrderId) && (
+         <TopUpModal
+            existingOrderId={openOrderId}
+            onClose={() => { setIsTopUpOpen(false); setOpenOrderId(null); setOrdersKey((k) => k + 1); fetchWalletData(); }}
+            onPaid={() => { setOrdersKey((k) => k + 1); fetchWalletData(); }}
+         />
       )}
 
     </div>

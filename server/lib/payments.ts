@@ -1,7 +1,6 @@
-// Saklar pembayaran Academy. Selama payment gateway belum aktif:
-// - hanya kursus gratis (harga 0) yang bisa diikuti,
-// - top-up dan penarikan saldo ditutup.
-// Ubah ke true hanya setelah payment gateway terpasang dan diuji.
+// Saklar top-up dan penarikan saldo. Pembelian kursus dari dompet TIDAK bergantung pada saklar ini
+// (debit atomik, tidak bisa minus). Top-up saat ini hanya simulasi tanpa pembayaran nyata, jadi tetap
+// false sampai ada payment gateway (webhook terverifikasi) atau verifikasi bukti transfer oleh Admin.
 export const PAYMENTS_ENABLED = false;
 
 export const PAYMENTS_CLOSED_MESSAGE =

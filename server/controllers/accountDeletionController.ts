@@ -7,7 +7,7 @@ import { db } from "../db";
 import { accountDeletionRequests, balanceSettlements, courses, transactions, users } from "../schema/schema";
 import { successResponse, errorResponse } from "../utils/response";
 import { notifyUser } from "../lib/cards";
-import { proofPath, removeProofFile, saveProofFile } from "../lib/proof-storage";
+import { proofAccess, removeProofFile, saveProofFile } from "../lib/proof-storage";
 import {
   DECIDER_ROLES,
   DELETION_ROLES,
@@ -258,7 +258,7 @@ export const settleBalance = async (req: any, res: any) => {
       const v = validateSettlement({ amount: req.body?.amount, balance: target.walletBalance, transferDate: req.body?.transferDate, bankRef: req.body?.bankRef });
       if (!v.ok) return { code: 400 as const, message: v.message };
 
-      await saveProofFile(fileName, file.buffer);
+      await saveProofFile(fileName, file.buffer, proof.mime);
       savedFile = fileName;
 
       const [settlement] = await tx
@@ -309,10 +309,12 @@ export const getSettlementProof = async (req: any, res: any) => {
     if (!inRoles(req.user.role, DECIDER_ROLES)) return errorResponse(res, "Tidak diizinkan", 403);
     const [s] = await db.select().from(balanceSettlements).where(eq(balanceSettlements.id, req.params.id)).limit(1);
     if (!s) return errorResponse(res, "Bukti tidak ditemukan", 404);
-    res.setHeader("Content-Type", s.proofMime);
+    const access = await proofAccess(s.proofFile, s.proofMime);
     res.setHeader("Cache-Control", "private, no-store");
+    if (access.type === "redirect") return res.redirect(302, access.url); // tautan bertanda tangan, berlaku 60 detik
+    res.setHeader("Content-Type", s.proofMime);
     res.setHeader("Content-Disposition", "inline");
-    res.sendFile(proofPath(s.proofFile), (err: any) => {
+    res.sendFile(access.path, (err: any) => {
       if (err && !res.headersSent) errorResponse(res, "Berkas bukti tidak tersedia", 404);
     });
   } catch (error) {

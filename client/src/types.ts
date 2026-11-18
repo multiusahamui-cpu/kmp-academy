@@ -164,6 +164,10 @@ export interface Course {
   instructor: string;
   instructorId?: string; // ID of the Content Creator
   price: number;
+  /** Harga setelah diskon otomatis yang sedang berlaku (dihitung server). */
+  finalPrice?: number;
+  discountPercent?: number;
+  discountEndsAt?: string | null;
   type: CourseType;
   status: CourseStatus;
   thumbnail: string;

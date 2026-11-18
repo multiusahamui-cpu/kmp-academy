@@ -54,8 +54,11 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                  <div>
                     <p className="text-sm text-gray-500 dark:text-slate-400">Harga Kursus</p>
                     <h3 className="text-2xl font-bold text-kodman-600 dark:text-kodman-400">
-                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}
+                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.finalPrice ?? course.price)}
                     </h3>
+                    {(course.finalPrice ?? course.price) < course.price && (
+                       <p className="text-xs text-gray-400"><s>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}</s> diskon {course.discountPercent}%{course.discountEndsAt ? ` sampai ${new Date(course.discountEndsAt).toLocaleDateString('id-ID')}` : ''}</p>
+                    )}
                  </div>
                  <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded text-yellow-700 dark:text-yellow-500 font-bold text-sm">
                     <Star size={14} fill="currentColor" /> {course.rating}
@@ -70,7 +73,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     }}
                     className="w-full py-3 bg-kodman-600 hover:bg-kodman-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center transition"
                  >
-                    <ShoppingBag size={18} className="mr-2" /> Masukkan Keranjang
+                    <ShoppingBag size={18} className="mr-2" /> {(course.finalPrice ?? course.price) === 0 ? 'Daftar Gratis' : 'Beli Kursus'}
                  </button>
                  <button 
                     onClick={() => onToggleWishlist(course)}

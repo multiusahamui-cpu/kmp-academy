@@ -1,6 +1,7 @@
 import app from "./App";
 import { checkConnection } from "./db";
 import { connectSessionStore } from "./lib/session";
+import { startOrderJobs } from "./lib/order-service";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -28,6 +29,9 @@ const startServer = async () => {
     console.error("FATAL: Redis tidak dapat dihubungi.", err);
     process.exit(1);
   }
+
+  // 1c. Job berkala pembayaran (kedaluwarsa order, rekonsiliasi debit dan VA)
+  startOrderJobs();
 
   // 2. Start Express Server
   app.listen(PORT, HOST, () => {

@@ -85,12 +85,11 @@ export const userApi = {
   toggleWishlist: (courseId: string) => api.post(`/users/wishlist/${courseId}`),
   
   // Cart/Enrollment
-  enroll: (courseId: string) => api.post(`/users/enroll/${courseId}`),
+  enroll: (courseId: string, body?: { promoCode?: string; expectedPrice?: number }) => api.post(`/users/enroll/${courseId}`, body ?? {}),
   getMyCourses: () => api.get('/users/enrolled'),
 
   // Wallet Features (New)
   getWallet: () => api.get('/users/wallet'),
-  topUpWallet: (data: { amount: number, method: string }) => api.post('/users/wallet/topup', data),
   withdrawWallet: (data: { amount: number, bankId: string }) => api.post('/users/wallet/withdraw', data),
   getNotifications: () => api.get('/users/notifications'),
   markNotificationRead: (id: string) => api.post(`/users/notifications/${id}/read`),

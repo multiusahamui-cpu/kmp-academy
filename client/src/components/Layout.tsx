@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { UserRole, CartItem, WishlistItem } from "../types";
 import {
+  Receipt,
+  ClipboardCheck,
   Menu,
   LayoutDashboard,
   BookOpen,
@@ -172,6 +174,7 @@ export const Layout: React.FC<LayoutProps> = ({
             label: "Penjaminan Mutu",
             icon: ShieldCheck,
           },
+          { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "communication", label: "Komunikasi Publik", icon: Megaphone },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
@@ -193,6 +196,8 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "categories", label: "Manajemen Kategori", icon: Tags },
           { id: "proposals", label: "Approval Center", icon: FileCheck },
           { id: "users", label: "Manajemen User", icon: Users },
+          { id: "payment-verification", label: "Verifikasi Pembayaran", icon: Receipt },
+          { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
           { id: "moderation", label: "Moderasi Konten", icon: BookOpen },

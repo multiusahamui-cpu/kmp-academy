@@ -15,6 +15,8 @@ import FinanceDashboard from './views/admin/FinanceDashboard';
 import CategoryManager from './views/admin/CategoryManager'; 
 import HelpdeskTickets from './views/admin/HelpdeskTickets'; 
 import AccountDeletions from './views/admin/AccountDeletions';
+import PaymentVerification from './views/admin/PaymentVerification';
+import CourseReviews from './views/admin/CourseReviews';
 import ArchivedAccounts from './views/admin/ArchivedAccounts';
 import CourseCreator from './views/creator/CourseCreator';
 import ClassRoom from './views/mentor/ClassRoom';
@@ -350,6 +352,10 @@ const App: React.FC = () => {
         return <AppSettings isPolicyMode />;
       case 'users':
         return <UserManagement />;
+      case 'course-reviews':
+        return currentRole === UserRole.ADMIN_SYSTEM || currentRole === UserRole.DIRECTOR ? <CourseReviews /> : <Dashboard role={currentRole} />;
+      case 'payment-verification':
+        return <PaymentVerification />;
       case 'account-deletions':
         return <AccountDeletions />;
       case 'archived-accounts':

@@ -1,5 +1,5 @@
 
-import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique, uniqueIndex, date } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique, uniqueIndex, date, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // --- 1. Define Custom Schema 'academy' ---
@@ -112,7 +112,18 @@ export const courses = academySchema.table("courses", {
   // Rating Stats (Denormalized for performance)
   rating: integer("rating").default(0), // Disimpan skala 0-50 (misal 4.5 jadi 45) atau float logic di app
   totalReviews: integer("total_reviews").default(0),
-  
+
+  // Persetujuan lisensi, ujian, dan alur review terbit
+  licenseAcceptedAt: timestamp("license_accepted_at"),
+  licenseVersion: varchar("license_version", { length: 10 }),
+  examEnabled: boolean("exam_enabled").default(false).notNull(),
+  examPassingGrade: integer("exam_passing_grade").default(70).notNull(),
+  examDurationMinutes: integer("exam_duration_minutes").default(60).notNull(),
+  submittedAt: timestamp("submitted_at"),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNote: text("review_note"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -126,6 +137,11 @@ export const enrollments = academySchema.table("enrollments", {
   enrolledAt: timestamp("enrolled_at").defaultNow(),
   completedAt: timestamp("completed_at"),
   lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+  // Salinan harga saat mendaftar (null = pendaftaran sebelum fitur harga/promo).
+  basePrice: integer("base_price"),
+  discountPercent: integer("discount_percent"),
+  discountId: uuid("discount_id"),
+  amountPaid: integer("amount_paid"),
 }, (t) => [unique("enrollments_user_course_unique").on(t.userId, t.courseId)]);
 
 // Wishlists Table
@@ -295,3 +311,102 @@ export const balanceSettlements = academySchema.table("balance_settlements", {
   settledByName: varchar("settled_by_name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Modul/kurikulum kursus. Berkas (video/PDF) ada di bucket private; kolom content_key = kunci objek.
+export const courseModules = academySchema.table("course_modules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  position: integer("position").notNull(),
+  title: varchar("title", { length: 150 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 10 }).notNull(), // VIDEO | PDF | TEXT
+  contentKey: text("content_key"),
+  contentMime: varchar("content_mime", { length: 50 }),
+  contentSize: integer("content_size"),
+  textContent: text("text_content"),
+  isFreePreview: boolean("is_free_preview").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [index("course_modules_course_idx").on(t.courseId, t.position)]);
+
+// Bank soal ujian kursus. Kunci jawaban tidak pernah dikirim ke peserta.
+export const courseExamQuestions = academySchema.table("course_exam_questions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  position: integer("position").notNull(),
+  question: text("question").notNull(),
+  options: jsonb("options").$type<string[]>().notNull(), // tepat 4 pilihan
+  correctIndex: integer("correct_index").notNull(), // 0-3
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [index("course_exam_questions_course_idx").on(t.courseId, t.position)]);
+
+// Diskon kursus: AUTO (otomatis pada periode) atau CODE (kode promo, umum atau sekali pakai). Dibatalkan, tidak dihapus.
+export const courseDiscounts = academySchema.table("course_discounts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
+  kind: varchar("kind", { length: 10 }).notNull(), // AUTO | CODE
+  code: varchar("code", { length: 20 }),
+  percent: integer("percent").notNull(), // 1-100
+  startsAt: timestamp("starts_at").notNull(),
+  endsAt: timestamp("ends_at").notNull(),
+  maxRedemptions: integer("max_redemptions"), // null = tanpa batas
+  redemptionCount: integer("redemption_count").default(0).notNull(),
+  batchId: uuid("batch_id"), // kode sekali pakai yang dibuat massal
+  createdBy: uuid("created_by").references(() => users.id).notNull(),
+  createdByRole: varchar("created_by_role", { length: 20 }).notNull(),
+  reason: text("reason"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancelledBy: uuid("cancelled_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("course_discounts_code_unique").on(t.courseId, t.code).where(sql`${t.code} is not null`),
+  index("course_discounts_course_idx").on(t.courseId),
+]);
+
+// Satu akun hanya sekali memakai satu diskon.
+export const discountRedemptions = academySchema.table("discount_redemptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  discountId: uuid("discount_id").references(() => courseDiscounts.id).notNull(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  courseId: uuid("course_id").references(() => courses.id).notNull(),
+  amountPaid: integer("amount_paid").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique("discount_redemptions_user_discount_unique").on(t.discountId, t.userId)]);
+
+// Order pembayaran: pembelian kursus (VA, transfer manual, dompet digitalcoop.id) dan top-up dompet Academy (VA, manual).
+export const paymentOrders = academySchema.table("payment_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  kind: varchar("kind", { length: 10 }).notNull(), // COURSE | TOPUP
+  courseId: uuid("course_id").references(() => courses.id),
+  method: varchar("method", { length: 12 }).notNull(), // VA | MANUAL | DC_WALLET
+  status: varchar("status", { length: 12 }).notNull().default("PENDING"),
+  amount: integer("amount").notNull(), // jumlah yang harus dibayar (rupiah)
+  basePrice: integer("base_price"),
+  discountPercent: integer("discount_percent"),
+  discountId: uuid("discount_id"),
+  bank: varchar("bank", { length: 10 }),
+  vaNumber: varchar("va_number", { length: 40 }),
+  gatewayStatus: varchar("gateway_status", { length: 30 }),
+  debitTxId: varchar("debit_tx_id", { length: 100 }),
+  proofKey: text("proof_key"),
+  proofMime: varchar("proof_mime", { length: 60 }),
+  proofSha256: varchar("proof_sha256", { length: 64 }),
+  proofUploadedAt: timestamp("proof_uploaded_at"),
+  paidReference: varchar("paid_reference", { length: 100 }),
+  paidDate: date("paid_date"),
+  decidedBy: uuid("decided_by").references(() => users.id),
+  decidedAt: timestamp("decided_at"),
+  decisionNote: text("decision_note"),
+  paidAt: timestamp("paid_at"),
+  enrollmentId: uuid("enrollment_id"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("payment_orders_open_course_unique").on(t.userId, t.courseId)
+    .where(sql`${t.kind} = 'COURSE' and ${t.status} in ('PENDING','VERIFYING','CONFIRMING')`),
+  uniqueIndex("payment_orders_proof_sha_unique").on(t.proofSha256).where(sql`${t.proofSha256} is not null`),
+  index("payment_orders_status_idx").on(t.status, t.createdAt),
+  index("payment_orders_user_idx").on(t.userId, t.createdAt),
+]);

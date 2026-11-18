@@ -8,6 +8,8 @@ import mentorRoutes from "./mentorRoutes";
 import adminRoutes from "./adminRoutes";
 import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
+import paymentRoutes from "./paymentRoutes";
+import { midtransNotify } from "../controllers/paymentController";
 import { getPublicSystemConfig } from "../controllers/systemConfigController";
 import { maintenanceGuard } from "../middleware/maintenance";
 
@@ -19,12 +21,16 @@ router.get("/health", getSystemHealth);
 // Konfigurasi publik (nama situs, pengumuman, status maintenance, dll.)
 router.get("/config/public", getPublicSystemConfig);
 
+// Notifikasi Midtrans: tanpa login dan tetap jalan saat maintenance (diverifikasi lewat tanda tangan)
+router.post("/payments/midtrans/notify", midtransNotify);
+
 // Mode maintenance: menutup semua rute di bawah ini untuk selain Superadmin
 router.use(maintenanceGuard);
 
 // Module Routes
 router.use("/auth", authRoutes);
 router.use("/courses", courseRoutes); // Includes Categories & Content
+router.use("/payments", paymentRoutes); // Order pembayaran: VA, transfer manual, dompet digitalcoop.id
 router.use("/users", userRoutes); // Includes Learning, Wallet, Certs
 router.use("/mentor", mentorRoutes); // Includes Classroom
 router.use("/admin", adminRoutes); // Includes Finance, Helpdesk, Approvals

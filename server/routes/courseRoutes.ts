@@ -1,53 +1,57 @@
 import { Router } from "express";
-import multer from "multer";
-import path from "path";
 import * as course from "../controllers/courseController";
+import * as authoring from "../controllers/courseAuthoringController";
 import { authenticateToken, requireRole } from "../middleware/auth";
-import { errorResponse } from "../utils/response";
-import { getConfigInt } from "../lib/system-config";
+import * as pricing from "../controllers/pricingController";
+import { promoLimiter, uploadLimiter } from "../lib/security";
 
 const router = Router();
 
-// Multer Config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "static/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-// Batas ukuran mengikuti Konfigurasi Sistem (max_upload_mb), dibaca per unggahan.
-const uploadSingleFile = async (req: any, res: any, next: any) => {
-  try {
-    const maxMb = await getConfigInt("max_upload_mb");
-    const upload = multer({ storage, limits: { fileSize: maxMb * 1024 * 1024 } });
-    upload.single("file")(req, res, (err: any) => {
-      if (err?.code === "LIMIT_FILE_SIZE") {
-        return errorResponse(res, `Ukuran berkas melebihi batas ${maxMb} MB`, 413);
-      }
-      if (err) return next(err);
-      next();
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+const creator = [authenticateToken, requireRole(["CREATOR"])];
+const reviewer = [authenticateToken, requireRole(["ADMIN_SYSTEM", "DIRECTOR"])];
+const discountManager = [authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM", "DIRECTOR"])];
 
-// Public
+// Publik (detail memeriksa sesi sendiri: hanya kursus terbit untuk umum)
 router.get("/", course.getCourses);
-router.get("/categories", course.getCategories); // New
-router.get("/:id", course.getCourseDetails);
+router.get("/categories", authoring.getCategoriesList);
 
-// Creator Protected
-router.get("/creator/dashboard", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.getCreatorCourses); // New
-router.post("/", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.createCourse);
-router.put("/:id", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.updateCourse);
-router.post("/:id/modules", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.addModule);
-router.post("/:id/publish", authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM"]), course.requestPublish); // New
+// Admin: review kursus (sebelum "/:id" agar tidak tertangkap sebagai id)
+router.get("/reviews", ...reviewer, authoring.listCourseReviews);
+router.post("/reviews/:id/decision", ...reviewer, authoring.decideCourseReview);
 
-// Upload (General for Creators/Mentors)
-router.post("/upload", authenticateToken, requireRole(["CREATOR", "MENTOR", "ADMIN_SYSTEM"]), uploadSingleFile, course.uploadContent);
+// Creator
+router.get("/creator/dashboard", ...creator, authoring.getCreatorCourses);
+router.post("/", ...creator, authoring.createCourse);
 
-export default router;
+router.get("/:id", authoring.getCourseDetails);
+router.put("/:id", ...creator, authoring.updateCourse);
+router.post("/:id/thumbnail", ...creator, uploadLimiter, authoring.thumbnailUploadMiddleware, authoring.uploadThumbnail);
+router.post("/:id/publish", ...creator, authoring.requestPublish);
+
+router.post("/:id/modules", ...creator, authoring.addModule);
+router.put("/:id/modules/reorder", ...creator, authoring.reorderModules);
+router.put("/:id/modules/:mid", ...creator, authoring.updateModule);
+router.delete("/:id/modules/:mid", ...creator, authoring.deleteModule);
+router.post("/:id/modules/:mid/upload-init", ...creator, uploadLimiter, authoring.uploadInit);
+router.post("/:id/modules/:mid/upload-complete", ...creator, authoring.uploadComplete);
+router.post("/:id/modules/:mid/upload", ...creator, uploadLimiter, authoring.moduleFileMiddleware, authoring.uploadModuleFile);
+
+// Isi modul: pemilik, admin, peserta terdaftar, atau pratinjau gratis (diperiksa di controller)
+router.get("/:id/modules/:mid/content", authenticateToken, authoring.getModuleContent);
+router.get("/:id/modules/:mid/file", authenticateToken, authoring.streamModuleFile);
+
+// Diskon dan kode promo: pemilik kursus, Admin, atau Direktur (dicek lagi di controller)
+router.get("/:id/discounts", ...discountManager, pricing.listDiscounts);
+router.post("/:id/discounts", ...discountManager, pricing.createDiscount);
+router.post("/:id/discounts/bulk", ...discountManager, pricing.createBulkCodes);
+router.post("/:id/discounts/:did/cancel", ...discountManager, pricing.cancelDiscount);
+router.post("/:id/promo/validate", authenticateToken, promoLimiter, pricing.validatePromo);
+
+// Ujian (pemilik)
+router.get("/:id/exam", ...creator, authoring.getExam);
+router.put("/:id/exam", ...creator, authoring.updateExam);
+router.post("/:id/exam/questions", ...creator, authoring.addQuestion);
+router.put("/:id/exam/questions/:qid", ...creator, authoring.updateQuestion);
+router.delete("/:id/exam/questions/:qid", ...creator, authoring.deleteQuestion);
+
+export default router;

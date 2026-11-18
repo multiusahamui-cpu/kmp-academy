@@ -10,7 +10,7 @@
  */
 
 export type ConfigType = "boolean" | "integer" | "text" | "longtext" | "email" | "phone";
-export type ConfigGroupId = "umum" | "keamanan" | "pembelajaran";
+export type ConfigGroupId = "umum" | "keamanan" | "pembelajaran" | "pembayaran";
 
 export interface ConfigDefinition {
   key: string;
@@ -33,6 +33,7 @@ export const CONFIG_GROUPS: { id: ConfigGroupId; label: string; description: str
   { id: "umum", label: "Umum & Akses", description: "Identitas situs, kontak bantuan, pengumuman, maintenance, dan pendaftaran." },
   { id: "keamanan", label: "Keamanan Sesi", description: "Masa berlaku login, auto-logout, dan aturan password." },
   { id: "pembelajaran", label: "Pembelajaran", description: "Nilai bawaan ujian dan batas unggah materi." },
+  { id: "pembayaran", label: "Pembayaran", description: "Rekening tujuan transfer manual. Tidak ditampilkan ke publik; hanya kepada pemilik order." },
 ];
 
 export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
@@ -112,6 +113,25 @@ export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
     label: "Batas ukuran unggah materi",
     description: "Ukuran maksimal satu berkas materi. Batas atas 50 MB mengikuti batas nginx.",
     defaultValue: "50", min: 1, max: 50, unit: "MB",
+  },
+  // ── Pembayaran ──
+  {
+    key: "payment_bank_name", group: "pembayaran", type: "text", isPublic: false, allowEmpty: true,
+    label: "Bank tujuan transfer manual",
+    description: "Nama bank rekening koperasi untuk transfer manual. Kosong = transfer manual dinonaktifkan.",
+    defaultValue: "", maxLength: 60,
+  },
+  {
+    key: "payment_bank_account_number", group: "pembayaran", type: "text", isPublic: false, allowEmpty: true,
+    label: "Nomor rekening tujuan",
+    description: "Nomor rekening (angka, boleh dengan spasi atau tanda hubung).",
+    defaultValue: "", maxLength: 40,
+  },
+  {
+    key: "payment_bank_account_name", group: "pembayaran", type: "text", isPublic: false, allowEmpty: true,
+    label: "Nama pemilik rekening",
+    description: "Nama pemilik rekening sebagaimana tercatat di bank.",
+    defaultValue: "", maxLength: 100,
   },
 ];
 

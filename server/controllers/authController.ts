@@ -11,7 +11,7 @@ import { getConfigBool, getConfigInt, getConfigValue } from "../lib/system-confi
 import { cekAkunTertaut } from "./digitalcoopController";
 import multer from "multer";
 import { AVATAR_MAX_BYTES, detectImageType, validateBio, validateName } from "@shared/profile";
-import { avatarUrl, newAvatarFileName, removeOldAvatar, saveAvatarFile } from "../lib/avatar";
+import { newAvatarKey, removeOldAvatar, saveAvatar } from "../lib/avatar";
 
 // Masa berlaku sesi mengikuti Konfigurasi Sistem (login_session_hours).
 const sessionLifetimeMs = async (): Promise<number> => (await getConfigInt("login_session_hours")) * 60 * 60 * 1000;
@@ -289,9 +289,7 @@ export const uploadAvatar = async (req: any, res: any) => {
     const user = await db.query.users.findFirst({ where: (u, { eq: e }) => e(u.id, req.user.id) });
     if (!user) return errorResponse(res, "User not found", 404);
 
-    const fileName = newAvatarFileName(user.id, type.ext);
-    await saveAvatarFile(fileName, file.buffer);
-    const url = avatarUrl(fileName);
+    const url = await saveAvatar(newAvatarKey(user.id, type.ext), file.buffer, type.mime);
     await db.update(users).set({ avatar: url, updatedAt: new Date() }).where(eq(users.id, user.id));
     await removeOldAvatar(user.id, user.avatar);
     successResponse(res, { avatar: url }, "Foto profil diperbarui");

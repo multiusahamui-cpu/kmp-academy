@@ -15,6 +15,9 @@ export interface ApiCourse {
   rating?: number | null; // skala 0-50 di database
   totalReviews?: number | null;
   studentsEnrolled?: number;
+  finalPrice?: number;
+  discountPercent?: number;
+  discountEndsAt?: string | null;
 }
 
 const PLACEHOLDER_THUMB = 'https://via.placeholder.com/640x360?text=Kursus';
@@ -26,6 +29,9 @@ export const mapApiCourse = (c: ApiCourse): Course => ({
   instructor: c.instructorName ?? '',
   instructorId: c.instructorId ?? undefined,
   price: c.price,
+  finalPrice: c.finalPrice ?? c.price,
+  discountPercent: c.discountPercent ?? 0,
+  discountEndsAt: c.discountEndsAt ?? null,
   type: (c.type as CourseType) ?? CourseType.MANDIRI,
   status: (c.status as CourseStatus) ?? CourseStatus.PUBLISHED,
   thumbnail: c.thumbnail || PLACEHOLDER_THUMB,

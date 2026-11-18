@@ -69,6 +69,14 @@ export const createBridge = (env: NodeJS.ProcessEnv = process.env, fetchImpl: Fe
       (await call<{ cocok: boolean }>("POST", "/api/bridge/academy/verifikasi-password", { digitalcoopUserId, password })).cocok,
     status: async (digitalcoopUserId: string) =>
       (await call<{ profil: ProfilDigitalcoop }>("GET", `/api/bridge/academy/status/${encodeURIComponent(digitalcoopUserId)}`)).profil,
+    // Dompet simpanan sukarela (spesifikasi: docs/SPEC-BRIDGE-DOMPET-DIGITALCOOP.md)
+    saldo: (digitalcoopUserId: string) =>
+      call<{ saldo: number; pinSet: boolean }>("GET", `/api/bridge/academy/saldo/${encodeURIComponent(digitalcoopUserId)}`),
+    /** PIN hanya diteruskan, tidak disimpan dan tidak dicatat di Academy. */
+    debit: (input: { digitalcoopUserId: string; amount: number; pin: string; idempotencyKey: string; description: string }) =>
+      call<{ status: string; txId: string; saldoBaru: number }>("POST", "/api/bridge/academy/debit", input),
+    statusDebit: (idempotencyKey: string) =>
+      call<{ status: "SUCCESS" | "NOT_FOUND"; txId?: string; amount?: number }>("GET", `/api/bridge/academy/debit/${encodeURIComponent(idempotencyKey)}`),
   };
 };
 

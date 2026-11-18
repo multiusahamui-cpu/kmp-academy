@@ -4,6 +4,7 @@ import * as admin from "../controllers/adminController";
 import { authenticateToken, requireRole } from "../middleware/auth";
 import * as deletion from "../controllers/accountDeletionController";
 import { uploadLimiter } from "../lib/security";
+import * as payAdmin from "../controllers/adminPaymentController";
 
 const router = Router();
 
@@ -21,6 +22,11 @@ router.delete("/users/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.d
 router.get("/applications", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listRoleApplications);
 router.post("/applications/:id/decision", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.decideRoleApplication);
 router.post("/users/:id/card", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.issueUserCard);
+
+// Verifikasi pembayaran transfer manual (Admin Sistem)
+router.get("/payment-orders", requireRole(["ADMIN_SYSTEM"]), payAdmin.listPaymentOrders);
+router.get("/payment-orders/:id/proof", requireRole(["ADMIN_SYSTEM"]), payAdmin.getPaymentProof);
+router.post("/payment-orders/:id/decision", requireRole(["ADMIN_SYSTEM"]), payAdmin.decidePaymentOrder);
 
 // Penghapusan akun individual: diputuskan Admin atau Direktur; saldo diselesaikan Admin; arsip hanya baca
 router.get("/account-deletions", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listDeletions);

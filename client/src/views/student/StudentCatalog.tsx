@@ -5,6 +5,7 @@ import { Play, Heart, Filter, X, Award, Ticket, Key, CheckCircle, Info } from 'l
 import { CourseType, Course, WishlistItem } from '../../types';
 import ExamRoom from './ExamRoom';
 import CourseDetailModal from '../../components/CourseDetailModal';
+import CheckoutModal from '../../components/CheckoutModal';
 import { courseApi, userApi } from '../../services/api';
 import { ApiCourse, mapApiCourse } from '../../services/mappers';
 import { notifyProfileChanged, useProfile } from '../../services/profile';
@@ -81,24 +82,17 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
     return true;
   });
 
-  // Sebelum payment gateway aktif hanya kursus gratis yang bisa diikuti.
-  const handleEnroll = async (e: React.MouseEvent | null, course: Course) => {
+  // Pendaftaran lewat checkout: gratis, dompet Academy, dompet digitalcoop.id, Virtual Account, atau transfer manual.
+  const [checkoutCourse, setCheckoutCourse] = useState<Course | null>(null);
+  const handleEnroll = (e: React.MouseEvent | null, course: Course) => {
     if (e) e.stopPropagation();
-    if (course.price > 0) {
-       setNotice('Kursus berbayar segera hadir. Pembayaran akan dilakukan lewat Virtual Account setelah payment gateway aktif.');
-       return;
-    }
-    try {
-       const res = await userApi.enroll(course.id);
-       const card: string | null = res.data?.data?.cardNumber ?? null;
-       setNotice(card ? `Berhasil mengikuti kursus. Kartu Student Anda terbit: ${card}` : 'Berhasil mengikuti kursus.');
-       setSelectedCourseForDetail(null);
-       notifyProfileChanged();
-       loadCourses();
-    } catch (err: unknown) {
-       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-       setNotice(msg || 'Gagal mengikuti kursus.');
-    }
+    setSelectedCourseForDetail(null);
+    setCheckoutCourse(course);
+  };
+  const handleEnrolled = (card: string | null) => {
+    setNotice(card ? `Berhasil mengikuti kursus. Kartu Student Anda terbit: ${card}` : 'Berhasil mengikuti kursus.');
+    notifyProfileChanged();
+    loadCourses();
   };
 
   const handleWishlist = (e: React.MouseEvent | null, course: Course) => {
@@ -139,6 +133,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
             onToggleWishlist={(c) => handleWishlist(null, c)}
             isInWishlist={wishlistItems.some(item => item.courseId === selectedCourseForDetail.id)}
          />
+      )}
+
+      {checkoutCourse && (
+         <CheckoutModal course={checkoutCourse} onClose={() => setCheckoutCourse(null)} onEnrolled={handleEnrolled} />
       )}
 
       {notice && (

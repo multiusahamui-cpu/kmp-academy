@@ -1,30 +1,25 @@
-import fs from "node:fs/promises";
 import path from "node:path";
+import { deletePublic, publicKeyFromUrl, putPublic, readR2Config, resolveDriver } from "./storage";
 
-export const AVATAR_DIR = path.resolve("static", "avatars");
-export const AVATAR_URL_PREFIX = "/cdn/avatars/";
+export const newAvatarKey = (userId: string, ext: string, now = Date.now()): string => `avatars/${userId}-${now}.${ext}`;
 
-export const avatarUrl = (fileName: string): string => `${AVATAR_URL_PREFIX}${fileName}`;
+/** Menyimpan foto di penyimpanan publik; mengembalikan URL untuk disimpan di users.avatar. */
+export const newThumbnailKey = (courseId: string, ext: string, now = Date.now()): string => `thumbnails/${courseId}-${now}.${ext}`;
 
-export const newAvatarFileName = (userId: string, ext: string, now = Date.now()): string => `${userId}-${now}.${ext}`;
-
-/** Menyimpan foto baru di static/avatars; mengembalikan nama berkas. */
-export const saveAvatarFile = async (fileName: string, data: Uint8Array): Promise<void> => {
-  await fs.mkdir(AVATAR_DIR, { recursive: true });
-  await fs.writeFile(path.join(AVATAR_DIR, fileName), data, { flag: "wx" });
-};
+export const saveAvatar = (key: string, data: Uint8Array, mime: string): Promise<string> => putPublic(key, data, mime);
 
 /**
- * Menghapus foto lama milik user. Hanya berkas di static/avatars yang namanya diawali id user
- * yang disentuh, jadi nilai `avatar` dari data lama (mis. URL luar) tidak pernah menghapus berkas lain.
+ * Menghapus berkas publik lama milik satu pemilik. Hanya objek di `folder/` yang namanya diawali id pemilik yang
+ * disentuh, jadi nilai lama (mis. URL luar atau milik driver lain) tidak pernah menghapus berkas lain.
  */
-export const removeOldAvatar = async (userId: string, avatar: string | null | undefined): Promise<void> => {
-  if (!avatar || !avatar.startsWith(AVATAR_URL_PREFIX)) return;
-  const fileName = path.basename(avatar);
-  if (!fileName.startsWith(`${userId}-`)) return;
-  try {
-    await fs.unlink(path.join(AVATAR_DIR, fileName));
-  } catch {
-    // berkas sudah tidak ada: tidak masalah
-  }
+export const removeOldPublicFile = async (folder: string, ownerId: string, url: string | null | undefined): Promise<void> => {
+  if (!url) return;
+  const driver = resolveDriver();
+  const key = publicKeyFromUrl(url, driver, driver === "r2" ? readR2Config() : null);
+  if (!key || !key.startsWith(`${folder}/`)) return;
+  if (!path.basename(key).startsWith(`${ownerId}-`)) return;
+  await deletePublic(key);
 };
+
+export const removeOldAvatar = (userId: string, avatar: string | null | undefined): Promise<void> =>
+  removeOldPublicFile("avatars", userId, avatar);
