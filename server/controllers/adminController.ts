@@ -2,7 +2,7 @@
 import { successResponse, errorResponse } from "../utils/response";
 import { db } from "../db";
 import { roleApplications, users } from "../schema/schema";
-import { eq, desc } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { issueCard, notifyUser } from "../lib/cards";
 import { cardPrefixFor } from "@shared/card";
@@ -13,8 +13,54 @@ export const getDashboardStats = async (req: any, res: any) => {
 };
 
 // --- USER MANAGEMENT ---
+const USERS_PAGE_SIZE = 15;
+const TAB_ROLES: Record<string, string[]> = {
+  INTERNAL: ["SUPERADMIN", "ADMIN_SYSTEM", "DIRECTOR"],
+  MENTOR: ["MENTOR"],
+  CREATOR: ["CREATOR"],
+  STUDENT: ["STUDENT"],
+};
+
+/** Daftar pengguna asli dari database, per kelompok role, 15 per halaman. Password tidak pernah dikirim. */
 export const getAllUsers = async (req: any, res: any) => {
-  successResponse(res, [], "All Users");
+  try {
+    const tab = typeof req.query.tab === "string" ? req.query.tab : "STUDENT";
+    const roles = TAB_ROLES[tab];
+    if (!roles) return errorResponse(res, "Kelompok tidak valid", 400);
+    const q = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 100) : "";
+    const page = Math.max(1, Math.floor(Number(req.query.page)) || 1);
+
+    const like = `%${q.replace(/[%_\\]/g, "\\$&")}%`;
+    const roleFilter = inArray(users.role, roles as any);
+    const where = q
+      ? and(roleFilter, or(ilike(users.name, like), ilike(users.email, like), ilike(users.phone, like), ilike(users.cardNumber, like)))
+      : roleFilter;
+
+    const [total] = await db.select({ n: count() }).from(users).where(where);
+    const rows = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        role: users.role,
+        status: users.status,
+        avatar: users.avatar,
+        cardNumber: users.cardNumber,
+        linked: sql<boolean>`${users.digitalcoopUserId} is not null`,
+        joinedAt: users.createdAt,
+        enrolledCount: sql<number>`(select count(*)::int from academy.enrollments e where e.user_id = academy.users.id)`,
+      })
+      .from(users)
+      .where(where)
+      .orderBy(desc(users.createdAt))
+      .limit(USERS_PAGE_SIZE)
+      .offset((page - 1) * USERS_PAGE_SIZE);
+
+    successResponse(res, { total: Number(total?.n ?? 0), page, size: USERS_PAGE_SIZE, items: rows }, "Daftar pengguna");
+  } catch (error) {
+    errorResponse(res, "Gagal memuat daftar pengguna", 500, error);
+  }
 };
 
 export const updateUserRole = async (req: any, res: any) => {

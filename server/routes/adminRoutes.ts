@@ -13,7 +13,7 @@ router.use(authenticateToken);
 router.get("/stats", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getDashboardStats);
 
 // Users
-router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getAllUsers);
+router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getAllUsers);
 router.put("/users/:id/role", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.updateUserRole);
 router.delete("/users/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.deleteUser);
 

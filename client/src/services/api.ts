@@ -102,6 +102,7 @@ export const adminApi = {
   listApplications: (status = 'PENDING') => api.get('/admin/applications', { params: { status } }),
   decideApplication: (id: string, action: 'APPROVE' | 'REJECT', note?: string) =>
     api.post(`/admin/applications/${id}/decision`, { action, note }),
+  listUsers: (tab: string, q = '', page = 1) => api.get('/admin/users', { params: { tab, q, page } }),
   issueCard: (userId: string) => api.post(`/admin/users/${userId}/card`),
   // Penghapusan akun individual (Admin/Direktur)
   listDeletions: (status = 'PENDING') => api.get('/admin/account-deletions', { params: { status } }),
