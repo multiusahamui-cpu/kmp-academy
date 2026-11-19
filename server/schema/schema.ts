@@ -764,3 +764,38 @@ export const kycAccessLog = academySchema.table("kyc_access_log", {
   file: varchar("file", { length: 10 }).notNull(), // ktp | selfie | nik
   at: timestamp("at").defaultNow().notNull(),
 });
+
+// Industry Hub: profil talenta publik (opt-in). Portofolio/kompetensi dihitung dari sertifikat dan kursus, tidak disalin ke sini.
+export const talentProfiles = academySchema.table("talent_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  slug: varchar("slug", { length: 60 }).notNull(),
+  headline: varchar("headline", { length: 120 }).notNull(),
+  bio: text("bio").notNull(),
+  city: varchar("city", { length: 100 }),
+  skills: jsonb("skills").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  isPublic: boolean("is_public").notNull().default(false),
+  consentAt: timestamp("consent_at"),
+  consentVersion: varchar("consent_version", { length: 30 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  userUq: uniqueIndex("talent_profiles_user_uq").on(t.userId),
+  slugUq: uniqueIndex("talent_profiles_slug_uq").on(t.slug),
+  publicIdx: index("talent_profiles_public_idx").on(t.isPublic),
+}));
+
+// Pesan dari calon pemberi kerja ke talenta (juga diteruskan ke inbox talenta). Catatan permanen untuk jejak penyalahgunaan.
+export const talentInquiries = academySchema.table("talent_inquiries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: uuid("profile_id").references(() => talentProfiles.id).notNull(),
+  senderName: varchar("sender_name", { length: 100 }).notNull(),
+  company: varchar("company", { length: 120 }).notNull(),
+  senderEmail: varchar("sender_email", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  profileIdx: index("talent_inquiries_profile_idx").on(t.profileId, t.createdAt),
+}));

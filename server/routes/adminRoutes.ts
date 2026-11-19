@@ -22,9 +22,9 @@ router.get("/stats", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), re
 // Users
 router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getAllUsers);
 
-// Daftar tunggu calon mentor/creator & kartu
-router.get("/applications", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listRoleApplications);
-router.post("/applications/:id/decision", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.decideRoleApplication);
+// Daftar tunggu calon mentor/creator: diputuskan Direktur (penilai kompetensi). Penerbitan kartu manual tetap Admin/Superadmin.
+router.get("/applications", requireRole(["DIRECTOR"]), admin.listRoleApplications);
+router.post("/applications/:id/decision", requireRole(["DIRECTOR"]), admin.decideRoleApplication);
 router.post("/users/:id/card", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.issueUserCard);
 
 // Verifikasi pembayaran transfer manual (Admin Sistem)

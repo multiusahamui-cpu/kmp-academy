@@ -23,6 +23,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
     }
   };
 
+  const signer = data.signerName ?? "Direktur";
   const isWorkshop = data.courseType === CourseType.WORKSHOP;
   const isCertification = data.courseType === CourseType.CERTIFICATION;
 
@@ -119,15 +120,15 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
                 {/* Mock Signature 1 */}
                 <div className="h-16 mb-2 flex items-end justify-center">
                   <span className="font-script text-3xl text-black rotate-[-2deg] opacity-80">
-                    Ulpermadi Ibrahim
+                    {signer}
                   </span>
                 </div>
 
                 <div className="w-56 border-t border-gray-400 pt-2 font-bold text-gray-900">
-                  Ulpermadi Ibrahim
+                  {signer}
                 </div>
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">
-                  Direktur Kodman Academy
+                  Direktur KMP-ADNG Academy
                 </p>
               </div>
 

@@ -190,6 +190,13 @@
       "when": 1795068717352,
       "tag": "0026_certificate_pdf_url",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1795074717137,
+      "tag": "0027_talent_hub",
+      "breakpoints": true
     }
   ]
 }

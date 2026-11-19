@@ -78,6 +78,7 @@ export interface CertificateDto {
   kind: 'EXAM' | 'COMPLETION' | 'PARTICIPATION';
   issuedAt: string;
   pdfUrl?: string | null;
+  signerName?: string | null;
 }
 
 export interface VerifiedCertificate {
@@ -106,6 +107,7 @@ export const mapCertificate = (c: CertificateDto): Certificate => ({
   issueDate: formatLongDate(c.issuedAt),
   grade: c.grade ?? 0,
   pdfUrl: c.pdfUrl ?? null,
+  signerName: c.signerName ?? null,
 });
 
 export const learningApi = {

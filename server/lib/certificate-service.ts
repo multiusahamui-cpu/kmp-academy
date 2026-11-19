@@ -1,4 +1,4 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, asc, isNull } from "drizzle-orm";
 import { db } from "../db";
 import { certificates, users } from "../schema/schema";
 import { putPublic } from "./storage";
@@ -51,8 +51,8 @@ export const renderCertificatePdf = (c: Pick<Cert, "serial" | "studentName" | "c
   return buildPdf(p, `${certificateTitle(c.courseType, c.kind)} ${c.serial}`);
 };
 
-const currentDirectorName = async (): Promise<string | null> => {
-  const [d] = await db.select({ name: users.name }).from(users).where(and(eq(users.role, "DIRECTOR"), eq(users.status, "ACTIVE"))).limit(1);
+export const currentDirectorName = async (): Promise<string | null> => {
+  const [d] = await db.select({ name: users.name }).from(users).where(and(eq(users.role, "DIRECTOR"), eq(users.status, "ACTIVE"))).orderBy(asc(users.createdAt)).limit(1);
   return d?.name ?? null;
 };
 

@@ -2,7 +2,7 @@
 import { JOBS, findJob, getJobState, listRuns, runJob } from "../lib/job-runner";
 import { successResponse, errorResponse } from "../utils/response";
 import { db } from "../db";
-import { roleApplications, users } from "../schema/schema";
+import { kycRecords, roleApplications, users } from "../schema/schema";
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { issueCard, notifyUser } from "../lib/cards";
@@ -78,9 +78,12 @@ export const listRoleApplications = async (req: any, res: any) => {
         createdAt: roleApplications.createdAt,
         decidedAt: roleApplications.decidedAt,
         decisionNote: roleApplications.decisionNote,
+        kycStatus: kycRecords.status,
+        dcKycStatus: users.kycStatus,
     })
     .from(roleApplications)
     .innerJoin(users, eq(roleApplications.userId, users.id))
+    .leftJoin(kycRecords, eq(kycRecords.userId, users.id))
     .where(eq(roleApplications.status, status as "PENDING" | "APPROVED" | "REJECTED"))
     .orderBy(desc(roleApplications.createdAt));
     successResponse(res, rows, "Daftar tunggu");

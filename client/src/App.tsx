@@ -24,6 +24,7 @@ import AccountDeletions from './views/admin/AccountDeletions';
 import PaymentVerification from './views/admin/PaymentVerification';
 import CourseReviews from './views/admin/CourseReviews';
 import VerifyCertificate from './views/VerifyCertificate';
+import TalentHub from './views/TalentHub';
 import ArchivedAccounts from './views/admin/ArchivedAccounts';
 import CourseCreator from './views/creator/CourseCreator';
 import ClassRoom from './views/mentor/ClassRoom';
@@ -76,6 +77,8 @@ const App: React.FC = () => {
   const [isRestoringSession, setIsRestoringSession] = useState<boolean>(true);
   // Masuk dari digitalcoop.id: academy.digitalcoop.id/sso#t=<tiket>
   const [ssoMode, setSsoMode] = useState<boolean>(() => window.location.pathname === '/sso');
+  // Industry Hub publik: /talent dan /talent/<slug>
+  const [talentMode, setTalentMode] = useState<boolean>(() => /^\/talent(\/|$)/.test(window.location.pathname));
   // Halaman publik pemeriksaan sertifikat: /verify?no=KMPA-2026-XXXXXXXX
   const [verifyMode, setVerifyMode] = useState<boolean>(() => window.location.pathname === '/verify');
 
@@ -278,6 +281,17 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (talentMode) {
+      return (
+        <TalentHub
+          onHome={() => {
+            window.history.replaceState(null, '', '/');
+            setTalentMode(false);
+          }}
+        />
+      );
+    }
+
     if (verifyMode) {
       return (
         <VerifyCertificate

@@ -35,6 +35,8 @@ const errText = (err: unknown, fallback: string): string =>
 
 const UserManagement: React.FC = () => {
   const { profile } = useProfile();
+  // Pengajuan naik peran diputuskan Direktur (penilai kompetensi); Admin hanya mengurus pekerjaan rutin.
+  const isDirector = profile?.role === 'DIRECTOR';
   const canIssueCard = !!profile && CARD_ISSUERS.includes(profile.role);
   const [activeTab, setActiveTab] = useState<Tab>('STUDENT');
   const [searchTerm, setSearchTerm] = useState('');
@@ -137,12 +139,12 @@ const UserManagement: React.FC = () => {
          >
             <UserIcon size={16} className="mr-2 hidden md:block" /> Student <span className="ml-1 hidden md:inline text-[10px] bg-gray-200 dark:bg-slate-600 px-1.5 rounded-full text-gray-600 dark:text-slate-300">S</span>
          </button>
-         <button 
-            onClick={() => switchTab('DAFTAR_TUNGGU')}
-            className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'DAFTAR_TUNGGU' ? 'bg-white dark:bg-slate-700 shadow-sm text-green-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
-         >
-            Daftar Tunggu
-         </button>
+         {isDirector && (         <button 
+              onClick={() => switchTab('DAFTAR_TUNGGU')}
+              className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'DAFTAR_TUNGGU' ? 'bg-white dark:bg-slate-700 shadow-sm text-green-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
+           >
+              Daftar Tunggu
+           </button>)}
       </div>
 
       {message && (
@@ -151,7 +153,7 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'DAFTAR_TUNGGU' ? <RoleApplications /> : (
+      {activeTab === 'DAFTAR_TUNGGU' && isDirector ? <RoleApplications /> : (
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex gap-4">

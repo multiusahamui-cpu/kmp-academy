@@ -61,4 +61,6 @@ export const verifyLimiter = limiter(15, 60, "Terlalu banyak pemeriksaan sertifi
 
 export const uploadLimiter = limiter(60, 20, "Terlalu banyak unggahan foto. Coba lagi nanti.");
 // Permintaan/konfirmasi kode ganti email dibatasi per IP.
+export const talentBrowseLimiter = limiter(15, 120, "Terlalu banyak permintaan. Coba lagi nanti.");
+export const talentInquiryLimiter = limiter(60, 5, "Terlalu banyak pesan dari alamat ini. Coba lagi dalam satu jam.");
 export const emailChangeLimiter = limiter(15, 10, "Terlalu banyak percobaan ganti email. Coba lagi dalam 15 menit.");

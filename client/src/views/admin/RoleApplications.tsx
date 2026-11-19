@@ -10,11 +10,13 @@ interface Application {
   profile: string;
   experience: string;
   createdAt: string;
+  kycStatus?: string | null;
+  dcKycStatus?: string | null;
 }
 
 const ROLE_LABEL: Record<string, string> = { MENTOR: 'Mentor', CREATOR: 'Creator' };
 
-// Daftar tunggu calon Mentor/Creator yang melamar lewat digitalcoop.id.
+// Daftar tunggu calon Mentor/Creator (diajukan Student dari Profil > Upgrade Role; diputuskan Direktur).
 // Menyetujui = pengangkatan + kartu terbit langsung + notifikasi ke yang bersangkutan.
 const RoleApplications: React.FC = () => {
   const [items, setItems] = useState<Application[]>([]);
@@ -63,7 +65,7 @@ const RoleApplications: React.FC = () => {
       <div className="p-4 border-b border-gray-200 dark:border-slate-800">
         <h3 className="font-bold text-gray-900 dark:text-white">Daftar Tunggu Calon Mentor dan Creator</h3>
         <p className="text-xs text-gray-500 dark:text-slate-400">
-          Diisi dari lamaran anggota di digitalcoop.id. Setelah disetujui, pelamar keluar dari daftar ini dan muncul di tab Mentor atau Creator.
+          Diajukan Student dari Profil Academy (wajib KYC lengkap). Setelah disetujui, pelamar keluar dari daftar ini dan muncul di tab Mentor atau Creator.
         </p>
       </div>
       {message && <div className="px-4 py-3 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">{message}</div>}
@@ -78,6 +80,9 @@ const RoleApplications: React.FC = () => {
               <div className="space-y-1 text-sm">
                 <p className="font-bold text-gray-900 dark:text-white">
                   {item.name} <span className="font-normal text-gray-500">({item.email})</span>
+                  <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded ${item.kycStatus === 'VERIFIED' || item.dcKycStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {item.kycStatus === 'VERIFIED' ? 'KYC Academy' : item.dcKycStatus === 'completed' ? 'KYC digitalcoop.id' : 'KYC belum lengkap'}
+                  </span>
                 </p>
                 <p className="text-xs font-bold uppercase text-kodman-600">Melamar: {ROLE_LABEL[item.requestedRole] ?? item.requestedRole}</p>
                 <p className="text-gray-700 dark:text-slate-300"><strong>Profil:</strong> {item.profile}</p>

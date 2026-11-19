@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { UserRole, Certificate, KYCStatus } from "../../types";
+import { UserRole, Certificate } from "../../types";
 import { CertificateDto, learningApi, mapCertificate } from "../../services/learning";
 import {
   Shield,
@@ -10,8 +10,11 @@ import {
   FileCheck,
   Linkedin,
   Lock,
-  Globe,
 } from "lucide-react";
+import { apiMessage } from "../../services/classes";
+import { roleApplicationsApi, type MyApplication } from "../../services/roleApplications";
+import type { ApplyRole } from "@shared/roleApplication";
+import TalentProfileEditor from "../../components/TalentProfileEditor";
 import KycPanel from "../../components/KycPanel";
 import { kycApi, type MyKyc } from "../../services/kyc";
 import CertificateTemplate from "../../components/CertificateTemplate";
@@ -30,18 +33,11 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
   const [activeTab, setActiveTab] = useState<
     "profile" | "security" | "notifications" | "kyc" | "career" | "roles" | "certificates"
   >(initialTab ?? "profile");
-  const [requestStatus, setRequestStatus] = useState<"NONE" | "PENDING">(
-    "NONE",
-  );
   const [viewCert, setViewCert] = useState<Certificate | null>(null);
   const [kycData, setKycData] = useState<MyKyc | null>(null);
   const loadKyc = async () => { try { setKycData(await kycApi.me()); } catch { setKycData(null); } };
   useEffect(() => { void loadKyc(); }, []);
   // KYC dianggap beres bila terverifikasi di Academy, atau anggota digitalcoop.id dengan KYC lengkap.
-  const kycStatus: KYCStatus = kycData?.status === 'VERIFIED' || kycData?.exempt ? KYCStatus.VERIFIED : kycData?.status === 'PENDING' ? KYCStatus.PENDING : KYCStatus.UNVERIFIED;
-
-  // LinkedIn KMP - ADNG State
-  const [isJobSeekerActive, setIsJobSeekerActive] = useState(false);
 
   // Sertifikat dari server (dimuat saat tab dibuka)
   const [myCertificates, setMyCertificates] = useState<Certificate[]>([]);
@@ -58,25 +54,40 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
     return () => { cancelled = true; };
   }, [activeTab]);
 
-  const handleApplyRole = (role: string) => {
-    // Simulating API call
-    if (kycStatus !== KYCStatus.VERIFIED) {
-      alert(
-        "Harap selesaikan Verifikasi Identitas (KYC) terlebih dahulu sebelum mengajukan upgrade role.",
-      );
+  // Pengajuan naik peran (nyata, lewat backend)
+  const [application, setApplication] = useState<{ last: MyApplication | null; kycOk: boolean } | null>(null);
+  const [applyRole, setApplyRole] = useState<ApplyRole | null>(null);
+  const [applyForm, setApplyForm] = useState({ profile: "", experience: "" });
+  const [applyMsg, setApplyMsg] = useState("");
+  const [applyBusy, setApplyBusy] = useState(false);
+  const loadApplication = async () => { try { setApplication(await roleApplicationsApi.mine()); } catch { setApplication(null); } };
+  useEffect(() => { if (activeTab === "roles") void loadApplication(); }, [activeTab]);
+  const requestStatus: "NONE" | "PENDING" = application?.last?.status === "PENDING" ? "PENDING" : "NONE";
+
+  const handleApplyRole = (role: ApplyRole) => {
+    if (!application?.kycOk) {
+      setApplyMsg("Selesaikan verifikasi identitas (KYC) terlebih dahulu sebelum mengajukan.");
       setActiveTab("kyc");
       return;
     }
-    setRequestStatus("PENDING");
-    alert(`Pengajuan untuk menjadi ${role} berhasil dikirim ke Admin!`);
+    setApplyMsg("");
+    setApplyRole(role);
   };
-
-  const toggleJobSeeker = () => {
-    if (kycStatus !== KYCStatus.VERIFIED) {
-      alert("Fitur ini terkunci. Harap verifikasi KTP (KYC) terlebih dahulu.");
-      return;
+  const submitApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applyRole) return;
+    setApplyBusy(true);
+    setApplyMsg("");
+    try {
+      await roleApplicationsApi.apply({ requestedRole: applyRole, ...applyForm });
+      setApplyRole(null);
+      setApplyForm({ profile: "", experience: "" });
+      await loadApplication();
+    } catch (err) {
+      setApplyMsg(apiMessage(err, "Gagal mengirim pengajuan."));
+    } finally {
+      setApplyBusy(false);
     }
-    setIsJobSeekerActive(!isJobSeekerActive);
   };
 
   // Logic: Student Optional, others Mandatory
@@ -202,111 +213,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
             </div>
           )}
 
-          {activeTab === "career" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                  <Linkedin className="mr-2 text-blue-600" /> LinkedIn KMP -
-                  ADNG Industry Hub
-                </h3>
-                <div className="flex items-center">
-                  <span
-                    className={`text-sm mr-3 font-medium ${isJobSeekerActive ? "text-green-600" : "text-gray-500"}`}
-                  >
-                    {isJobSeekerActive
-                      ? "Status: OPEN TO WORK"
-                      : "Status: PRIVATE"}
-                  </span>
-                  <button
-                    onClick={toggleJobSeeker}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${isJobSeekerActive ? "bg-green-500" : "bg-gray-300"}`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${isJobSeekerActive ? "translate-x-6" : "translate-x-1"}`}
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {kycStatus !== KYCStatus.VERIFIED ? (
-                <div className="bg-gray-100 dark:bg-slate-800 p-8 rounded-lg border border-gray-300 dark:border-slate-700 text-center">
-                  <Lock className="mx-auto text-gray-400 mb-4" size={48} />
-                  <h4 className="text-lg font-bold text-gray-700 dark:text-slate-300 mb-2">
-                    Fitur Terkunci
-                  </h4>
-                  <p className="text-gray-500 max-w-md mx-auto mb-6">
-                    Anda harus melakukan Verifikasi Identitas (KYC) terlebih
-                    dahulu untuk memastikan keamanan dan validitas data bagi
-                    Mitra Industri kami.
-                  </p>
-                  <button
-                    onClick={() => setActiveTab("kyc")}
-                    className="px-4 py-2 bg-blue-600 text-white rounded font-bold shadow-md hover:bg-blue-700"
-                  >
-                    Lakukan KYC Sekarang
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`space-y-6 transition-opacity ${!isJobSeekerActive ? "opacity-50 pointer-events-none filter grayscale" : ""}`}
-                >
-                  <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-                    <p className="text-sm text-blue-800 dark:text-blue-300 flex items-start">
-                      <Globe className="mr-2 flex-shrink-0 mt-0.5" size={16} />
-                      Profil Anda akan dapat diakses oleh HRD dari 50+ Koperasi
-                      Besar dan UMKM Mitra KMP - ADNG. Sertifikat kompetensi
-                      Anda akan menjadi nilai jual utama.
-                    </p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                        Judul Profesional (Headline)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: React Developer | Digital Marketing Specialist"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                        Lokasi Preferensi
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Jakarta, Remote"
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                        Keahlian (Skills)
-                      </label>
-                      <div className="flex flex-wrap gap-2 p-2 border rounded bg-white dark:bg-slate-800 min-h-[50px]">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                          React.js
-                        </span>
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                          Digital Marketing
-                        </span>
-                        <span className="text-gray-400 text-xs self-center">
-                          + Tambah Skill dari Sertifikat
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">
-                      Update Profil Industri
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {activeTab === "career" && <TalentProfileEditor />}
 
           {activeTab === "roles" && (
             <div>
@@ -329,6 +236,28 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                   </p>
                 </div>
               </div>
+
+              {applyMsg && <p role="alert" className="mb-4 text-sm text-red-600">{applyMsg}</p>}
+              {application?.last?.status === "REJECTED" && requestStatus === "NONE" && (
+                <p className="mb-4 text-sm text-red-700 dark:text-red-300">Pengajuan terakhir ditolak. {application.last.decisionNote ?? ""} Anda boleh mengajukan lagi.</p>
+              )}
+              {applyRole && (
+                <form onSubmit={submitApplication} className="mb-6 border border-gray-200 dark:border-slate-800 rounded-lg p-5 space-y-4 bg-white dark:bg-slate-900">
+                  <h4 className="font-bold dark:text-white">Pengajuan menjadi {applyRole === "MENTOR" ? "Mentor" : "Creator"}</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Profil singkat (30-1000 karakter)</label>
+                    <textarea required minLength={30} maxLength={1000} rows={3} value={applyForm.profile} onChange={(e) => setApplyForm({ ...applyForm, profile: e.target.value })} className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pengalaman dan keahlian (30-2000 karakter)</label>
+                    <textarea required minLength={30} maxLength={2000} rows={5} value={applyForm.experience} onChange={(e) => setApplyForm({ ...applyForm, experience: e.target.value })} className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded" />
+                  </div>
+                  <div className="flex gap-3">
+                    <button type="submit" disabled={applyBusy} className="px-5 py-2 bg-kodman-600 text-white rounded font-bold disabled:opacity-50">Kirim pengajuan</button>
+                    <button type="button" onClick={() => setApplyRole(null)} className="px-5 py-2 border rounded dark:border-slate-700 dark:text-slate-200">Batal</button>
+                  </div>
+                </form>
+              )}
 
               {requestStatus === "PENDING" ? (
                 <div className="p-8 border border-dashed border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/10 rounded-lg text-center">
@@ -381,10 +310,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                     </ul>
                     <button
                       onClick={() => handleApplyRole("MENTOR")}
-                      disabled={currentRole === "MENTOR"}
-                      className={`w-full py-2 border rounded font-bold transition ${currentRole === "MENTOR" ? "bg-gray-100 dark:bg-slate-800 text-gray-400 cursor-not-allowed" : "border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"}`}
+                      disabled={currentRole !== "STUDENT"}
+                      className={`w-full py-2 border rounded font-bold transition ${currentRole !== "STUDENT" ? "bg-gray-100 dark:bg-slate-800 text-gray-400 cursor-not-allowed" : "border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"}`}
                     >
-                      {currentRole === "MENTOR" ? "Aktif" : "Ajukan Diri"}
+                      {currentRole === "MENTOR" ? "Aktif" : currentRole === "STUDENT" ? "Ajukan Diri" : "Tidak tersedia"}
                     </button>
                   </div>
 
@@ -426,10 +355,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                     </ul>
                     <button
                       onClick={() => handleApplyRole("CREATOR")}
-                      disabled={currentRole === "CREATOR"}
-                      className={`w-full py-2 border rounded font-bold transition ${currentRole === "CREATOR" ? "bg-gray-100 dark:bg-slate-800 text-gray-400 cursor-not-allowed" : "border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"}`}
+                      disabled={currentRole !== "STUDENT"}
+                      className={`w-full py-2 border rounded font-bold transition ${currentRole !== "STUDENT" ? "bg-gray-100 dark:bg-slate-800 text-gray-400 cursor-not-allowed" : "border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"}`}
                     >
-                      {currentRole === "CREATOR" ? "Aktif" : "Ajukan Diri"}
+                      {currentRole === "CREATOR" ? "Aktif" : currentRole === "STUDENT" ? "Ajukan Diri" : "Tidak tersedia"}
                     </button>
                   </div>
                 </div>
