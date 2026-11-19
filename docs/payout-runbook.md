@@ -23,7 +23,7 @@
 
 ## Catatan
 - Sertifikat: PDF dibuat server saat terbit dan disimpan di R2 PUBLIK `certificates/<nomor-huruf-kecil>.pdf`; database hanya menyimpan URL di `certificates.pdf_url`. Sertifikat lama atau yang gagal dibuat dilengkapi otomatis saat pemilik membuka daftar sertifikatnya. Bila berkas di R2 hilang, kosongkan `pdf_url` baris terkait (`update academy.certificates set pdf_url = null where ...`) agar dibuat ulang. Nama dengan huruf di luar Latin-1 tampil sebagai `?` di PDF.
-- Setelah deploy: `pnpm db:migrate` sampai 0027 (termasuk Industry Hub), cek job `payout-posting` di System Cron Jobs, pastikan SMTP dan R2 privat terkonfigurasi, isi `KYC_ENCRYPTION_KEY` di .env server, buat cadangan baru.
+- Setelah deploy: `pnpm db:migrate` sampai 0028 (Industry Hub + lupa password), cek job `payout-posting` di System Cron Jobs, pastikan SMTP dan R2 privat terkonfigurasi, isi `KYC_ENCRYPTION_KEY` di .env server, buat cadangan baru.
 
 ## KYC (R2 privat)
 - Foto KTP dan selfie: R2 PRIVAT, prefix `kyc/<userId>/`. Sama seperti bukti bayar, restore database tidak memulihkan berkas: sertakan prefix ini di cadangan bucket dan jangan beri lifecycle kedaluwarsa.
@@ -31,3 +31,4 @@
 - Pembukaan foto/NIK oleh Admin tercatat di `kyc_access_log`. Admin Sistem saja yang dapat membukanya.
 - Tombol "Ambil data KYC dari digitalcoop.id" butuh endpoint di repo garuda-superapp: lihat `docs/SPEC-BRIDGE-KYC-DIGITALCOOP.md`.
 - Industry Hub (`/talent`): hosting frontend harus mengembalikan index.html untuk path `/talent/*` (sama seperti `/verify`). Profil publik hanya tampil bila Student KYC-verified dan memberi persetujuan PDP.
+- Lupa password (`/auth/password/forgot` + `/reset`): kode OTP 6 digit (10 menit, 5 percobaan) dikirim ke email terdaftar lewat SMTP; pengirim tampil "KMP-ADNG Academy" (ubah lewat `SMTP_FROM_NAME`, alamat tetap dari `SMTP_FROM`). Akun tanpa email tidak bisa memakai fitur ini; reset mencabut semua sesi lama.

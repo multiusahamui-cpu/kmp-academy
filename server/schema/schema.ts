@@ -306,6 +306,15 @@ export const emailChangeRequests = academySchema.table("email_change_requests", 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Permintaan lupa password yang menunggu kode OTP (satu per user; kode disimpan sebagai HMAC, bukan polos).
+export const passwordResetRequests = academySchema.table("password_reset_requests", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).primaryKey(),
+  codeHash: varchar("code_hash", { length: 64 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  attempts: integer("attempts").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Pengajuan penghapusan akun oleh pemilik; diputuskan Admin atau Direktur (salah satu).
 export const accountDeletionRequests = academySchema.table("account_deletion_requests", {
   id: uuid("id").defaultRandom().primaryKey(),

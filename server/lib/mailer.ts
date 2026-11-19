@@ -25,6 +25,14 @@ export const readSmtpConfig = (env: NodeJS.ProcessEnv = process.env) => {
   return { host, port, user, pass, from, secure: secureFlag(port, env.SMTP_SECURE) };
 };
 
+/** Alamat pengirim dari SMTP_FROM dengan nama tampilan tetap "KMP-ADNG Academy" (ganti lewat SMTP_FROM_NAME bila perlu). */
+export const fromHeader = (rawFrom: string, env: NodeJS.ProcessEnv = process.env): string => {
+  const m = rawFrom.match(/<([^<>]+)>\s*$/);
+  const address = (m ? m[1] : rawFrom).trim();
+  const name = ((env.SMTP_FROM_NAME ?? "").trim() || "KMP-ADNG Academy").replace(/["\r\n]/g, "");
+  return `"${name}" <${address}>`;
+};
+
 export const isSmtpConfigured = (): boolean => readSmtpConfig() !== null;
 
 export const sendMail = async (input: MailInput): Promise<void> => {
@@ -36,5 +44,5 @@ export const sendMail = async (input: MailInput): Promise<void> => {
     secure: cfg.secure,
     auth: { user: cfg.user, pass: cfg.pass },
   });
-  await transporter.sendMail({ from: cfg.from, to: input.to, subject: input.subject, text: input.text, attachments: input.attachments });
+  await transporter.sendMail({ from: fromHeader(cfg.from), to: input.to, subject: input.subject, text: input.text, attachments: input.attachments });
 };

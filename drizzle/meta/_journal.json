@@ -197,6 +197,13 @@
       "when": 1795074717137,
       "tag": "0027_talent_hub",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795077513720,
+      "tag": "0028_password_reset",
+      "breakpoints": true
     }
   ]
 }

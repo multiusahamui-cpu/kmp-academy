@@ -105,6 +105,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               >
                 Lihat Katalog Kursus
               </a>
+              <a
+                href="/talent"
+                className="text-white/80 hover:text-white font-sans font-semibold py-3.5 px-4 flex items-center justify-center underline underline-offset-4"
+              >
+                Perusahaan: Cari Talenta
+              </a>
             </div>
           </div>
         </div>

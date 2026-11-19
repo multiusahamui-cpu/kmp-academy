@@ -64,3 +64,6 @@ export const uploadLimiter = limiter(60, 20, "Terlalu banyak unggahan foto. Coba
 export const talentBrowseLimiter = limiter(15, 120, "Terlalu banyak permintaan. Coba lagi nanti.");
 export const talentInquiryLimiter = limiter(60, 5, "Terlalu banyak pesan dari alamat ini. Coba lagi dalam satu jam.");
 export const emailChangeLimiter = limiter(15, 10, "Terlalu banyak percobaan ganti email. Coba lagi dalam 15 menit.");
+// Lupa password: minta kode (anti banjir email) dan setel ulang (anti tebak kode), per IP.
+export const forgotLimiter = limiter(15, 5, "Terlalu banyak permintaan kode. Coba lagi dalam 15 menit.");
+export const resetLimiter = limiter(15, 10, "Terlalu banyak percobaan. Coba lagi dalam 15 menit.");

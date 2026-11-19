@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserRole, toUserRole } from "../types";
 import { authApi } from "../services/api";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 import { usePublicConfig } from "../services/publicConfig";
 import {
   X,
@@ -39,6 +40,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [forgot, setForgot] = useState(false);
+  const [doneMsg, setDoneMsg] = useState("");
 
   if (!isOpen) return null;
 
@@ -101,6 +104,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             className={`flex-1 py-4 text-sm font-bold transition ${mode === "LOGIN" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
             onClick={() => {
               setActiveTab("LOGIN");
+              setForgot(false);
               setErrorMsg("");
             }}
           >
@@ -111,6 +115,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               className={`flex-1 py-4 text-sm font-bold transition ${mode === "REGISTER" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
               onClick={() => {
                 setActiveTab("REGISTER");
+                setForgot(false);
                 setErrorMsg("");
               }}
             >
@@ -120,6 +125,15 @@ const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Form */}
+        {forgot && mode === "LOGIN" ? (
+          <ForgotPasswordForm
+            onBack={() => setForgot(false)}
+            onDone={(m) => {
+              setForgot(false);
+              setDoneMsg(m);
+            }}
+          />
+        ) : (
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "REGISTER" && (
@@ -212,6 +226,20 @@ const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
+            {mode === "LOGIN" && (
+              <div className="text-right -mt-3">
+                <button type="button" onClick={() => { setForgot(true); setDoneMsg(""); setErrorMsg(""); }} className="text-xs font-bold text-kodman-600 hover:underline">
+                  Lupa password?
+                </button>
+              </div>
+            )}
+
+            {doneMsg && !errorMsg && (
+              <div role="status" className="text-sm text-green-800 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300 rounded-lg px-3 py-2">
+                {doneMsg}
+              </div>
+            )}
+
             {notice && !errorMsg && (
               <div
                 role="status"
@@ -264,6 +292,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </p>
 
         </div>
+        )}
       </div>
     </div>
   );
