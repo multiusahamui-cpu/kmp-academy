@@ -2,6 +2,7 @@ import app from "./App";
 import { checkConnection } from "./db";
 import { connectSessionStore } from "./lib/session";
 import { startOrderJobs } from "./lib/order-service";
+import { startNotificationMailJob } from "./lib/notification-mail";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -32,6 +33,7 @@ const startServer = async () => {
 
   // 1c. Job berkala pembayaran (kedaluwarsa order, rekonsiliasi debit dan VA)
   startOrderJobs();
+  startNotificationMailJob();
 
   // 2. Start Express Server
   app.listen(PORT, HOST, () => {

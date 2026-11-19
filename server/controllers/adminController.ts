@@ -187,7 +187,7 @@ export const decideRoleApplication = async (req: any, res: any) => {
         await tx.update(roleApplications)
           .set({ status: "REJECTED", decidedBy: actor.id, decidedAt: now, decisionNote: note ?? null })
           .where(eq(roleApplications.id, id));
-        await notifyUser(tx, app.userId, "Pengajuan ditolak", note ? `Pengajuan Anda ditolak. Catatan: ${note}` : "Pengajuan Anda ditolak.");
+        await notifyUser(tx, app.userId, "Pengajuan ditolak", note ? `Pengajuan Anda ditolak. Catatan: ${note}` : "Pengajuan Anda ditolak.", "AKUN");
         return { cardNumber: null } as const;
       }
 
@@ -199,7 +199,7 @@ export const decideRoleApplication = async (req: any, res: any) => {
       // Bulan pada nomor kartu = bulan pengangkatan (saat disetujui).
       const card = await issueCard(tx, app.userId, { id: actor.id, name: actor.name }, now);
       await notifyUser(tx, app.userId, "Pengajuan disetujui",
-        `Anda diangkat sebagai ${role === "MENTOR" ? "Mentor" : "Creator"}.` + (card ? ` Nomor kartu Anda ${card.cardNumber}.` : ""));
+        `Anda diangkat sebagai ${role === "MENTOR" ? "Mentor" : "Creator"}.` + (card ? ` Nomor kartu Anda ${card.cardNumber}.` : ""), "AKUN");
       return { cardNumber: card?.cardNumber ?? null } as const;
     });
 
@@ -223,7 +223,7 @@ export const issueUserCard = async (req: any, res: any) => {
 
     const card = await db.transaction(async (tx) => {
       const c = await issueCard(tx, id, { id: actor.id, name: actor.name });
-      if (c) await notifyUser(tx, id, "Kartu Anda terbit", `Nomor kartu Anda ${c.cardNumber}.`);
+      if (c) await notifyUser(tx, id, "Kartu Anda terbit", `Nomor kartu Anda ${c.cardNumber}.`, "AKUN");
       return c;
     });
     if (!card) return errorResponse(res, "Kartu sudah terbit untuk role ini", 409);

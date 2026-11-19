@@ -239,13 +239,3 @@ export const getNotifications = async (req: any, res: any) => {
     errorResponse(res, "Gagal memuat notifikasi", 500, error);
   }
 };
-
-export const markNotificationRead = async (req: any, res: any) => {
-  try {
-    await db.update(notifications).set({ readAt: new Date() })
-      .where(and(eq(notifications.id, req.params.id), eq(notifications.userId, req.user.id)));
-    successResponse(res, null, "Ditandai dibaca");
-  } catch (error) {
-    errorResponse(res, "Gagal memperbarui notifikasi", 500, error);
-  }
-};

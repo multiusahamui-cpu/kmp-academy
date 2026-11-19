@@ -263,7 +263,7 @@ export const uploadOrderProof = async (req: any, res: any) => {
       if (!l || l.status !== "PENDING") return false;
       await tx.update(paymentOrders).set({ status: "VERIFYING", proofKey: key, proofMime: type.mime, proofSha256: sha, proofUploadedAt: new Date(), updatedAt: new Date() }).where(eq(paymentOrders.id, o.id));
       const admins = await tx.select({ id: users.id }).from(users).where(eq(users.role, "ADMIN_SYSTEM"));
-      for (const a of admins) await notifyUser(tx, a.id, "Bukti pembayaran menunggu verifikasi", `Pesanan Rp ${o.amount.toLocaleString("id-ID")} menunggu verifikasi di menu Verifikasi Pembayaran.`);
+      for (const a of admins) await notifyUser(tx, a.id, "Bukti pembayaran menunggu verifikasi", `Pesanan Rp ${o.amount.toLocaleString("id-ID")} menunggu verifikasi di menu Verifikasi Pembayaran.`, "ADMIN");
       return true;
     });
     if (!done) { await deletePrivate(key); return errorResponse(res, "Status pesanan sudah berubah.", 409); }

@@ -2,6 +2,7 @@
 import { Router } from "express";
 import * as user from "../controllers/userController";
 import * as learning from "../controllers/learningController";
+import * as notif from "../controllers/notificationController";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
@@ -30,7 +31,11 @@ router.post("/wallet/bank-account", user.addBankAccount);
 
 // Notifikasi
 router.get("/notifications", user.getNotifications);
-router.post("/notifications/:id/read", user.markNotificationRead);
+router.get("/notifications/unread-count", notif.getUnreadCount);
+router.post("/notifications/read-all", notif.markAllNotificationsRead);
+router.post("/notifications/:id/read", notif.markNotificationRead);
+router.get("/notification-settings", notif.getNotificationSettings);
+router.put("/notification-settings", notif.updateNotificationSettings);
 
 // Certificate
 router.get("/certificates", learning.listMyCertificates);

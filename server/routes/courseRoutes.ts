@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as course from "../controllers/courseController";
 import * as authoring from "../controllers/courseAuthoringController";
+import * as category from "../controllers/categoryController";
 import { authenticateToken, requireRole } from "../middleware/auth";
 import * as pricing from "../controllers/pricingController";
 import { promoLimiter, uploadLimiter } from "../lib/security";
@@ -9,11 +10,15 @@ const router = Router();
 
 const creator = [authenticateToken, requireRole(["CREATOR"])];
 const reviewer = [authenticateToken, requireRole(["ADMIN_SYSTEM", "DIRECTOR"])];
+const categoryAdmin = [authenticateToken, requireRole(["ADMIN_SYSTEM", "SUPERADMIN"])];
 const discountManager = [authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTEM", "DIRECTOR"])];
 
 // Publik (detail memeriksa sesi sendiri: hanya kursus terbit untuk umum)
 router.get("/", course.getCourses);
-router.get("/categories", authoring.getCategoriesList);
+router.get("/categories", category.getCategoriesList);
+router.post("/categories", ...categoryAdmin, category.createCategory);
+router.put("/categories/:id", ...categoryAdmin, category.updateCategory);
+router.delete("/categories/:id", ...categoryAdmin, category.deleteCategory);
 
 // Admin: review kursus (sebelum "/:id" agar tidak tertangkap sebagai id)
 router.get("/reviews", ...reviewer, authoring.listCourseReviews);

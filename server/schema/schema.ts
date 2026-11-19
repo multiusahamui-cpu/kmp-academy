@@ -91,6 +91,8 @@ export const categories = academySchema.table("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  // Tidak dipakai lagi: jumlah kursus dihitung langsung dari tabel kursus.
   count: integer("count").default(0),
 });
 
@@ -260,8 +262,16 @@ export const notifications = academySchema.table("notifications", {
   title: varchar("title", { length: 255 }).notNull(),
   body: text("body").notNull(),
   readAt: timestamp("read_at"),
+  // AKUN | PEMBAYARAN | BELAJAR | ADMIN | INFO (lihat shared/notifications.ts)
+  category: varchar("category", { length: 12 }).notNull().default("INFO"),
+  // Pengiriman email opt-in: emailedAt terisi bila sudah terkirim; emailAttempts membatasi percobaan ulang.
+  emailedAt: timestamp("emailed_at"),
+  emailAttempts: integer("email_attempts").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("notifications_user_idx").on(t.userId, t.createdAt),
+  index("notifications_email_pending_idx").on(t.createdAt).where(sql`${t.emailedAt} is null`),
+]);
 
 export const userPreferences = academySchema.table("user_preferences", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).primaryKey(),
@@ -269,6 +279,8 @@ export const userPreferences = academySchema.table("user_preferences", {
   language: varchar("language", { length: 5 }).default("id").notNull(),
   notifyEmail: boolean("notify_email").default(true).notNull(),
   notifyInApp: boolean("notify_in_app").default(true).notNull(),
+  // Kategori notifikasi dalam aplikasi yang dimatikan pengguna (kategori terkunci tidak bisa dimatikan).
+  mutedCategories: jsonb("muted_categories").$type<string[]>().default([]).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

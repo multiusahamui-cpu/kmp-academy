@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UserRole, CartItem, WishlistItem } from "../types";
+import NotificationBell from "./NotificationBell";
 import {
   Receipt,
   ClipboardCheck,
@@ -81,6 +82,8 @@ export const Layout: React.FC<LayoutProps> = ({
   onRemoveFromWishlist = (_: string) => {},
   onOpenAuth,
 }) => {
+  // Halaman pengaturan notifikasi tetap menyorot menu Profil.
+  const activeView = currentView === "profile-notifications" ? "profile" : currentView;
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isInfoModalOpen, setInfoModalOpen] = useState(false); // State for Info Modal
@@ -434,7 +437,7 @@ export const Layout: React.FC<LayoutProps> = ({
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
-                    currentView === item.id
+                    activeView === item.id
                       ? "bg-kodman-600 dark:bg-kodman-600 text-white shadow-md shadow-kodman-900/20"
                       : "text-kodman-100 hover:bg-white/10 hover:text-white"
                   }`}
@@ -442,7 +445,7 @@ export const Layout: React.FC<LayoutProps> = ({
                   {item.icon && (
                     <item.icon
                       size={18}
-                      className={`mr-3 transition-transform duration-200 ${currentView === item.id ? "scale-110" : "group-hover:scale-110"}`}
+                      className={`mr-3 transition-transform duration-200 ${activeView === item.id ? "scale-110" : "group-hover:scale-110"}`}
                     />
                   )}
                   {item.label}
@@ -495,6 +498,8 @@ export const Layout: React.FC<LayoutProps> = ({
                 )}
               </button>
             )}
+
+            <NotificationBell onOpenSettings={() => onNavigate("profile-notifications")} />
 
             <div className="h-8 w-px bg-gray-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
 

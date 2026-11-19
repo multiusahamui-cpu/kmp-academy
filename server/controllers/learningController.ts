@@ -48,7 +48,7 @@ const issueCertificate = async (tx: Tx, course: CourseRow, userId: string, kind:
       studentName: user?.name ?? "Peserta", courseTitle: course.title, courseType: course.type, instructorName: course.instructorName ?? "KMP - ADNG Academy",
     }).onConflictDoNothing().returning({ id: certificates.id, serial: certificates.serial });
     if (inserted.length > 0) {
-      await notifyUser(tx, userId, "Sertifikat terbit", `Selamat! Sertifikat kursus "${course.title}" telah terbit dengan nomor ${serial}. Lihat di Pengaturan Profil > Sertifikat.`);
+      await notifyUser(tx, userId, "Sertifikat terbit", `Selamat! Sertifikat kursus "${course.title}" telah terbit dengan nomor ${serial}. Lihat di Pengaturan Profil > Sertifikat.`, "BELAJAR");
       return { ...inserted[0], created: true };
     }
     const again = await find(); // bentrok akun-kursus (balapan) atau nomor kembar

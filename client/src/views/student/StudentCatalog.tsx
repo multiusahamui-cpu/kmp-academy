@@ -1,6 +1,5 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { MOCK_CATEGORIES } from '../../constants';
 import { Play, Heart, Filter, X, Award, Key, CheckCircle, Info } from 'lucide-react';
 import { CourseType, Course, WishlistItem } from '../../types';
 import ExamRoom from './ExamRoom';
@@ -9,6 +8,7 @@ import CheckoutModal from '../../components/CheckoutModal';
 import { courseApi, userApi } from '../../services/api';
 import { ApiCourse, mapApiCourse } from '../../services/mappers';
 import { notifyProfileChanged } from '../../services/profile';
+import { CategoryDto, courseAuthoringApi } from '../../services/courses';
 
 interface StudentCatalogProps {
   enrolledOnly?: boolean;
@@ -29,6 +29,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeExamCourseId, setActiveExamCourseId] = useState<string | null>(null);
   
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [progressById, setProgressById] = useState<Record<string, number>>({});
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
@@ -59,6 +60,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   useEffect(() => {
     loadCourses();
   }, [loadCourses]);
+
+  useEffect(() => {
+    courseAuthoringApi.categories().then((r) => setCategories(r.data.data as CategoryDto[])).catch(() => setCategories([]));
+  }, []);
 
   // Detail Modal State
   const [selectedCourseForDetail, setSelectedCourseForDetail] = useState<Course | null>(null);
@@ -217,9 +222,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                      >
                         Semua Kategori
                      </button>
-                     {MOCK_CATEGORIES.map(cat => (
+                     {categories.map(cat => (
                         <button
                            key={cat.id}
+                           title={cat.description ?? undefined}
                            onClick={() => setSelectedCategory(cat.id)}
                            className={`w-full text-left px-3 py-2 rounded text-sm flex justify-between items-center transition ${selectedCategory === cat.id ? 'bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
@@ -310,7 +316,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                               {!enrolledOnly && (
                                  <div className="flex flex-wrap gap-1 mb-3">
                                     {course.categoryIds?.slice(0, 2).map(catId => {
-                                       const cat = MOCK_CATEGORIES.find(c => c.id === catId);
+                                       const cat = categories.find(c => c.id === catId);
                                        return cat ? <span key={catId} className="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-1.5 py-0.5 rounded">{cat.name}</span> : null;
                                     })}
                                     {(course.categoryIds?.length || 0) > 2 && <span className="text-[10px] text-gray-400">+{(course.categoryIds?.length || 0) - 2}</span>}

@@ -78,6 +78,20 @@
       "when": 1795035984554,
       "tag": "0010_learning_progress_exam_certificates",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795050598767,
+      "tag": "0011_notifications_preferences",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795052072619,
+      "tag": "0012_categories_description",
+      "breakpoints": true
     }
   ]
 }

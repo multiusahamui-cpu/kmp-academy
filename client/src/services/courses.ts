@@ -43,7 +43,7 @@ export interface CreatorCourse {
   reviewNote?: string | null;
 }
 
-export interface CategoryDto { id: string; name: string }
+export interface CategoryDto { id: string; name: string; slug: string; description: string | null; count: number; totalCourses: number }
 
 export interface ExamQuestionDto { id: string; position: number; question: string; options: string[]; correctIndex: number }
 export interface ExamDto { enabled: boolean; passingGrade: number; durationMinutes: number; minQuestions: number; questions: ExamQuestionDto[] }
@@ -68,6 +68,9 @@ export interface CourseInputDto { title: string; description: string; price: num
 
 export const courseAuthoringApi = {
   categories: () => api.get('/courses/categories'),
+  createCategory: (data: { name: string; slug: string; description: string | null }) => api.post('/courses/categories', data),
+  updateCategory: (id: string, data: { name: string; slug: string; description: string | null }) => api.put(`/courses/categories/${id}`, data),
+  deleteCategory: (id: string) => api.delete(`/courses/categories/${id}`),
   mine: () => api.get('/courses/creator/dashboard'),
   detail: (id: string) => api.get(`/courses/${id}`),
   create: (data: CourseInputDto) => api.post('/courses', data),

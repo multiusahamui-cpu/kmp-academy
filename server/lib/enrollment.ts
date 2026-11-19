@@ -77,7 +77,7 @@ export const fulfillCourse = async (tx: Tx, f: FulfillInput): Promise<{ enrollme
     const card = await issueCard(tx, f.userId, null);
     if (card) {
       cardNumber = card.cardNumber;
-      await notifyUser(tx, f.userId, "Kartu Student Anda terbit", `Nomor kartu Anda ${card.cardNumber}.`);
+      await notifyUser(tx, f.userId, "Kartu Student Anda terbit", `Nomor kartu Anda ${card.cardNumber}.`, "AKUN");
     }
   }
   return { enrollmentId: enr.id, cardNumber };

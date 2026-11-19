@@ -120,7 +120,7 @@ export const confirmEmailChange = async (req: any, res: any) => {
       await db.transaction(async (tx) => {
         await tx.update(users).set({ email: pending.newEmail, updatedAt: new Date() }).where(eq(users.id, req.user.id));
         await tx.delete(emailChangeRequests).where(eq(emailChangeRequests.userId, req.user.id));
-        await notifyUser(tx, req.user.id, "Email akun diganti", `Email akun Academy Anda kini ${pending.newEmail}.`);
+        await notifyUser(tx, req.user.id, "Email akun diganti", `Email akun Academy Anda kini ${pending.newEmail}.`, "AKUN");
       });
     } catch (error: any) {
       if (error?.code === "23505") {

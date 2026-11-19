@@ -76,15 +76,6 @@ const syncSessions = async (courseId: string, tx: any = db) => {
 // Kursus
 // ---------------------------------------------------------------------------
 
-export const getCategoriesList = async (_req: any, res: any) => {
-  try {
-    const rows = await db.select().from(categories).orderBy(asc(categories.name));
-    successResponse(res, rows, "List of categories");
-  } catch (error) {
-    errorResponse(res, "Failed to fetch categories", 500, error);
-  }
-};
-
 export const getCreatorCourses = async (req: any, res: any) => {
   try {
     const rows = await db
@@ -560,7 +551,7 @@ export const requestPublish = async (req: any, res: any) => {
       const now = new Date();
       await tx.update(courses).set({ status: "PENDING_REVIEW", submittedAt: now, reviewNote: null, licenseAcceptedAt: c.licenseAcceptedAt ?? now, licenseVersion: c.licenseVersion ?? LICENSE_VERSION, sessions: mods.length, updatedAt: now }).where(eq(courses.id, c.id));
       const admins = await tx.select({ id: users.id }).from(users).where(eq(users.role, "ADMIN_SYSTEM"));
-      for (const a of admins) await notifyUser(tx, a.id, "Kursus menunggu review", `"${c.title}" diajukan untuk terbit. Tinjau di menu Review Kursus.`);
+      for (const a of admins) await notifyUser(tx, a.id, "Kursus menunggu review", `"${c.title}" diajukan untuk terbit. Tinjau di menu Review Kursus.`, "ADMIN");
       return { code: 200 as const, message: "Kursus diajukan. Admin akan meninjau sebelum terbit." };
     });
 
@@ -612,7 +603,7 @@ export const decideCourseReview = async (req: any, res: any) => {
       const approve = p.data.decision === "APPROVE";
       await tx.update(courses).set({ status: approve ? "PUBLISHED" : "REJECTED", reviewedBy: req.user.id, reviewedAt: now, reviewNote: note || null, updatedAt: now }).where(eq(courses.id, c.id));
       if (c.instructorId) {
-        await notifyUser(tx, c.instructorId, approve ? "Kursus Anda terbit" : "Kursus Anda ditolak", approve ? `"${c.title}" kini tampil di katalog.${note ? ` Catatan: ${note}` : ""}` : `"${c.title}" ditolak. Catatan: ${note}`);
+        await notifyUser(tx, c.instructorId, approve ? "Kursus Anda terbit" : "Kursus Anda ditolak", approve ? `"${c.title}" kini tampil di katalog.${note ? ` Catatan: ${note}` : ""}` : `"${c.title}" ditolak. Catatan: ${note}`, "BELAJAR");
       }
       return { code: 200 as const, message: approve ? "Kursus diterbitkan" : "Kursus ditolak" };
     });

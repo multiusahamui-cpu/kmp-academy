@@ -346,6 +346,9 @@ const App: React.FC = () => {
       case 'profile':
         return <ProfileSettings currentRole={currentRole} />;
 
+      case 'profile-notifications':
+        return <ProfileSettings key="notif" currentRole={currentRole} initialTab="notifications" />;
+
       // Director
       case 'partner-governance':
          return <PartnerGovernance />;

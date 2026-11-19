@@ -67,7 +67,7 @@ export const requestDeletion = async (req: any, res: any) => {
         await tx.insert(accountDeletionRequests).values({ userId: user.id, reason: reason.value });
         const deciders = await tx.select({ id: users.id }).from(users).where(inArray(users.role, ["ADMIN_SYSTEM", "DIRECTOR"]));
         for (const d of deciders) {
-          await notifyUser(tx, d.id, "Pengajuan penghapusan akun", `${user.name} mengajukan penghapusan akun. Tinjau di menu Penghapusan Akun.`);
+          await notifyUser(tx, d.id, "Pengajuan penghapusan akun", `${user.name} mengajukan penghapusan akun. Tinjau di menu Penghapusan Akun.`, "ADMIN");
         }
       });
     } catch (error: any) {
@@ -208,7 +208,7 @@ export const decideDeletion = async (req: any, res: any) => {
         })
         .where(eq(accountDeletionRequests.id, reqRow.id));
       if (decision === "REJECT") {
-        await notifyUser(tx, target.id, "Pengajuan penghapusan akun ditolak", `Catatan: ${note.value}`);
+        await notifyUser(tx, target.id, "Pengajuan penghapusan akun ditolak", `Catatan: ${note.value}`, "AKUN");
       }
       return { code: 200 as const, message: decision === "APPROVE" ? "Akun diarsipkan" : "Pengajuan ditolak" };
     });
@@ -287,7 +287,7 @@ export const settleBalance = async (req: any, res: any) => {
         referenceId: settlement.id,
         paymentMethod: "TRANSFER_MANUAL",
       });
-      await notifyUser(tx, target.id, "Saldo diselesaikan", `Saldo Rp${v.value.amount.toLocaleString("id-ID")} telah ditransfer kepada Anda (ref ${v.value.bankRef}).`);
+      await notifyUser(tx, target.id, "Saldo diselesaikan", `Saldo Rp${v.value.amount.toLocaleString("id-ID")} telah ditransfer kepada Anda (ref ${v.value.bankRef}).`, "AKUN");
       return { code: 200 as const, message: "Saldo ditandai selesai" };
     });
 

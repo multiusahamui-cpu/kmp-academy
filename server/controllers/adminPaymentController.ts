@@ -75,7 +75,7 @@ export const decidePaymentOrder = async (req: any, res: any) => {
         return { code: 200 as const, message: "Pembayaran dikonfirmasi", audit: `APPROVE ${o.amount}` };
       }
       await closeOrder(tx, o, "REJECTED", meta);
-      await notifyUser(tx, o.userId, "Bukti pembayaran ditolak", `Bukti transfer ditolak. Catatan: ${v.value.note} Silakan buat pesanan baru dan unggah bukti yang benar.`);
+      await notifyUser(tx, o.userId, "Bukti pembayaran ditolak", `Bukti transfer ditolak. Catatan: ${v.value.note} Silakan buat pesanan baru dan unggah bukti yang benar.`, "PEMBAYARAN");
       return { code: 200 as const, message: "Pembayaran ditolak", audit: "REJECT" };
     });
     if (result.code !== 200) return errorResponse(res, result.message, result.code);

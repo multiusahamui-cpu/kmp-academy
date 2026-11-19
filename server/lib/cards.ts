@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
-import { cardHistory, notifications, users } from "../schema/schema";
+import { cardHistory, notifications, userPreferences, users } from "../schema/schema";
 import { cardPrefixFor, formatCardNumber } from "@shared/card";
+import { shouldCreate, type NotificationCategory } from "@shared/notifications";
 
 // Tipe transaksi Drizzle (db.transaction) tanpa mengimpor `db` agar mudah diuji.
 type Tx = any;
@@ -46,6 +47,12 @@ export const issueCard = async (
   return { cardNumber, issuedAt: now, replaced };
 };
 
-export const notifyUser = async (tx: Tx, userId: string, title: string, body: string): Promise<void> => {
-  await tx.insert(notifications).values({ userId, title, body });
+/**
+ * Membuat notifikasi dalam aplikasi. Kategori yang dimatikan pengguna dilewati, kecuali kategori terkunci
+ * (akun & keamanan, pembayaran) yang selalu dibuat.
+ */
+export const notifyUser = async (tx: Tx, userId: string, title: string, body: string, category: NotificationCategory = "INFO"): Promise<void> => {
+  const [pref] = await tx.select({ muted: userPreferences.mutedCategories }).from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
+  if (!shouldCreate(category, pref?.muted ?? [])) return;
+  await tx.insert(notifications).values({ userId, title, body, category });
 };

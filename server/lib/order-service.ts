@@ -34,15 +34,15 @@ export const markPaid = async (tx: Tx, order: OrderRow, extra: Partial<typeof pa
     if (f) {
       enrollmentId = f.enrollmentId;
       cardNumber = f.cardNumber;
-      await notifyUser(tx, order.userId, "Pembayaran diterima", `Pembayaran Rp ${order.amount.toLocaleString("id-ID")} lewat ${methodLabel(order.method)} diterima. Kursus sudah terbuka.`);
+      await notifyUser(tx, order.userId, "Pembayaran diterima", `Pembayaran Rp ${order.amount.toLocaleString("id-ID")} lewat ${methodLabel(order.method)} diterima. Kursus sudah terbuka.`, "PEMBAYARAN");
     } else {
       // Sudah terdaftar lewat jalur lain: dana dikembalikan ke dompet Academy, tidak hilang.
       await creditWallet(tx, order.userId, order.amount, "Pengembalian pembayaran: sudah terdaftar di kursus ini", order.id);
-      await notifyUser(tx, order.userId, "Pembayaran dikembalikan ke dompet", `Anda sudah terdaftar di kursus ini. Rp ${order.amount.toLocaleString("id-ID")} dikreditkan ke dompet Academy.`);
+      await notifyUser(tx, order.userId, "Pembayaran dikembalikan ke dompet", `Anda sudah terdaftar di kursus ini. Rp ${order.amount.toLocaleString("id-ID")} dikreditkan ke dompet Academy.`, "PEMBAYARAN");
     }
   } else {
     await creditWallet(tx, order.userId, order.amount, `Top Up Saldo via ${methodLabel(order.method)}`, order.id, order.method);
-    await notifyUser(tx, order.userId, "Top-up berhasil", `Saldo dompet Academy bertambah Rp ${order.amount.toLocaleString("id-ID")}.`);
+    await notifyUser(tx, order.userId, "Top-up berhasil", `Saldo dompet Academy bertambah Rp ${order.amount.toLocaleString("id-ID")}.`, "PEMBAYARAN");
   }
 
   await tx.update(paymentOrders).set({ ...extra, status: "PAID", paidAt: now, enrollmentId, updatedAt: now }).where(eq(paymentOrders.id, order.id));
@@ -139,7 +139,7 @@ export const reconcileConfirming = async (): Promise<number> => {
           const locked = await lockOrder(tx, o.id);
           if (locked) {
             await closeOrder(tx, locked, "CANCELLED", { decisionNote: "Debit dompet digitalcoop.id tidak ditemukan." });
-            await notifyUser(tx, locked.userId, "Pembayaran dibatalkan", "Pembayaran dari dompet digitalcoop.id tidak terkonfirmasi dan saldo Anda tidak dipotong. Silakan ulangi.");
+            await notifyUser(tx, locked.userId, "Pembayaran dibatalkan", "Pembayaran dari dompet digitalcoop.id tidak terkonfirmasi dan saldo Anda tidak dipotong. Silakan ulangi.", "PEMBAYARAN");
           }
         });
       }

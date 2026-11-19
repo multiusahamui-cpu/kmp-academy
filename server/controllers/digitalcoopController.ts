@@ -145,7 +145,7 @@ export const submitOnboarding = async (req: any, res: any) => {
         .returning();
       // Kartu Creator terbit saat akun aktif; kartu Student terbit setelah kursus pertama (aturan Academy).
       if (peran === "CREATOR") await issueCard(tx, u.id, null, now);
-      await notifyUser(tx, u.id, "Selamat datang di KMP-ADNG Academy", "Akun Anda tertaut dengan digitalcoop.id. Anda juga dapat masuk langsung di academy.digitalcoop.id.");
+      await notifyUser(tx, u.id, "Selamat datang di KMP-ADNG Academy", "Akun Anda tertaut dengan digitalcoop.id. Anda juga dapat masuk langsung di academy.digitalcoop.id.", "INFO");
       return u;
     });
 
