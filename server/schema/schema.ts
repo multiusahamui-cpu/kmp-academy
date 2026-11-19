@@ -104,6 +104,8 @@ export const courses = academySchema.table("courses", {
   description: text("description"),
   instructorId: uuid("instructor_id").references(() => users.id),
   instructorName: varchar("instructor_name", { length: 255 }), // Denormalized for query speed
+  // Kursus WORKSHOP: materi (modul) dibaca dari kursus sumber ini. Null = memakai modulnya sendiri.
+  contentSourceId: uuid("content_source_id"),
   price: integer("price").default(0).notNull(),
   type: courseTypeEnum("type").default("MANDIRI").notNull(),
   status: courseStatusEnum("status").default("DRAFT").notNull(),
@@ -152,6 +154,8 @@ export const enrollments = academySchema.table("enrollments", {
   mentorId: uuid("mentor_id").references(() => users.id, { onDelete: "set null" }),
   mentorSharePercent: integer("mentor_share_percent"),
   mentorShare: integer("mentor_share"),
+  // Batch pencairan bagi hasil yang memuat pendaftaran ini (null = belum diposting).
+  payoutBatchId: uuid("payout_batch_id"),
 }, (t) => [unique("enrollments_user_course_unique").on(t.userId, t.courseId)]);
 
 // Wishlists Table
@@ -655,4 +659,71 @@ export const workshopProposals = academySchema.table("workshop_proposals", {
   mentorIdx: index("workshop_proposals_mentor_idx").on(t.mentorId, t.createdAt),
   statusIdx: index("workshop_proposals_status_idx").on(t.status, t.createdAt),
   pendingUq: uniqueIndex("workshop_proposals_pending_uq").on(t.mentorId, t.sourceCourseId).where(sql`status = 'PENDING'`),
+}));
+
+// Riwayat pengangkatan dan pemberhentian Direktur / Admin Sistem (tidak pernah diubah/dihapus oleh aplikasi).
+export const roleAppointments = academySchema.table("role_appointments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  action: varchar("action", { length: 8 }).notNull(), // APPOINT | DISMISS
+  fromRole: varchar("from_role", { length: 20 }).notNull(),
+  toRole: varchar("to_role", { length: 20 }).notNull(),
+  note: text("note").notNull(),
+  actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+  actorName: varchar("actor_name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  createdIdx: index("role_appointments_created_idx").on(t.createdAt),
+}));
+
+// --- PENCAIRAN BAGI HASIL BULANAN ---
+// Batch dibuat saat posting (tanggal 25, batas 00:00 WIB). Pendaftaran berbayar yang ikut diberi payout_batch_id.
+export const payoutBatches = academySchema.table("payout_batches", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  cutoffAt: timestamp("cutoff_at").notNull(), // UTC; pendaftaran sebelum waktu ini ikut batch
+  status: varchar("status", { length: 10 }).notNull().default("POSTED"), // POSTED | APPROVED | COMPLETED | VOID
+  postedBy: uuid("posted_by").references(() => users.id, { onDelete: "set null" }), // null = otomatis oleh job
+  postedAt: timestamp("posted_at").defaultNow().notNull(),
+  approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "set null" }),
+  approvedAt: timestamp("approved_at"),
+  voidedBy: uuid("voided_by").references(() => users.id, { onDelete: "set null" }),
+  voidedAt: timestamp("voided_at"),
+  voidNote: text("void_note"),
+  completedAt: timestamp("completed_at"),
+  salesCount: integer("sales_count").notNull().default(0),
+  grossTotal: integer("gross_total").notNull().default(0),
+  ownerTotal: integer("owner_total").notNull().default(0),
+  mentorTotal: integer("mentor_total").notNull().default(0),
+  platformTotal: integer("platform_total").notNull().default(0),
+}, (t) => ({
+  cutoffUq: uniqueIndex("payout_batches_cutoff_uq").on(t.cutoffAt).where(sql`status <> 'VOID'`),
+  statusIdx: index("payout_batches_status_idx").on(t.status, t.cutoffAt),
+}));
+
+// Satu baris per penerima per batch (gabungan bagian pemilik materi dan Mentor).
+export const payoutPayees = academySchema.table("payout_payees", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  batchId: uuid("batch_id").references(() => payoutBatches.id).notNull(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  userName: varchar("user_name", { length: 255 }).notNull(),
+  ownerAmount: integer("owner_amount").notNull().default(0),
+  mentorAmount: integer("mentor_amount").notNull().default(0),
+  amount: integer("amount").notNull(),
+  status: varchar("status", { length: 8 }).notNull().default("PENDING"), // PENDING | PAID
+  bankName: varchar("bank_name", { length: 50 }),
+  accountNumber: varchar("account_number", { length: 50 }),
+  holderName: varchar("holder_name", { length: 100 }),
+  transferRef: varchar("transfer_ref", { length: 100 }),
+  note: text("note"),
+  // Bukti bayar: berkas di bucket R2 private (tidak ikut pencadangan database; kunci objek tidak boleh dihapus).
+  proofKey: text("proof_key"),
+  proofMime: varchar("proof_mime", { length: 50 }),
+  proofSha256: varchar("proof_sha256", { length: 64 }),
+  proofEmailedAt: timestamp("proof_emailed_at"),
+  paidAt: timestamp("paid_at"),
+  paidBy: uuid("paid_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => ({
+  batchUserUq: uniqueIndex("payout_payees_batch_user_uq").on(t.batchId, t.userId),
+  userIdx: index("payout_payees_user_idx").on(t.userId),
 }));

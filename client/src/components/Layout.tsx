@@ -158,7 +158,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "System Control" },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "system-config", label: "Konfigurasi Sistem", icon: SlidersHorizontal },
-          { id: "settings", label: "App Settings", icon: Settings },
+          { id: "settings", label: "Pengangkatan Jabatan", icon: Settings },
           { id: "policy", label: "Dokumen Hukum", icon: ShieldAlert },
           { isDivider: true },
           profileItem,
@@ -181,6 +181,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "communication", label: "Komunikasi Publik", icon: Megaphone },
+          { id: "payouts", label: "Pencairan Bagi Hasil", icon: Wallet },
           { id: "policy", label: "Dokumen Hukum", icon: ShieldAlert },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
@@ -199,6 +200,7 @@ export const Layout: React.FC<LayoutProps> = ({
           dashboardItem,
           { isDivider: true, sectionTitle: "Administration" },
           { id: "finance", label: "Keuangan & Settlement", icon: Banknote },
+          { id: "payouts", label: "Pencairan Bagi Hasil", icon: Wallet },
           { id: "categories", label: "Manajemen Kategori", icon: Tags },
           { id: "proposals", label: "Approval Center", icon: FileCheck },
           { id: "users", label: "Manajemen User", icon: Users },
@@ -219,6 +221,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "Area Creator" }, // Separator
           { id: "my-courses", label: "Kursus Saya", icon: BookOpen },
           { id: "create-course", label: "Buat Materi", icon: GraduationCap },
+          { id: "my-payouts", label: "Bagi Hasil Saya", icon: Banknote },
 
           { isDivider: true, sectionTitle: "Area Student" }, // Separator
           ...studentItems,
@@ -235,6 +238,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "Area Mentor" }, // Separator
           { id: "explore-content", label: "Workshop", icon: Compass },
           { id: "my-classes", label: "Rombongan Belajar", icon: Users },
+          { id: "my-payouts", label: "Bagi Hasil Saya", icon: Banknote },
 
           { isDivider: true, sectionTitle: "Area Student" }, // Separator
           ...studentItems,

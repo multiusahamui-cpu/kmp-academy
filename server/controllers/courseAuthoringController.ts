@@ -4,7 +4,7 @@ import multer from "multer";
 import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../db";
-import { categories, courseExamQuestions, courseModules, courses, enrollments, users } from "../schema/schema";
+import { categories, courseExamQuestions, courseModules, courses, enrollments, mentorClasses, users } from "../schema/schema";
 import { successResponse, errorResponse } from "../utils/response";
 import { notifyUser } from "../lib/cards";
 import { checkSession } from "../lib/session-user";
@@ -166,7 +166,7 @@ export const getCourseDetails = async (req: any, res: any) => {
     const isReviewer = !!viewer && REVIEW_ROLES.includes(viewer.role);
     if (course.status !== "PUBLISHED" && !isOwner && !isReviewer) return errorResponse(res, "Kursus tidak ditemukan", 404);
 
-    const mods = await db.select().from(courseModules).where(eq(courseModules.courseId, course.id)).orderBy(asc(courseModules.position));
+    const mods = await db.select().from(courseModules).where(eq(courseModules.courseId, course.contentSourceId ?? course.id)).orderBy(asc(courseModules.position));
     const [q] = await db.select({ n: count() }).from(courseExamQuestions).where(eq(courseExamQuestions.courseId, course.id));
     const [enr] = await db.select({ n: count() }).from(enrollments).where(eq(enrollments.courseId, course.id));
     let enrolled = false;
@@ -395,13 +395,20 @@ const canOpenModule = async (viewer: { id: string; role: string }, course: Cours
   if (viewer.id === course.instructorId || REVIEW_ROLES.includes(viewer.role)) return true;
   if (course.status === "PUBLISHED" && mod.isFreePreview) return true;
   const [e] = await db.select({ id: enrollments.id }).from(enrollments).where(and(eq(enrollments.courseId, course.id), eq(enrollments.userId, viewer.id))).limit(1);
-  return !!e;
+  if (e) return true;
+  // Mentor pengampu workshop boleh membuka materinya.
+  if (course.type === "WORKSHOP") {
+    const [m] = await db.select({ id: mentorClasses.id }).from(mentorClasses).where(and(eq(mentorClasses.courseId, course.id), eq(mentorClasses.mentorId, viewer.id))).limit(1);
+    return !!m;
+  }
+  return false;
 };
 
 const loadModuleForViewer = async (req: any, res: any) => {
   if (!isUuid(req.params.id)) { errorResponse(res, "Modul tidak ditemukan", 404); return null; }
   const [course] = await db.select().from(courses).where(eq(courses.id, req.params.id)).limit(1);
-  const mod = course ? await loadModule(course.id, req.params.mid) : null;
+  // Kursus WORKSHOP: modul berasal dari kursus sumber, hak akses tetap dinilai pada kursus yang diminta.
+  const mod = course ? await loadModule(course.contentSourceId ?? course.id, req.params.mid) : null;
   if (!course || !mod || !(await canOpenModule(req.user, course, mod))) { errorResponse(res, "Modul tidak ditemukan", 404); return null; }
   return { course, mod };
 };

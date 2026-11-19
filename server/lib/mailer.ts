@@ -4,6 +4,7 @@ export interface MailInput {
   to: string;
   subject: string;
   text: string;
+  attachments?: { filename: string; content: Buffer; contentType: string }[];
 }
 
 const secureFlag = (port: number, raw: string | undefined): boolean => {
@@ -35,5 +36,5 @@ export const sendMail = async (input: MailInput): Promise<void> => {
     secure: cfg.secure,
     auth: { user: cfg.user, pass: cfg.pass },
   });
-  await transporter.sendMail({ from: cfg.from, to: input.to, subject: input.subject, text: input.text });
+  await transporter.sendMail({ from: cfg.from, to: input.to, subject: input.subject, text: input.text, attachments: input.attachments });
 };

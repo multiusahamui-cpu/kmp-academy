@@ -3,6 +3,8 @@ import { db } from "../db";
 import { jobRuns } from "../schema/schema";
 import { expireStaleOrders, reconcileConfirming, reconcileVaOrders } from "./order-service";
 import { sendPendingNotificationEmails } from "./notification-mail";
+import { postBatch } from "./payout-service";
+import { isPostingDay } from "@shared/payout";
 
 export interface JobDef {
   id: string;
@@ -18,6 +20,7 @@ export const JOBS: JobDef[] = [
   { id: "expire-orders", label: "Kedaluwarsa pesanan", description: "Menutup pesanan pembayaran yang lewat batas waktu dan melepas reservasinya.", everyMinutes: 1, run: () => expireStaleOrders() },
   { id: "reconcile-debit", label: "Rekonsiliasi debit dompet", description: "Memeriksa debit dompet digitalcoop.id yang statusnya belum pasti.", everyMinutes: 1, run: () => reconcileConfirming() },
   { id: "reconcile-va", label: "Rekonsiliasi Virtual Account", description: "Menyamakan pesanan VA yang tertunda dengan status di Midtrans.", everyMinutes: 5, run: () => reconcileVaOrders() },
+  { id: "payout-posting", label: "Posting bagi hasil bulanan", description: "Setiap tanggal 25 (WIB) memposting bagi hasil transaksi sebelum tanggal itu menjadi batch pencairan yang menunggu persetujuan Direktur.", everyMinutes: 30, run: async () => (isPostingDay(new Date()) && (await postBatch(null)).status === "CREATED" ? 1 : 0) },
   { id: "notification-mail", label: "Kirim email notifikasi", description: "Mengirim email untuk notifikasi yang pengguna aktifkan lewat email.", everyMinutes: 1, run: () => sendPendingNotificationEmails() },
 ];
 

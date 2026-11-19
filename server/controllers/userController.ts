@@ -1,4 +1,5 @@
 
+import { validateBankAccount } from "@shared/payout";
 import { successResponse, errorResponse } from "../utils/response";
 import { db } from "../db";
 import { enrollments, wishlists, courses, users, transactions, bankAccounts, notifications } from "../schema/schema";
@@ -212,14 +213,9 @@ export const withdrawWallet = async (req: any, res: any) => {
 export const addBankAccount = async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    const { bankName, accountNumber, holderName } = req.body;
-    
-    await db.insert(bankAccounts).values({
-        userId,
-        bankName,
-        accountNumber,
-        holderName
-    });
+    const v = validateBankAccount(req.body);
+    if (!v.ok) return errorResponse(res, v.message, 400);
+    await db.insert(bankAccounts).values({ userId, ...v.value });
 
     successResponse(res, null, "Bank account added");
   } catch (error) {

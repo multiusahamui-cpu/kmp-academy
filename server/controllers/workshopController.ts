@@ -134,7 +134,7 @@ export const approveProposal = async (req: any, res: any) => {
           const [course] = await tx.insert(courses).values({
             title: p.title, slug: `${slugify(p.title)}-${crypto.randomBytes(3).toString("hex")}`, description: p.description ?? src.description,
             instructorId: src.instructorId, instructorName: src.instructorName, price: p.price, type: "WORKSHOP", status: "PUBLISHED",
-            thumbnail: src.thumbnail, categoryIds: src.categoryIds, examEnabled: false,
+            thumbnail: src.thumbnail, categoryIds: src.categoryIds, examEnabled: false, contentSourceId: src.id,
           }).returning({ id: courses.id });
           const [cls] = await tx.insert(mentorClasses).values({ mentorId: p.mentorId, name: p.title, description: p.description, joinCode, courseId: course.id }).returning({ id: mentorClasses.id });
           await tx.update(workshopProposals).set({ status: "APPROVED", decidedBy: req.user.id, decidedAt: new Date(), decisionNote: note.value || null, workshopCourseId: course.id, classId: cls.id }).where(eq(workshopProposals.id, p.id));

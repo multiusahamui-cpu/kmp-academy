@@ -148,6 +148,34 @@
       "when": 1795060642150,
       "tag": "0020_workshop",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795061740490,
+      "tag": "0021_role_appointments",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795062915991,
+      "tag": "0022_workshop_content_source",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795064546247,
+      "tag": "0023_payouts",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795066788018,
+      "tag": "0024_payout_proofs",
+      "breakpoints": true
     }
   ]
 }

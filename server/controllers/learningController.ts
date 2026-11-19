@@ -17,6 +17,19 @@ type Tx = any;
 type CourseRow = typeof courses.$inferSelect;
 
 const isUuid = (v: unknown): v is string => z.string().uuid().safeParse(v).success;
+
+/** Kursus yang menyimpan modulnya: kursus WORKSHOP membaca materi dari kursus sumbernya. */
+const contentCourseId = (course: { id: string; contentSourceId: string | null }): string => course.contentSourceId ?? course.id;
+
+/** Jumlah modul selesai milik peserta dan total modul pada materi sebuah kursus (dihitung per modul, bukan per kursus pendaftaran). */
+const moduleCounts = async (tx: Tx, userId: string, contentId: string): Promise<{ done: number; total: number }> => {
+  const [[d], [t]] = await Promise.all([
+    tx.select({ n: sql<number>`count(*)::int` }).from(moduleProgress).innerJoin(courseModules, eq(courseModules.id, moduleProgress.moduleId))
+      .where(and(eq(moduleProgress.userId, userId), eq(courseModules.courseId, contentId))),
+    tx.select({ n: sql<number>`count(*)::int` }).from(courseModules).where(eq(courseModules.courseId, contentId)),
+  ]);
+  return { done: d?.n ?? 0, total: t?.n ?? 0 };
+};
 const NOT_ENROLLED = "Kursus tidak ditemukan atau Anda belum terdaftar.";
 
 const loadCourseAndEnrollment = async (tx: Tx, userId: string, courseId: string, lock = false) => {
@@ -73,8 +86,9 @@ export const getLearning = async (req: any, res: any) => {
 
     const [modules, done, attempts, qCount, cert] = await Promise.all([
       db.select({ id: courseModules.id, position: courseModules.position, title: courseModules.title, description: courseModules.description, type: courseModules.type, isFreePreview: courseModules.isFreePreview })
-        .from(courseModules).where(eq(courseModules.courseId, course.id)).orderBy(asc(courseModules.position)),
-      db.select({ moduleId: moduleProgress.moduleId }).from(moduleProgress).where(and(eq(moduleProgress.userId, userId), eq(moduleProgress.courseId, course.id))),
+        .from(courseModules).where(eq(courseModules.courseId, contentCourseId(course))).orderBy(asc(courseModules.position)),
+      db.select({ moduleId: moduleProgress.moduleId }).from(moduleProgress).innerJoin(courseModules, eq(courseModules.id, moduleProgress.moduleId))
+        .where(and(eq(moduleProgress.userId, userId), eq(courseModules.courseId, contentCourseId(course)))),
       db.select({ id: examAttempts.id, status: examAttempts.status, score: examAttempts.score, passed: examAttempts.passed }).from(examAttempts).where(and(eq(examAttempts.userId, userId), eq(examAttempts.courseId, course.id))),
       db.select({ n: sql<number>`count(*)::int` }).from(courseExamQuestions).where(eq(courseExamQuestions.courseId, course.id)),
       db.select({ id: certificates.id, serial: certificates.serial }).from(certificates).where(and(eq(certificates.userId, userId), eq(certificates.courseId, course.id))).limit(1),
@@ -119,14 +133,11 @@ export const completeModule = async (req: any, res: any) => {
       const ctx = await loadCourseAndEnrollment(tx, userId, req.params.courseId, true); // kunci baris pendaftaran: penyelesaian serentak berurutan
       if (!ctx) return { notFound: NOT_ENROLLED } as const;
       const { course, enrollment } = ctx;
-      const [mod] = await tx.select({ id: courseModules.id }).from(courseModules).where(and(eq(courseModules.id, moduleId), eq(courseModules.courseId, course.id))).limit(1);
+      const [mod] = await tx.select({ id: courseModules.id }).from(courseModules).where(and(eq(courseModules.id, moduleId), eq(courseModules.courseId, contentCourseId(course)))).limit(1);
       if (!mod) return { notFound: "Modul tidak ditemukan" } as const;
 
       await tx.insert(moduleProgress).values({ userId, courseId: course.id, moduleId }).onConflictDoNothing();
-      const [[{ done }], [{ total }]] = await Promise.all([
-        tx.select({ done: sql<number>`count(*)::int` }).from(moduleProgress).where(and(eq(moduleProgress.userId, userId), eq(moduleProgress.courseId, course.id))),
-        tx.select({ total: sql<number>`count(*)::int` }).from(courseModules).where(eq(courseModules.courseId, course.id)),
-      ]);
+      const { done, total } = await moduleCounts(tx, userId, contentCourseId(course));
       const progress = progressPercent(done, total);
       const now = new Date();
       await tx.update(enrollments).set({ progress, lastAccessedAt: now, completedAt: progress === 100 ? (enrollment.completedAt ?? now) : enrollment.completedAt }).where(eq(enrollments.id, enrollment.id));
@@ -170,10 +181,9 @@ export const startExam = async (req: any, res: any) => {
       const { course } = ctx;
 
       await expireStaleAttempts(tx, userId, course.id);
-      const [attempts, [{ done }], [{ total }], [{ n }]] = await Promise.all([
+      const [attempts, { done, total }, [{ n }]] = await Promise.all([
         tx.select().from(examAttempts).where(and(eq(examAttempts.userId, userId), eq(examAttempts.courseId, course.id))).orderBy(desc(examAttempts.startedAt)),
-        tx.select({ done: sql<number>`count(*)::int` }).from(moduleProgress).where(and(eq(moduleProgress.userId, userId), eq(moduleProgress.courseId, course.id))),
-        tx.select({ total: sql<number>`count(*)::int` }).from(courseModules).where(eq(courseModules.courseId, course.id)),
+        moduleCounts(tx, userId, contentCourseId(course)),
         tx.select({ n: sql<number>`count(*)::int` }).from(courseExamQuestions).where(eq(courseExamQuestions.courseId, course.id)),
       ]);
       const open = (attempts as (typeof examAttempts.$inferSelect)[]).find((a) => a.status === "IN_PROGRESS");

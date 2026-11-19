@@ -7,6 +7,8 @@ import LandingPage from './views/LandingPage';
 import Dashboard from './views/Dashboard';
 import AppSettings from './views/admin/AppSettings';
 import LegalManager from './views/admin/LegalManager';
+import PayoutManager from './views/admin/PayoutManager';
+import PayoutMine from './views/PayoutMine';
 import LegalGate from './components/LegalGate';
 import UserManagement from './views/admin/UserManagement';
 import CronManager from './views/admin/CronManager';
@@ -387,6 +389,10 @@ const App: React.FC = () => {
         return <FinanceDashboard />;
       case 'categories':
         return <CategoryManager />; 
+      case 'payouts':
+        return <PayoutManager role={currentRole === UserRole.DIRECTOR ? 'DIRECTOR' : 'ADMIN_SYSTEM'} />;
+      case 'my-payouts':
+        return <PayoutMine />;
       case 'proposals':
         return <ProposalManager />;
       case 'classes':

@@ -60,20 +60,6 @@ export const getAllUsers = async (req: any, res: any) => {
   }
 };
 
-export const updateUserRole = async (req: any, res: any) => {
-  successResponse(res, null, "User role updated");
-};
-
-export const deleteUser = async (req: any, res: any) => {
-  try {
-    const { id: _id } = req.params;
-    // TODO: Soft delete
-    successResponse(res, null, "User deleted");
-  } catch (error) {
-    errorResponse(res, "Delete failed", 500, error);
-  }
-};
-
 // --- DAFTAR TUNGGU CALON MENTOR / CREATOR & PENERBITAN KARTU ---
 // Daftar tunggu diisi dari digitalcoop.id; Admin/Superadmin memutuskan di sini.
 export const listRoleApplications = async (req: any, res: any) => {

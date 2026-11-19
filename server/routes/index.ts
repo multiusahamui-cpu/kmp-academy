@@ -9,6 +9,7 @@ import adminRoutes from "./adminRoutes";
 import helpdeskRoutes from "./helpdeskRoutes";
 import classRoutes from "./classRoutes";
 import legalRoutes from "./legalRoutes";
+import payoutRoutes from "./payoutRoutes";
 import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
 import paymentRoutes from "./paymentRoutes";
@@ -41,6 +42,7 @@ router.use("/courses", courseRoutes); // Includes Categories & Content
 router.use("/payments", paymentRoutes); // Order pembayaran: VA, transfer manual, dompet digitalcoop.id
 router.use("/users", userRoutes); // Includes Learning, Wallet, Certs
 router.use("/mentor", mentorRoutes); // Kelas, sesi, dan penilaian Mentor
+router.use("/payouts", payoutRoutes); // Bagi hasil: sisi Creator/Mentor
 router.use("/legal", legalRoutes); // Dokumen hukum dan persetujuan
 router.use("/classes", classRoutes); // Sisi siswa: gabung dan kelas yang diikuti
 router.use("/helpdesk", helpdeskRoutes); // Tiket bantuan

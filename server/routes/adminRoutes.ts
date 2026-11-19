@@ -1,5 +1,6 @@
 
 import * as workshop from "../controllers/workshopController";
+import * as payout from "../controllers/payoutController";
 import { Router } from "express";
 import * as admin from "../controllers/adminController";
 import { authenticateToken, requireRole } from "../middleware/auth";
@@ -19,8 +20,6 @@ router.get("/stats", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), re
 
 // Users
 router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getAllUsers);
-router.put("/users/:id/role", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.updateUserRole);
-router.delete("/users/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.deleteUser);
 
 // Daftar tunggu calon mentor/creator & kartu
 router.get("/applications", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listRoleApplications);
@@ -36,6 +35,17 @@ router.post("/payment-orders/:id/decision", requireRole(["ADMIN_SYSTEM"]), payAd
 router.get("/workshop-proposals", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.listProposals);
 router.post("/workshop-proposals/:id/approve", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.approveProposal);
 router.post("/workshop-proposals/:id/reject", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.rejectProposal);
+// Pencairan bagi hasil bulanan: Admin memposting dan mencatat transfer, Direktur menyetujui.
+router.get("/payouts", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.overview);
+router.post("/payouts/post", requireRole(["ADMIN_SYSTEM"]), payout.postNow);
+router.get("/payouts/archive", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.archive);
+router.post("/payouts/payees/:pid/pay", requireRole(["ADMIN_SYSTEM"]), uploadLimiter, payout.payProofMiddleware, payout.pay);
+router.get("/payouts/payees/:pid/proof", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.adminProof);
+router.post("/payouts/payees/:pid/resend", requireRole(["ADMIN_SYSTEM"]), payout.resendProof);
+router.get("/payouts/:id", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.getBatch);
+router.get("/payouts/:id/transactions.csv", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.exportTransactions);
+router.post("/payouts/:id/approve", requireRole(["DIRECTOR"]), payout.approve);
+router.post("/payouts/:id/void", requireRole(["DIRECTOR"]), payout.voidIt);
 router.get("/account-deletions", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listDeletions);
 router.post("/account-deletions/:id/decision", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.decideDeletion);
 router.post("/account-deletions/:id/settlement", requireRole(["ADMIN_SYSTEM"]), uploadLimiter, deletion.proofUploadMiddleware, deletion.settleBalance);
