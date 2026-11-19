@@ -132,44 +132,6 @@ export const toggleWishlist = async (req: any, res: any) => {
     }
 };
 
-// --- CONTENT & LEARNING ---
-export const getCourseContent = async (req: any, res: any) => {
-  try {
-    const { id: _id } = req.params;
-    // TODO: Check enrollment logic here
-    successResponse(res, { modules: [] }, "Course Content");
-  } catch (error) {
-    errorResponse(res, "Access denied", 403, error);
-  }
-};
-
-export const updateProgress = async (req: any, res: any) => {
-  successResponse(res, null, "Progress updated");
-};
-
-// --- EXAMS & CERTIFICATES ---
-export const startExam = async (req: any, res: any) => {
-  try {
-    const { courseId: _courseId } = req.params;
-    successResponse(res, { questions: [], timer: 60 }, "Exam started");
-  } catch (error) {
-    errorResponse(res, "Failed to start exam", 500, error);
-  }
-};
-
-export const submitExam = async (req: any, res: any) => {
-  successResponse(res, { score: 85, passed: true }, "Exam submitted");
-};
-
-export const getCertificates = async (req: any, res: any) => {
-  successResponse(res, [], "My Certificates");
-};
-
-export const downloadCertificate = async (req: any, res: any) => {
-  res.setHeader("Content-Type", "application/pdf");
-  res.send("PDF_BUFFER_MOCK");
-};
-
 // --- REAL WALLET IMPLEMENTATION ---
 
 export const getWallet = async (req: any, res: any) => {

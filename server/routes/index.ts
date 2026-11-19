@@ -10,6 +10,8 @@ import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
 import paymentRoutes from "./paymentRoutes";
 import { midtransNotify } from "../controllers/paymentController";
+import { verifyCertificate } from "../controllers/learningController";
+import { verifyLimiter } from "../lib/security";
 import { getPublicSystemConfig } from "../controllers/systemConfigController";
 import { maintenanceGuard } from "../middleware/maintenance";
 
@@ -26,6 +28,9 @@ router.post("/payments/midtrans/notify", midtransNotify);
 
 // Mode maintenance: menutup semua rute di bawah ini untuk selain Superadmin
 router.use(maintenanceGuard);
+
+// Publik: pemeriksaan keaslian sertifikat dari nomornya.
+router.get("/certificates/verify/:serial", verifyLimiter, verifyCertificate);
 
 // Module Routes
 router.use("/auth", authRoutes);

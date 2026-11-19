@@ -1,14 +1,14 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { MOCK_CATEGORIES } from '../../constants';
-import { Play, Heart, Filter, X, Award, Ticket, Key, CheckCircle, Info } from 'lucide-react';
+import { Play, Heart, Filter, X, Award, Key, CheckCircle, Info } from 'lucide-react';
 import { CourseType, Course, WishlistItem } from '../../types';
 import ExamRoom from './ExamRoom';
 import CourseDetailModal from '../../components/CourseDetailModal';
 import CheckoutModal from '../../components/CheckoutModal';
 import { courseApi, userApi } from '../../services/api';
 import { ApiCourse, mapApiCourse } from '../../services/mappers';
-import { notifyProfileChanged, useProfile } from '../../services/profile';
+import { notifyProfileChanged } from '../../services/profile';
 
 interface StudentCatalogProps {
   enrolledOnly?: boolean;
@@ -29,7 +29,6 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeExamCourseId, setActiveExamCourseId] = useState<string | null>(null);
   
-  const { profile } = useProfile();
   const [courses, setCourses] = useState<Course[]>([]);
   const [progressById, setProgressById] = useState<Record<string, number>>({});
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
@@ -118,7 +117,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
   };
 
   if (activeExamCourseId) {
-     return <ExamRoom courseId={activeExamCourseId} studentName={profile?.name ?? ""} onExit={() => setActiveExamCourseId(null)} />;
+     return <ExamRoom courseId={activeExamCourseId} onExit={() => { setActiveExamCourseId(null); loadCourses(); }} />;
   }
 
   return (
@@ -322,20 +321,14 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                               
                               {enrolledOnly ? (
                                  <div className="space-y-2">
-                                    {course.type === CourseType.CERTIFICATION ? (
-                                       <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mb-2 border border-amber-100">
-                                          <strong>Jadwal Ujian:</strong> {course.examConfig?.examDate}
+                                    <div>
+                                       <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
+                                          <div className="bg-kodman-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
                                        </div>
-                                    ) : (
-                                       <div>
-                                          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
-                                             <div className="bg-kodman-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
-                                          </div>
-                                          <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400">
-                                             <span>{progressById[course.id] ?? 0}% Selesai</span>
-                                          </div>
+                                       <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400">
+                                          <span>{progressById[course.id] ?? 0}% Selesai</span>
                                        </div>
-                                    )}
+                                    </div>
                                     
                                     <div className="flex gap-2">
                                        <button 
@@ -344,16 +337,12 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                        >
                                           <Play size={14} className="mr-2" /> Materi
                                        </button>
-                                       {course.examConfig?.isEnabled && (
+                                       {course.examEnabled && course.type !== CourseType.CERTIFICATION && (
                                           <button 
                                             onClick={() => setActiveExamCourseId(course.id)}
                                             className="flex-1 py-2 bg-green-600 text-white rounded font-medium text-xs flex items-center justify-center hover:bg-green-700 shadow-sm transition"
                                           >
-                                             {course.type === CourseType.CERTIFICATION ? (
-                                                <><Ticket size={14} className="mr-2" /> Tiket Ujian</>
-                                             ) : (
-                                                <><Award size={14} className="mr-2" /> Ujian Akhir</>
-                                             )}
+                                             <Award size={14} className="mr-2" /> Ujian Akhir
                                           </button>
                                        )}
                                     </div>

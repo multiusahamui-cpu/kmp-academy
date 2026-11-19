@@ -129,6 +129,10 @@ export interface Certificate {
   issueDate: string;
   grade: number;
   signatureUrl?: string; // Mock URL
+  /** Nomor resmi sertifikat (KMPA-tahun-kode) untuk verifikasi publik. */
+  serial?: string;
+  /** EXAM = lulus ujian, COMPLETION = menyelesaikan materi, PARTICIPATION = keikutsertaan (kursus sertifikasi). */
+  kind?: 'EXAM' | 'COMPLETION' | 'PARTICIPATION';
 }
 
 export interface Module {
@@ -180,6 +184,8 @@ export interface Course {
   totalReviews: number;
 
   categoryIds: string[]; // Array of Category IDs (Max 3)
+  /** Kursus ini memiliki ujian akhir (dari server). */
+  examEnabled?: boolean;
   examConfig?: ExamConfig; // Optional Exam Configuration
   
   // Licensing & Rights

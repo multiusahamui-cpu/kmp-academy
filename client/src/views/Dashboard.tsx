@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserRole, WishlistItem } from "../types";
 import {
   TrendingUp,
@@ -16,7 +16,7 @@ import {
   ArrowRight,
   Wallet,
 } from "lucide-react";
-import { MOCK_COURSES } from "../constants";
+import { userApi } from "../services/api";
 import IdentityCard from "../components/IdentityCard";
 import { useProfile } from "../services/profile";
 
@@ -135,8 +135,21 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
   wishlistItems,
   onNavigate,
 }) => {
-  // Mock "Last Accessed" Course
-  const lastCourse = MOCK_COURSES[0];
+  // Kursus yang terakhir dibuka: dari data pendaftaran nyata.
+  const [lastCourse, setLastCourse] = useState<{ id: string; title: string; instructor: string; progress: number } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    userApi
+      .getMyCourses()
+      .then((res) => {
+        const rows: { enrollment: { progress?: number | null; lastAccessedAt?: string | null }; course: { id: string; title: string; instructorName?: string | null } }[] = res.data?.data ?? [];
+        const sorted = [...rows].sort((a, b) => new Date(b.enrollment.lastAccessedAt ?? 0).getTime() - new Date(a.enrollment.lastAccessedAt ?? 0).getTime());
+        const pick = sorted.find((r) => (r.enrollment.progress ?? 0) < 100) ?? sorted[0];
+        if (!cancelled) setLastCourse(pick ? { id: pick.course.id, title: pick.course.title, instructor: pick.course.instructorName ?? "", progress: pick.enrollment.progress ?? 0 } : null);
+      })
+      .catch(() => { if (!cancelled) setLastCourse(null); });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -148,27 +161,43 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
         </div>
 
         <div className="flex-1 relative z-10">
-          <span className="inline-block px-2 py-1 bg-white/20 rounded text-xs font-bold mb-2 backdrop-blur-sm">
-            Terakhir Diakses
-          </span>
-          <h2 className="text-2xl font-bold mb-2">{lastCourse.title}</h2>
-          <p className="text-kodman-100 text-sm mb-4">
-            Modul 4: State Management Fundamentals
-          </p>
-          <div className="w-full bg-black/20 rounded-full h-2 mb-2">
-            <div
-              className="bg-green-400 h-2 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"
-              style={{ width: "35%" }}
-            ></div>
-          </div>
-          <p className="text-xs text-kodman-200">35% Selesai</p>
+          {lastCourse ? (
+            <>
+              <span className="inline-block px-2 py-1 bg-white/20 rounded text-xs font-bold mb-2 backdrop-blur-sm">
+                Terakhir Diakses
+              </span>
+              <h2 className="text-2xl font-bold mb-2">{lastCourse.title}</h2>
+              <p className="text-kodman-100 text-sm mb-4">{lastCourse.instructor}</p>
+              <div className="w-full bg-black/20 rounded-full h-2 mb-2">
+                <div
+                  className="bg-green-400 h-2 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"
+                  style={{ width: `${lastCourse.progress}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-kodman-200">{lastCourse.progress}% Selesai</p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold mb-2">Mulai perjalanan belajar Anda</h2>
+              <p className="text-kodman-100 text-sm">Anda belum mengikuti kursus. Jelajahi katalog untuk memilih kursus pertama.</p>
+            </>
+          )}
         </div>
-        <button
-          onClick={() => onOpenLearning(lastCourse.id)}
-          className="px-6 py-3 bg-white text-kodman-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
-        >
-          <Play size={18} className="mr-2 fill-current" /> Lanjut Belajar
-        </button>
+        {lastCourse ? (
+          <button
+            onClick={() => onOpenLearning(lastCourse.id)}
+            className="px-6 py-3 bg-white text-kodman-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
+          >
+            <Play size={18} className="mr-2 fill-current" /> Lanjut Belajar
+          </button>
+        ) : (
+          <button
+            onClick={() => onNavigate("catalog")}
+            className="px-6 py-3 bg-white text-kodman-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
+          >
+            Lihat Katalog
+          </button>
+        )}
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">

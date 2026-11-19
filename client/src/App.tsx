@@ -17,6 +17,7 @@ import HelpdeskTickets from './views/admin/HelpdeskTickets';
 import AccountDeletions from './views/admin/AccountDeletions';
 import PaymentVerification from './views/admin/PaymentVerification';
 import CourseReviews from './views/admin/CourseReviews';
+import VerifyCertificate from './views/VerifyCertificate';
 import ArchivedAccounts from './views/admin/ArchivedAccounts';
 import CourseCreator from './views/creator/CourseCreator';
 import ClassRoom from './views/mentor/ClassRoom';
@@ -69,6 +70,8 @@ const App: React.FC = () => {
   const [isRestoringSession, setIsRestoringSession] = useState<boolean>(true);
   // Masuk dari digitalcoop.id: academy.digitalcoop.id/sso#t=<tiket>
   const [ssoMode, setSsoMode] = useState<boolean>(() => window.location.pathname === '/sso');
+  // Halaman publik pemeriksaan sertifikat: /verify?no=KMPA-2026-XXXXXXXX
+  const [verifyMode, setVerifyMode] = useState<boolean>(() => window.location.pathname === '/verify');
 
   // Global State (Cart & Wishlist)
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -269,6 +272,18 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (verifyMode) {
+      return (
+        <VerifyCertificate
+          initialSerial={new URLSearchParams(window.location.search).get('no') ?? ''}
+          onHome={() => {
+            window.history.replaceState(null, '', '/');
+            setVerifyMode(false);
+          }}
+        />
+      );
+    }
+
     if (ssoMode) {
       const selesai = () => {
         window.history.replaceState(null, '', '/');

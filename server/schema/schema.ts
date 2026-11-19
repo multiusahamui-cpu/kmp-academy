@@ -410,3 +410,55 @@ export const paymentOrders = academySchema.table("payment_orders", {
   index("payment_orders_status_idx").on(t.status, t.createdAt),
   index("payment_orders_user_idx").on(t.userId, t.createdAt),
 ]);
+
+// Progres belajar: satu baris per modul yang sudah diselesaikan peserta. Persentase di enrollments.progress diturunkan dari sini.
+export const moduleProgress = academySchema.table("module_progress", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  courseId: uuid("course_id").references(() => courses.id).notNull(),
+  moduleId: uuid("module_id").references(() => courseModules.id, { onDelete: "cascade" }).notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+}, (t) => [
+  unique("module_progress_user_module_unique").on(t.userId, t.moduleId),
+  index("module_progress_user_course_idx").on(t.userId, t.courseId),
+]);
+
+// Percobaan ujian. Penilaian selalu di server; kunci jawaban tidak pernah dikirim ke peserta.
+export const examAttempts = academySchema.table("exam_attempts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  courseId: uuid("course_id").references(() => courses.id).notNull(),
+  status: varchar("status", { length: 12 }).notNull().default("IN_PROGRESS"), // IN_PROGRESS | SUBMITTED | EXPIRED
+  questionOrder: jsonb("question_order").$type<string[]>().notNull(),
+  answers: jsonb("answers").$type<number[]>(),
+  totalQuestions: integer("total_questions").notNull(),
+  correctCount: integer("correct_count"),
+  score: integer("score"),
+  passingGrade: integer("passing_grade").notNull(), // salinan nilai lulus saat ujian dimulai
+  passed: boolean("passed"),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  deadlineAt: timestamp("deadline_at").notNull(),
+  submittedAt: timestamp("submitted_at"),
+}, (t) => [
+  uniqueIndex("exam_attempts_open_unique").on(t.userId, t.courseId).where(sql`${t.status} = 'IN_PROGRESS'`),
+  index("exam_attempts_user_course_idx").on(t.userId, t.courseId),
+]);
+
+// Sertifikat yang diterbitkan. Nama, judul, dan pengajar disalin saat terbit agar tidak berubah bila data sumber berubah.
+export const certificates = academySchema.table("certificates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  serial: varchar("serial", { length: 30 }).notNull(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  courseId: uuid("course_id").references(() => courses.id).notNull(),
+  kind: varchar("kind", { length: 16 }).notNull(), // EXAM | COMPLETION | PARTICIPATION
+  attemptId: uuid("attempt_id"),
+  studentName: varchar("student_name", { length: 255 }).notNull(),
+  courseTitle: varchar("course_title", { length: 255 }).notNull(),
+  courseType: varchar("course_type", { length: 20 }).notNull(),
+  instructorName: varchar("instructor_name", { length: 255 }).notNull(),
+  grade: integer("grade"),
+  issuedAt: timestamp("issued_at").defaultNow().notNull(),
+}, (t) => [
+  unique("certificates_user_course_unique").on(t.userId, t.courseId),
+  unique("certificates_serial_unique").on(t.serial),
+]);

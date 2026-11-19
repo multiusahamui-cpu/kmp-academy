@@ -27,14 +27,19 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   const isCertification = data.courseType === CourseType.CERTIFICATION;
 
   // Logic Judul Sertifikat
+  const isCompletion = data.kind === "COMPLETION";
   let titleText = "Sertifikat Kompetensi";
   if (isCertification) titleText = "Sertifikat Keikutsertaan";
+  else if (isCompletion) titleText = "Sertifikat Penyelesaian";
 
   // Logic Body Text
   let bodyText = "";
   if (isCertification) {
     bodyText =
       "Telah mengikuti pelatihan persiapan sertifikasi profesi (Exam Preparation Course) yang diselenggarakan oleh KMP - ADNG Academy bekerjasama dengan Partner Resmi pada materi:";
+  } else if (isCompletion) {
+    bodyText =
+      "Telah menyelesaikan seluruh materi pembelajaran pada KMP - ADNG Academy untuk kursus:";
   } else if (isWorkshop) {
     bodyText = `Telah berhasil menyelesaikan Program Bootcamp / Workshop dan memenuhi standar penilaian akademik dengan predikat LULUS (Grade: ${data.grade}) pada materi:`;
   } else {
@@ -165,8 +170,8 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
             )}
 
             <div className="absolute bottom-4 right-4 text-[10px] text-gray-400 font-mono">
-              Certificate ID: {data.id} • Type: {data.courseType} • Verify at
-              academy.digitalcoop.id/verify
+              No. Sertifikat: {data.serial ?? data.id} • Type: {data.courseType} • Verifikasi di
+              academy.digitalcoop.id/verify{data.serial ? `?no=${data.serial}` : ""}
             </div>
           </div>
         </div>

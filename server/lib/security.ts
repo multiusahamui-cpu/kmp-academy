@@ -57,6 +57,7 @@ export const passwordLimiter = limiter(15, 5, "Terlalu banyak percobaan ganti pa
 export const payLimiter = limiter(15, 20, "Terlalu banyak permintaan pembayaran. Coba lagi dalam beberapa menit.");
 
 export const promoLimiter = limiter(15, 30, "Terlalu banyak percobaan kode promo. Coba lagi nanti.");
+export const verifyLimiter = limiter(15, 60, "Terlalu banyak pemeriksaan sertifikat. Coba lagi nanti.");
 
 export const uploadLimiter = limiter(60, 20, "Terlalu banyak unggahan foto. Coba lagi nanti.");
 // Permintaan/konfirmasi kode ganti email dibatasi per IP.

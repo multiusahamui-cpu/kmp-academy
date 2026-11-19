@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { UserRole, Certificate, CourseType, KYCStatus } from "../../types";
+import React, { useEffect, useState } from "react";
+import { UserRole, Certificate, KYCStatus } from "../../types";
+import { CertificateDto, learningApi, mapCertificate } from "../../services/learning";
 import {
   User,
   Shield,
@@ -36,19 +37,20 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
   // LinkedIn KMP - ADNG State
   const [isJobSeekerActive, setIsJobSeekerActive] = useState(false);
 
-  // Mock Certificates Data
-  const myCertificates: Certificate[] = [
-    {
-      id: "CERT-123456",
-      courseId: "1",
-      courseTitle: "Mastering React & Vite Ecosystem",
-      courseType: CourseType.MANDIRI,
-      studentName: "User Kodman",
-      instructorName: "Budi Santoso",
-      issueDate: "20 Oktober 2023",
-      grade: 85,
-    },
-  ];
+  // Sertifikat dari server (dimuat saat tab dibuka)
+  const [myCertificates, setMyCertificates] = useState<Certificate[]>([]);
+  const [certsLoading, setCertsLoading] = useState(false);
+  useEffect(() => {
+    if (activeTab !== "certificates") return;
+    let cancelled = false;
+    setCertsLoading(true);
+    learningApi
+      .certificates()
+      .then((res) => { if (!cancelled) setMyCertificates((res.data.data as CertificateDto[]).map(mapCertificate)); })
+      .catch(() => { if (!cancelled) setMyCertificates([]); })
+      .finally(() => { if (!cancelled) setCertsLoading(false); });
+    return () => { cancelled = true; };
+  }, [activeTab]);
 
   const handleApplyRole = (role: string) => {
     // Simulating API call
@@ -555,12 +557,15 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
                         {cert.courseTitle}
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-                        Issued: {cert.issueDate}
+                        Terbit: {cert.issueDate}
+                        {cert.serial ? ` · ${cert.serial}` : ""}
                       </p>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded">
-                          Grade: {cert.grade}
-                        </span>
+                        {cert.grade > 0 && (
+                          <span className="text-xs font-bold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded">
+                            Nilai: {cert.grade}
+                          </span>
+                        )}
                         <button
                           onClick={() => setViewCert(cert)}
                           className="text-xs font-bold text-kodman-600 dark:text-kodman-400 hover:underline flex items-center"
@@ -572,11 +577,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole }) => {
                   </div>
                 ))}
 
-                {/* Empty State placeholder if needed */}
                 <div className="border border-dashed border-gray-300 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center justify-center text-center text-gray-400 min-h-[120px]">
                   <p className="text-sm">
-                    Selesaikan kursus Mandiri lainnya untuk mendapatkan lebih
-                    banyak sertifikat.
+                    {certsLoading
+                      ? "Memuat sertifikat..."
+                      : myCertificates.length === 0
+                        ? "Belum ada sertifikat. Selesaikan materi dan ujian kursus untuk mendapatkannya."
+                        : "Selesaikan kursus lainnya untuk mendapatkan lebih banyak sertifikat."}
                   </p>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 
 import { Router } from "express";
 import * as user from "../controllers/userController";
+import * as learning from "../controllers/learningController";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
@@ -10,16 +11,16 @@ router.use(authenticateToken);
 // Catalog & Learning
 router.get("/enrolled", user.getMyCourses);
 router.post("/enroll/:courseId", user.enrollCourse);
-router.get("/courses/:id/content", user.getCourseContent);
-router.post("/learning/:courseId/progress", user.updateProgress);
+router.get("/learning/:courseId", learning.getLearning);
+router.post("/learning/:courseId/modules/:moduleId/complete", learning.completeModule);
 
 // Wishlist (New)
 router.get("/wishlist", user.getMyWishlist);
 router.post("/wishlist/:courseId", user.toggleWishlist);
 
 // Exams
-router.post("/exams/:courseId/start", user.startExam);
-router.post("/exams/:courseId/submit", user.submitExam);
+router.post("/exams/:courseId/start", learning.startExam);
+router.post("/exams/:courseId/submit", learning.submitExam);
 
 // Wallet
 router.get("/wallet", user.getWallet);
@@ -32,7 +33,6 @@ router.get("/notifications", user.getNotifications);
 router.post("/notifications/:id/read", user.markNotificationRead);
 
 // Certificate
-router.get("/certificates", user.getCertificates);
-router.get("/certificates/:id/download", user.downloadCertificate);
+router.get("/certificates", learning.listMyCertificates);
 
 export default router;

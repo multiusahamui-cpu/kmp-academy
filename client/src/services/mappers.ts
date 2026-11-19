@@ -18,6 +18,7 @@ export interface ApiCourse {
   finalPrice?: number;
   discountPercent?: number;
   discountEndsAt?: string | null;
+  examEnabled?: boolean;
 }
 
 const PLACEHOLDER_THUMB = 'https://via.placeholder.com/640x360?text=Kursus';
@@ -40,4 +41,5 @@ export const mapApiCourse = (c: ApiCourse): Course => ({
   rating: (c.rating ?? 0) / 10,
   totalReviews: c.totalReviews ?? 0,
   categoryIds: c.categoryIds ?? [],
+  examEnabled: c.examEnabled ?? false,
 });
