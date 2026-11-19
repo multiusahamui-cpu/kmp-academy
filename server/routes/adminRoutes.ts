@@ -5,13 +5,14 @@ import { authenticateToken, requireRole } from "../middleware/auth";
 import * as deletion from "../controllers/accountDeletionController";
 import { uploadLimiter } from "../lib/security";
 import * as payAdmin from "../controllers/adminPaymentController";
+import * as report from "../controllers/reportController";
 
 const router = Router();
 
 router.use(authenticateToken);
 
 // Stats
-router.get("/stats", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getDashboardStats);
+router.get("/stats", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), report.getDashboardStats);
 
 // Users
 router.get("/users", requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]), admin.getAllUsers);
@@ -35,24 +36,20 @@ router.post("/account-deletions/:id/settlement", requireRole(["ADMIN_SYSTEM"]), 
 router.get("/settlements/:id/proof", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.getSettlementProof);
 router.get("/archived-accounts", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listArchived);
 
-// Approvals
-router.get("/approvals/:type", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getApprovals);
-router.post("/approvals/:type/:id", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.processApproval);
-
-// Helpdesk
-router.get("/tickets", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getTickets);
-router.post("/tickets/:id/reply", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.replyTicket);
-router.put("/tickets/:id/close", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.closeTicket);
-
-// System
-router.get("/cron-logs", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getCronLogs);
-router.post("/cron/trigger/:jobId", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.triggerCron);
-
-// Finance
-router.get("/finance/settlements", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.getSettlements);
-router.post("/finance/settlements/:id/process", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.processSettlement);
+// Job berkala (riwayat, pemicu manual)
+router.get("/jobs", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listJobs);
+router.get("/jobs/:jobId/runs", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listJobRuns);
+router.post("/jobs/:jobId/run", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.runJobNow);
+// Keuangan (data nyata; bagi hasil Creator belum ditetapkan sehingga belum ada pencairan royalti)
+const finance = requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]);
+router.get("/finance/summary", finance, report.getFinanceSummary);
+router.get("/finance/sales", finance, report.getFinanceSales);
+router.get("/finance/sales.csv", finance, report.exportFinanceSales);
+router.get("/finance/settlements", finance, report.getSettlements);
+router.get("/finance/voucher-batches", finance, report.getVoucherBatches);
 
 // Director specific
-router.get("/reports/strategic", requireRole(["DIRECTOR", "SUPERADMIN"]), admin.getStrategicReport);
+router.get("/reports/strategic", requireRole(["DIRECTOR", "SUPERADMIN"]), report.getStrategicReport);
+router.get("/quality", requireRole(["DIRECTOR", "SUPERADMIN", "ADMIN_SYSTEM"]), report.getQuality);
 
 export default router;

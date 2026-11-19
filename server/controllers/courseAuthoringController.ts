@@ -9,6 +9,7 @@ import { notifyUser } from "../lib/cards";
 import { checkSession } from "../lib/session-user";
 import { getConfigInt } from "../lib/system-config";
 import { autoDiscountMap } from "./pricingController";
+import { courseIdRef } from "../lib/sql-refs";
 import { newThumbnailKey, removeOldPublicFile } from "../lib/avatar";
 import { deletePrivate, inspectPrivate, privateAccess, privateUploadTarget, putPrivate, putPublic } from "../lib/storage";
 import { applyPercent } from "@shared/pricing";
@@ -81,9 +82,9 @@ export const getCreatorCourses = async (req: any, res: any) => {
     const rows = await db
       .select({
         course: courses,
-        studentsEnrolled: sql<number>`(select count(*)::int from academy.enrollments e where e.course_id = ${courses.id})`,
-        moduleCount: sql<number>`(select count(*)::int from academy.course_modules m where m.course_id = ${courses.id})`,
-        questionCount: sql<number>`(select count(*)::int from academy.course_exam_questions q where q.course_id = ${courses.id})`,
+        studentsEnrolled: sql<number>`(select count(*)::int from academy.enrollments e where e.course_id = ${courseIdRef})`,
+        moduleCount: sql<number>`(select count(*)::int from academy.course_modules m where m.course_id = ${courseIdRef})`,
+        questionCount: sql<number>`(select count(*)::int from academy.course_exam_questions q where q.course_id = ${courseIdRef})`,
       })
       .from(courses)
       .where(eq(courses.instructorId, req.user.id))
@@ -572,8 +573,8 @@ export const listCourseReviews = async (req: any, res: any) => {
         id: courses.id, title: courses.title, status: courses.status, price: courses.price, type: courses.type, submittedAt: courses.submittedAt,
         reviewedAt: courses.reviewedAt, reviewNote: courses.reviewNote, instructorName: courses.instructorName, thumbnail: courses.thumbnail,
         description: courses.description, examEnabled: courses.examEnabled,
-        moduleCount: sql<number>`(select count(*)::int from academy.course_modules m where m.course_id = ${courses.id})`,
-        questionCount: sql<number>`(select count(*)::int from academy.course_exam_questions q where q.course_id = ${courses.id})`,
+        moduleCount: sql<number>`(select count(*)::int from academy.course_modules m where m.course_id = ${courseIdRef})`,
+        questionCount: sql<number>`(select count(*)::int from academy.course_exam_questions q where q.course_id = ${courseIdRef})`,
       })
       .from(courses)
       .where(status === "ALL" ? sql`${courses.status} <> 'DRAFT'` : eq(courses.status, status as any))

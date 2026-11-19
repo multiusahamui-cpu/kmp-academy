@@ -1,8 +1,7 @@
 import app from "./App";
 import { checkConnection } from "./db";
 import { connectSessionStore } from "./lib/session";
-import { startOrderJobs } from "./lib/order-service";
-import { startNotificationMailJob } from "./lib/notification-mail";
+import { startJobScheduler } from "./lib/job-runner";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -31,9 +30,8 @@ const startServer = async () => {
     process.exit(1);
   }
 
-  // 1c. Job berkala pembayaran (kedaluwarsa order, rekonsiliasi debit dan VA)
-  startOrderJobs();
-  startNotificationMailJob();
+  // 1c. Job berkala (kedaluwarsa order, rekonsiliasi debit/VA, email notifikasi); riwayatnya di tabel job_runs
+  startJobScheduler();
 
   // 2. Start Express Server
   app.listen(PORT, HOST, () => {

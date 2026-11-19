@@ -7,13 +7,14 @@ import LandingPage from './views/LandingPage';
 import Dashboard from './views/Dashboard';
 import AppSettings from './views/admin/AppSettings';
 import UserManagement from './views/admin/UserManagement';
-import Moderation from './views/admin/Moderation';
 import CronManager from './views/admin/CronManager';
 import ProposalManager from './views/admin/ProposalManager';
 import SystemConfig from './views/admin/SystemConfig';
 import FinanceDashboard from './views/admin/FinanceDashboard';
 import CategoryManager from './views/admin/CategoryManager'; 
-import HelpdeskTickets from './views/admin/HelpdeskTickets'; 
+import HelpdeskTickets from './views/admin/HelpdeskTickets';
+import Support from './views/Support';
+import StudentClasses from './views/StudentClasses';
 import AccountDeletions from './views/admin/AccountDeletions';
 import PaymentVerification from './views/admin/PaymentVerification';
 import CourseReviews from './views/admin/CourseReviews';
@@ -378,8 +379,6 @@ const App: React.FC = () => {
         return <AccountDeletions />;
       case 'archived-accounts':
         return <ArchivedAccounts />;
-      case 'moderation':
-        return <Moderation />;
       case 'cron':
         return <CronManager />;
       case 'finance':
@@ -388,6 +387,10 @@ const App: React.FC = () => {
         return <CategoryManager />; 
       case 'proposals':
         return <ProposalManager />;
+      case 'classes':
+        return <StudentClasses />;
+      case 'support':
+        return <Support />;
       case 'helpdesk':
         return <HelpdeskTickets />;
 
@@ -406,8 +409,6 @@ const App: React.FC = () => {
         return <ClassRoom />;
       case 'explore-content':
         return <ContentExplorer />;
-      case 'grading':
-        return <div className="p-8 text-center text-gray-500">Modul Penilaian Siswa</div>;
 
       // Student
       case 'enrolled':

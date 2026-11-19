@@ -6,6 +6,8 @@ import courseRoutes from "./courseRoutes";
 import userRoutes from "./userRoutes";
 import mentorRoutes from "./mentorRoutes";
 import adminRoutes from "./adminRoutes";
+import helpdeskRoutes from "./helpdeskRoutes";
+import classRoutes from "./classRoutes";
 import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
 import paymentRoutes from "./paymentRoutes";
@@ -37,7 +39,9 @@ router.use("/auth", authRoutes);
 router.use("/courses", courseRoutes); // Includes Categories & Content
 router.use("/payments", paymentRoutes); // Order pembayaran: VA, transfer manual, dompet digitalcoop.id
 router.use("/users", userRoutes); // Includes Learning, Wallet, Certs
-router.use("/mentor", mentorRoutes); // Includes Classroom
+router.use("/mentor", mentorRoutes); // Kelas, sesi, dan penilaian Mentor
+router.use("/classes", classRoutes); // Sisi siswa: gabung dan kelas yang diikuti
+router.use("/helpdesk", helpdeskRoutes); // Tiket bantuan
 router.use("/admin", adminRoutes); // Includes Finance, Helpdesk, Approvals
 router.use("/", reviewRoutes); // Root level for clean /courses/:id/reviews path
 router.use("/superadmin", superadminRoutes); // Restricted IT Ops

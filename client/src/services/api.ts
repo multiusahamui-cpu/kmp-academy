@@ -65,6 +65,7 @@ export const configApi = {
 
 export const courseApi = {
   getAll: () => api.get('/courses'),
+  landing: () => api.get('/courses/landing'),
   getById: (id: string) => api.get(`/courses/${id}`),
 };
 

@@ -4,16 +4,15 @@ import { db } from "../db";
 import { categories } from "../schema/schema";
 import { successResponse, errorResponse } from "../utils/response";
 import { validateCategoryInput } from "@shared/categories";
+import { categoryIdRef } from "../lib/sql-refs";
 
 const isUuid = (v: unknown): v is string => z.string().uuid().safeParse(v).success;
 const UNIQUE_VIOLATION = "23505";
 const isUniqueViolation = (e: any): boolean => e?.code === UNIQUE_VIOLATION || e?.cause?.code === UNIQUE_VIOLATION;
 
 // Jumlah kursus dihitung langsung dari tabel kursus (kolom `count` lama tidak lagi dipakai).
-// Kolom dikualifikasi penuh: tanpa itu, `id` di dalam subquery terbaca sebagai c.id (milik kursus).
-const CATEGORY_ID = sql.raw('"academy"."categories"."id"');
-const countPublished = sql<number>`(select count(*)::int from academy.courses c where c.status = 'PUBLISHED' and c.category_ids @> jsonb_build_array(${CATEGORY_ID}::text))`;
-const countAll = sql<number>`(select count(*)::int from academy.courses c where c.category_ids @> jsonb_build_array(${CATEGORY_ID}::text))`;
+const countPublished = sql<number>`(select count(*)::int from academy.courses c where c.status = 'PUBLISHED' and c.category_ids @> jsonb_build_array(${categoryIdRef}::text))`;
+const countAll = sql<number>`(select count(*)::int from academy.courses c where c.category_ids @> jsonb_build_array(${categoryIdRef}::text))`;
 
 /** Publik: daftar kategori beserta jumlah kursus terbit. `totalCourses` (semua status) untuk halaman admin. */
 export const getCategoriesList = async (_req: any, res: any) => {

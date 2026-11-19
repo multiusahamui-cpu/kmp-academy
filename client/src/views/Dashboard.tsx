@@ -6,19 +6,18 @@ import {
   BookOpen,
   AlertCircle,
   Clock,
-  CheckCircle,
   Calendar,
-  DollarSign,
   Heart,
   Play,
-  Activity,
-  FileText,
   ArrowRight,
   Wallet,
 } from "lucide-react";
 import { userApi } from "../services/api";
 import IdentityCard from "../components/IdentityCard";
 import { useProfile } from "../services/profile";
+import { reportsApi } from "../services/reports";
+import { classesApi } from "../services/classes";
+import { Bars, Card, Empty, StateBox, dateId, dateTimeId, num, rupiah, uptimeLabel, useAsync } from "../components/ReportBits";
 
 interface DashboardProps {
   role: UserRole;
@@ -56,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           />
         );
       case UserRole.MENTOR:
-        return <MentorDashboard />;
+        return <MentorDashboard onNavigate={onNavigate ?? (() => undefined)} />;
       case UserRole.CREATOR:
         return <CreatorDashboard onNavigate={onNavigate} />;
       case UserRole.ADMIN_SYSTEM:
@@ -273,338 +272,217 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
         </div>
 
         {/* Upcoming Schedule */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Calendar size={18} className="mr-2 text-orange-500" /> Jadwal
-            Workshop
-          </h3>
-          <div className="space-y-4">
-            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border-l-4 border-orange-500 hover:shadow-md transition cursor-pointer">
-              <p className="text-xs font-bold text-orange-700 dark:text-orange-400 mb-1 flex items-center">
-                <Clock size={12} className="mr-1" /> BESOK, 19:00 WIB
-              </p>
-              <p className="text-sm font-bold text-gray-900 dark:text-white">
-                Workshop Digital Marketing
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Sesi 3: Social Media Ads
-              </p>
-              <div className="mt-2 text-xs text-blue-600 hover:underline flex items-center">
-                Link Zoom <ArrowRight size={10} className="ml-1" />
-              </div>
-            </div>
-            <div className="text-center py-4 text-gray-500 text-sm">
-              Tidak ada jadwal lain minggu ini.
-            </div>
-          </div>
-        </div>
+        <StudentSchedule onNavigate={onNavigate} />
       </div>
     </div>
   );
 };
 
-const MentorDashboard = () => (
-  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <StatCard
-      title="Total Siswa Aktif"
-      value="24"
-      icon={<Users className="text-blue-500" />}
-      change="+4"
-    />
-    <StatCard
-      title="Tugas Perlu Dinilai"
-      value="5"
-      icon={<BookOpen className="text-orange-500" />}
-      change="Urgent"
-    />
-    <StatCard
-      title="Jadwal Mengajar"
-      value="2"
-      icon={<Calendar className="text-purple-500" />}
-      change="Minggu Ini"
-    />
-    {/* Changed label from 'Est. Pendapatan' to 'Saldo Efektif' */}
-    <StatCard
-      title="Saldo Efektif"
-      value="Rp 4.2jt"
-      icon={<DollarSign className="text-green-500" />}
-      change="Bulan Ini"
-    />
+const StudentSchedule: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const { data, loading, error, reload } = useAsync(() => classesApi.mine());
+  const upcoming = (data ?? [])
+    .flatMap((c) => c.sessions.map((s) => ({ ...s, className: c.name })))
+    .sort((x, y) => x.startsAt.localeCompare(y.startsAt))
+    .slice(0, 3);
+  return (
+    <Card title="Jadwal Kelas" right={<Calendar size={18} className="text-orange-500" />}>
+      <StateBox loading={loading} error={error} onRetry={reload}>
+        {upcoming.length === 0 ? (
+          <Empty>Belum ada sesi kelas mendatang.</Empty>
+        ) : (
+          <div className="space-y-3">
+            {upcoming.map((s) => (
+              <div key={s.id} className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border-l-4 border-orange-500">
+                <p className="text-xs font-bold text-orange-700 dark:text-orange-400 mb-1 flex items-center">
+                  <Clock size={12} className="mr-1" /> {dateTimeId(s.startsAt)}
+                </p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">{s.className}</p>
+                <p className="text-xs text-gray-500 mt-1">{s.title}</p>
+                {s.meetingUrl && (
+                  <a href={s.meetingUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-xs text-blue-600 hover:underline flex items-center">
+                    Buka tautan <ArrowRight size={10} className="ml-1" />
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        <button onClick={() => onNavigate("classes")} className="mt-3 text-xs text-kodman-600 underline">Semua kelas</button>
+      </StateBox>
+    </Card>
+  );
+};
 
-    <div className="md:col-span-2 lg:col-span-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-        Jadwal Kelas Berikutnya
-      </h3>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 dark:bg-slate-800 text-gray-500">
-            <tr>
-              <th className="px-4 py-3 rounded-l-lg">Topik / Materi</th>
-              <th className="px-4 py-3">Batch</th>
-              <th className="px-4 py-3">Waktu</th>
-              <th className="px-4 py-3 text-right rounded-r-lg">Link Zoom</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-            <tr>
-              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                Social Media Ads Strategy
-              </td>
-              <td className="px-4 py-3">Batch 12</td>
-              <td className="px-4 py-3">Besok, 19:00 WIB</td>
-              <td className="px-4 py-3 text-right">
-                <button className="text-blue-600 hover:underline">
-                  Buka Zoom
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+const MentorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const { data, loading, error, reload } = useAsync(() => classesApi.list());
+  const active = (data ?? []).filter((c) => !c.archived);
+  return (
+    <StateBox loading={loading} error={error} onRetry={reload}>
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          <StatCard title="Kelas Aktif" value={num(active.length)} icon={<BookOpen className="text-orange-500" />} change="Tidak diarsipkan" />
+          <StatCard title="Total Siswa" value={num(active.reduce((n, c) => n + c.members, 0))} icon={<Users className="text-blue-500" />} change="Di semua kelas aktif" />
+          <StatCard title="Kelas Berjadwal" value={num(active.filter((c) => c.nextSession).length)} icon={<Calendar className="text-purple-500" />} change="Punya sesi mendatang" />
+        </div>
+        <Card title="Sesi Berikutnya per Kelas" right={<button onClick={() => onNavigate("my-classes")} className="text-xs text-kodman-600 underline">Kelola kelas</button>}>
+          {active.length === 0 ? (
+            <Empty>Belum ada kelas. Buat kelas di menu Rombongan Belajar.</Empty>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead className="text-gray-500"><tr><th className="py-2">Kelas</th><th className="text-right">Siswa</th><th className="text-right">Sesi berikutnya</th></tr></thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                {active.map((c) => (
+                  <tr key={c.id}>
+                    <td className="py-2 font-medium text-gray-900 dark:text-white">{c.name}</td>
+                    <td className="text-right font-mono">{num(c.members)}</td>
+                    <td className="text-right">{c.nextSession ? dateTimeId(c.nextSession) : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
-    </div>
+    </StateBox>
+  );
+};
 
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-        Pengingat
-      </h3>
-      <ul className="space-y-3">
-        <li className="flex items-start text-sm text-gray-600 dark:text-slate-300">
-          <AlertCircle
-            size={16}
-            className="mr-2 text-red-500 flex-shrink-0 mt-0.5"
-          />
-          Input nilai tugas akhir Batch 11 sebelum Jumat.
-        </li>
-        <li className="flex items-start text-sm text-gray-600 dark:text-slate-300">
-          <CheckCircle
-            size={16}
-            className="mr-2 text-green-500 flex-shrink-0 mt-0.5"
-          />
-          Proposal Workshop &quot;Basic Accounting&quot; disetujui Admin.
-        </li>
-      </ul>
-    </div>
-  </div>
-);
+const STATUS_STYLE: Record<string, string> = {
+  PUBLISHED: "bg-green-100 text-green-700",
+  PENDING_REVIEW: "bg-yellow-100 text-yellow-700",
+  DRAFT: "bg-gray-100 text-gray-700",
+  REJECTED: "bg-red-100 text-red-700",
+};
+const STATUS_LABEL: Record<string, string> = {
+  PUBLISHED: "TERBIT",
+  PENDING_REVIEW: "MENUNGGU REVIEW",
+  DRAFT: "DRAF",
+  REJECTED: "DITOLAK",
+};
 
 const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
   onNavigate,
-}) => (
-  <div className="space-y-6">
-    <div className="grid md:grid-cols-3 gap-6">
-      <StatCard
-        title="Total Penjualan"
-        value="Rp 12.500.000"
-        icon={<TrendingUp className="text-green-500" />}
-        change="+15%"
-      />
-      <StatCard
-        title="Siswa Terdaftar"
-        value="150"
-        icon={<Users className="text-blue-500" />}
-        change="+12"
-      />
-      <StatCard
-        title="Rating Rata-rata"
-        value="4.8/5.0"
-        icon={<Heart className="text-red-500" />}
-        change="Stabil"
-      />
-    </div>
-
-    <div className="grid md:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-          Status Konten
-        </h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-            <div>
-              <p className="font-bold text-gray-800 dark:text-white">
-                Mastering React
-              </p>
-              <p className="text-xs text-gray-500">Updated: 2 hari lalu</p>
-            </div>
-            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">
-              PUBLISHED
-            </span>
+}) => {
+  const { data, loading, error, reload } = useAsync(() =>
+    reportsApi.creatorSummary(),
+  );
+  return (
+    <StateBox loading={loading} error={error} onRetry={reload}>
+      {data && (
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <StatCard
+              title="Total Penjualan"
+              value={rupiah(data.salesTotal)}
+              icon={<TrendingUp className="text-green-500" />}
+              change={`${rupiah(data.salesThisMonth)} bulan ini`}
+            />
+            <StatCard
+              title="Siswa Terdaftar"
+              value={num(data.students)}
+              icon={<Users className="text-blue-500" />}
+              change="Semua kursus Anda"
+            />
+            <StatCard
+              title="Rating Rata-rata"
+              value={data.totalReviews > 0 ? `${data.averageRating.toFixed(1)}/5.0` : "-"}
+              icon={<Heart className="text-red-500" />}
+              change={`${num(data.totalReviews)} ulasan`}
+            />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-            <div>
-              <p className="font-bold text-gray-800 dark:text-white">
-                Dasar Akuntansi
-              </p>
-              <p className="text-xs text-gray-500">Updated: 5 jam lalu</p>
-            </div>
-            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded">
-              PENDING REVIEW
-            </span>
-          </div>
-        </div>
-      </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-900 dark:text-white">
-            Royalti Bulan Ini
-          </h3>
-          <button
-            onClick={() => onNavigate("wallet")}
-            className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold flex items-center hover:bg-kodman-100 dark:hover:bg-kodman-900/50"
-          >
-            <Wallet size={12} className="mr-1" /> Dompet Saya
-          </button>
-        </div>
-        <div className="h-32 flex items-end justify-between gap-2 px-2">
-          {[40, 65, 30, 80, 55, 90, 70].map((h, i) => (
-            <div
-              key={i}
-              className="w-full bg-kodman-200 dark:bg-kodman-900 rounded-t-sm relative group"
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card title="Status Konten">
+              {data.content.length === 0 ? (
+                <Empty>Belum ada kursus.</Empty>
+              ) : (
+                <div className="space-y-3">
+                  {data.content.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-800 dark:text-white truncate">{c.title}</p>
+                        <p className="text-xs text-gray-500">Diperbarui: {dateId(c.updatedAt)}</p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs font-bold rounded shrink-0 ${STATUS_STYLE[c.status] ?? STATUS_STYLE.DRAFT}`}>
+                        {STATUS_LABEL[c.status] ?? c.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            <Card
+              title="Penjualan 7 Hari Terakhir"
+              right={
+                <button
+                  onClick={() => onNavigate("wallet")}
+                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold flex items-center"
+                >
+                  <Wallet size={12} className="mr-1" /> Dompet Saya
+                </button>
+              }
             >
-              <div
-                className="absolute bottom-0 left-0 right-0 bg-kodman-500 rounded-t-sm transition-all duration-500"
-                style={{ height: `${h}%` }}
-              ></div>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded">
-                Rp {h}00k
-              </div>
-            </div>
-          ))}
+              <Bars
+                items={data.last7Days.map((d) => ({
+                  label: d.date.slice(5),
+                  value: d.revenue,
+                  title: `${d.date}: ${rupiah(d.revenue)}`,
+                }))}
+                height={128}
+              />
+            </Card>
+          </div>
         </div>
-        <p className="text-center text-xs text-gray-500 mt-2">
-          7 Hari Terakhir
-        </p>
-      </div>
-    </div>
-  </div>
-);
+      )}
+    </StateBox>
+  );
+};
 
 const AdminDashboard = () => {
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleGenerateReport = (type: "WEEKLY" | "MONTHLY") => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      setIsGenerating(false);
-      alert(
-        `Laporan ${type} telah berhasil digenerate dan dikirim ke Dashboard Direktur.`,
-      );
-    }, 1500);
-  };
-
+  const { data, loading, error, reload } = useAsync(() => reportsApi.stats());
   return (
-    <div className="space-y-6">
-      {/* 1. Report Generator Widget (Wakil Direktur Function) */}
-      <div className="bg-gradient-to-r from-purple-700 to-purple-900 rounded-xl p-6 text-white shadow-lg flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold flex items-center mb-1">
-            <FileText className="mr-2" /> Routine Management Report
-          </h2>
-          <p className="text-purple-200 text-sm">
-            Generate laporan otomatis sistem untuk disampaikan ke Direktur.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => handleGenerateReport("WEEKLY")}
-            disabled={isGenerating}
-            className="px-4 py-2 bg-white text-purple-900 rounded font-bold text-sm hover:bg-gray-100 flex items-center"
-          >
-            {isGenerating ? (
-              "Generating..."
-            ) : (
-              <>
-                <Clock size={16} className="mr-2" /> Report Mingguan
-              </>
-            )}
-          </button>
-          <button
-            onClick={() => handleGenerateReport("MONTHLY")}
-            disabled={isGenerating}
-            className="px-4 py-2 bg-purple-600 border border-purple-400 text-white rounded font-bold text-sm hover:bg-purple-500 flex items-center"
-          >
-            {isGenerating ? (
-              "Generating..."
-            ) : (
-              <>
-                <Calendar size={16} className="mr-2" /> Report Bulanan
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total User"
-          value="1,240"
-          icon={<Users className="text-blue-500" />}
-          change="+50"
-        />
-        <StatCard
-          title="Transaksi (Bulan ini)"
-          value="Rp 45.2jt"
-          icon={<DollarSign className="text-green-500" />}
-          change="+12%"
-        />
-        <StatCard
-          title="Pending Review"
-          value="3 Kursus"
-          icon={<Clock className="text-orange-500" />}
-          change="Action Needed"
-        />
-        <StatCard
-          title="Server Uptime"
-          value="99.9%"
-          icon={<Activity className="text-purple-500" />}
-          change="Healthy"
-        />
-      </div>
-
-      {/* 3. Operational Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-            Butuh Persetujuan (Role Upgrade)
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200"></div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    John Doe
-                  </p>
-                  <p className="text-xs text-gray-500">Request: MENTOR</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 text-xs border border-red-200 text-red-600 rounded hover:bg-red-50">
-                  Tolak
-                </button>
-                <button className="px-3 py-1 text-xs bg-kodman-600 text-white rounded hover:bg-kodman-700">
-                  Approve
-                </button>
-              </div>
-            </div>
+    <StateBox loading={loading} error={error} onRetry={reload}>
+      {data && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              title="Total Pengguna"
+              value={num(data.users.total)}
+              icon={<Users className="text-blue-500" />}
+              change={`+${num(data.users.newThisMonth)} bulan ini`}
+            />
+            <StatCard
+              title="Pendapatan (Bulan ini)"
+              value={rupiah(data.sales.revenueThisMonth)}
+              icon={<TrendingUp className="text-green-500" />}
+              change={`${num(data.sales.enrollmentsThisMonth)} pendaftaran`}
+            />
+            <StatCard
+              title="Menunggu Review"
+              value={`${num(data.courses.pendingReview)} Kursus`}
+              icon={<Clock className="text-orange-500" />}
+              change={data.courses.pendingReview > 0 ? "Perlu tindakan" : "Tidak ada antrean"}
+            />
+            <StatCard
+              title="Server Aktif"
+              value={uptimeLabel(data.uptimeSeconds)}
+              icon={<AlertCircle className="text-purple-500" />}
+              change="Sejak restart terakhir"
+            />
           </div>
+
+          <Card title="Antrean Operasional">
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <li>Pembayaran menunggu verifikasi: <b>{num(data.queue.pendingPayments)}</b></li>
+              <li>Permintaan hapus akun: <b>{num(data.queue.openDeletions)}</b></li>
+              <li>Lamaran pengajar: <b>{num(data.queue.pendingApplications)}</b></li>
+              <li>Review kursus: <b>{num(data.queue.pendingReviews)}</b></li>
+            </ul>
+          </Card>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4">
-            Log Sistem Terkini
-          </h3>
-          <div className="space-y-2 text-xs font-mono text-gray-600 dark:text-slate-400">
-            <p>
-              [10:45:12] Cron Job &quot;Payout Settlement&quot; executed
-              successfully.
-            </p>
-            <p>[10:42:00] New user registration: user@example.com</p>
-            <p>[10:30:15] Payment received: TRX-005 (Bayarind)</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
+    </StateBox>
   );
 };
 

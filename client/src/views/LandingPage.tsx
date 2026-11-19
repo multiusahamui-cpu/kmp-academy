@@ -1,5 +1,5 @@
-import React from "react";
-import { MOCK_COURSES, MOCK_CATEGORIES } from "../constants";
+import React, { useEffect, useState } from "react";
+import { courseApi } from "../services/api";
 import {
   Users,
   Award,
@@ -9,16 +9,51 @@ import {
   Zap,
 } from "lucide-react";
 
+interface LandingCourse {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+  type: string;
+  price: number;
+  finalPrice: number;
+  discountPercent: number;
+  studentsEnrolled: number;
+  categories: string[];
+}
+
+interface LandingSummary {
+  courses: LandingCourse[];
+  stats: { instructors: number; courses: number; students: number; certificates: number; satisfactionPercent: number | null };
+}
+
 interface LandingPageProps {
   onRegister: () => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
-  // Logic for Top 10 Best Sellers
-  const topCourses = [...MOCK_COURSES]
-    .filter((c) => c.status === "PUBLISHED")
-    .sort((a, b) => b.studentsEnrolled - a.studentsEnrolled)
-    .slice(0, 10);
+  const [summary, setSummary] = useState<LandingSummary | null>(null);
+  const [summaryState, setSummaryState] = useState<"loading" | "ok" | "error">("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+    courseApi
+      .landing()
+      .then((r) => {
+        if (cancelled) return;
+        setSummary(r.data.data as LandingSummary);
+        setSummaryState("ok");
+      })
+      .catch(() => !cancelled && setSummaryState("error"));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const topCourses = summary?.courses ?? [];
+  const stats = summary?.stats;
+  const fmtNumber = (n: number | undefined) => (n === undefined ? "–" : new Intl.NumberFormat("id-ID").format(n));
+  const rupiah = (n: number) =>
+    n === 0 ? "Gratis" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
   const scrollToCourses = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,15 +116,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-gray-200 dark:divide-slate-800/50">
             <div>
               <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
-                50+
+                {fmtNumber(stats?.instructors)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Instruktur Ahli
+                Instruktur
               </div>
             </div>
             <div>
               <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
-                120+
+                {fmtNumber(stats?.courses)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
                 Kursus Tersedia
@@ -97,18 +132,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
             </div>
             <div>
               <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
-                5k+
+                {fmtNumber(stats?.students)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Siswa Aktif
+                Siswa Terdaftar
               </div>
             </div>
             <div>
               <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
-                98%
+                {stats?.satisfactionPercent != null ? `${stats.satisfactionPercent}%` : fmtNumber(stats?.certificates)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Kepuasan Alumni
+                {stats?.satisfactionPercent != null ? "Kepuasan Peserta" : "Sertifikat Terbit"}
               </div>
             </div>
           </div>
@@ -121,10 +156,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
             <div className="text-center md:text-left">
               <h2 className="font-sans text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center md:justify-start gap-3">
-                <TrendingUp className="text-red-500" /> Top 10 Paling Laris
+                <TrendingUp className="text-red-500" /> Kursus Terpopuler
               </h2>
               <p className="text-gray-500 dark:text-slate-400">
-                Kursus dengan peminat terbanyak bulan ini.
+                Kursus dengan peminat terbanyak.
               </p>
             </div>
             <button
@@ -135,6 +170,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
             </button>
           </div>
 
+          {summaryState === "loading" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">Memuat kursus...</p>}
+          {summaryState === "error" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">Katalog kursus belum dapat dimuat. Coba muat ulang halaman.</p>}
+          {summaryState === "ok" && topCourses.length === 0 && (
+            <p className="text-center text-gray-500 dark:text-slate-400 py-12">Belum ada kursus yang diterbitkan. Segera hadir.</p>
+          )}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {topCourses.map((course, index) => (
               <div
@@ -142,16 +182,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 dark:border-slate-800 group flex flex-col relative"
               >
                 {/* Ranking Badge */}
-                <div className="absolute top-0 left-0 bg-yellow-400 text-yellow-900 font-bold text-xs px-3 py-1 rounded-br-lg z-20 shadow-sm">
-                  #{index + 1} Best Seller
+                <div className={`absolute top-0 left-0 font-bold text-xs px-3 py-1 rounded-br-lg z-20 shadow-sm ${course.studentsEnrolled > 0 ? "bg-yellow-400 text-yellow-900" : "bg-kodman-100 text-kodman-800"}`}>
+                  {course.studentsEnrolled > 0 ? `#${index + 1} Best Seller` : "Baru"}
                 </div>
 
-                <div className="h-48 overflow-hidden relative">
-                  <img
-                    src={course.thumbnail}
-                    alt={course.title}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
-                  />
+                <div className="h-48 overflow-hidden relative bg-gray-100 dark:bg-slate-800">
+                  {course.thumbnail && (
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                    />
+                  )}
                   <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 dark:text-white uppercase tracking-wide shadow-sm">
                     {course.type}
                   </div>
@@ -159,17 +202,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 <div className="p-5 flex-1 flex flex-col">
                   {/* Categories */}
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {course.categoryIds?.slice(0, 2).map((catId) => {
-                      const cat = MOCK_CATEGORIES.find((c) => c.id === catId);
-                      return cat ? (
-                        <span
-                          key={catId}
-                          className="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 px-1.5 py-0.5 rounded"
-                        >
-                          {cat.name}
-                        </span>
-                      ) : null;
-                    })}
+                    {course.categories.map((name) => (
+                      <span
+                        key={name}
+                        className="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 px-1.5 py-0.5 rounded"
+                      >
+                        {name}
+                      </span>
+                    ))}
                   </div>
 
                   <h3 className="font-sans font-bold text-base mb-2 text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-kodman-600 dark:group-hover:text-kodman-400 transition flex-1">
@@ -179,15 +219,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
                     <div className="flex items-center text-xs text-gray-600 dark:text-slate-400 font-medium">
                       <Users size={14} className="mr-1.5 text-kodman-500" />
-                      {course.studentsEnrolled} Siswa
+                      {fmtNumber(course.studentsEnrolled)} Siswa
                     </div>
-                    <span className="font-sans font-bold text-kodman-600 dark:text-kodman-400 text-base">
-                      {new Intl.NumberFormat("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                        maximumFractionDigits: 0,
-                      }).format(course.price)}
-                    </span>
+                    <div className="text-right">
+                      {course.discountPercent > 0 && (
+                        <span className="block text-[11px] text-gray-400 line-through leading-none">{rupiah(course.price)}</span>
+                      )}
+                      <span className="font-sans font-bold text-kodman-600 dark:text-kodman-400 text-base">{rupiah(course.finalPrice)}</span>
+                    </div>
                   </div>
                 </div>
               </div>

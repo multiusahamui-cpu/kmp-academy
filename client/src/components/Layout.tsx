@@ -147,6 +147,7 @@ export const Layout: React.FC<LayoutProps> = ({
     const studentItems = [
       { id: "enrolled", label: "Kursus Diikuti", icon: BookOpen },
       { id: "catalog", label: "Etalase Kursus", icon: GraduationCap },
+      { id: "classes", label: "Kelas", icon: Users },
       { id: "wallet", label: "Dompet", icon: Wallet },
     ];
 
@@ -188,6 +189,7 @@ export const Layout: React.FC<LayoutProps> = ({
             icon: BarChart,
           },
           { isDivider: true },
+          { id: "support", label: "Bantuan", icon: LifeBuoy },
           profileItem,
         ];
 
@@ -203,7 +205,6 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
-          { id: "moderation", label: "Moderasi Konten", icon: BookOpen },
           { id: "cron", label: "System Cron Jobs", icon: Activity },
           { id: "helpdesk", label: "Helpdesk Tickets", icon: LifeBuoy },
           { isDivider: true },
@@ -222,6 +223,7 @@ export const Layout: React.FC<LayoutProps> = ({
           ...studentItems,
 
           { isDivider: true },
+          { id: "support", label: "Bantuan", icon: LifeBuoy },
           profileItem,
         ];
 
@@ -232,12 +234,12 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "Area Mentor" }, // Separator
           { id: "explore-content", label: "Eksplorasi Materi", icon: Compass },
           { id: "my-classes", label: "Rombongan Belajar", icon: Users },
-          { id: "grading", label: "Penilaian", icon: BookOpen },
 
           { isDivider: true, sectionTitle: "Area Student" }, // Separator
           ...studentItems,
 
           { isDivider: true },
+          { id: "support", label: "Bantuan", icon: LifeBuoy },
           profileItem,
         ];
 
@@ -248,6 +250,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "Learning Zone" },
           ...studentItems,
           { isDivider: true },
+          { id: "support", label: "Bantuan", icon: LifeBuoy },
           profileItem,
         ];
 

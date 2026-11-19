@@ -1,125 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { CronJob } from '../../types';
-import { Activity, Play, Clock, AlertTriangle, CheckCircle, RefreshCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity } from 'lucide-react';
+import { jobsApi } from '../../services/reports';
+import { Card, Empty, StateBox, dateTimeId, useAsync } from '../../components/ReportBits';
 
-const MOCK_JOBS: CronJob[] = [
-  { id: '1', name: 'Daily Payout Settlement', schedule: '0 1 * * *', lastRun: '2023-10-26 01:00', nextRun: '2023-10-27 01:00', status: 'SUCCESS', description: 'Memproses mutasi saldo dari Virtual Account ke Dompet User.' },
-  { id: '2', name: 'Subscription Renewal', schedule: '0 0 * * *', lastRun: '2023-10-26 00:00', nextRun: '2023-10-27 00:00', status: 'SUCCESS', description: 'Mengecek masa aktif kursus berlangganan.' },
-  { id: '3', name: 'Course Reminder Email', schedule: '0 8 * * *', lastRun: '2023-10-26 08:00', nextRun: '2023-10-27 08:00', status: 'RUNNING', description: 'Mengirim email notifikasi kelas yang akan dimulai hari ini.' },
-  { id: '4', name: 'Database Backup', schedule: '0 3 * * *', lastRun: '2023-10-25 03:00', nextRun: '2023-10-26 03:00', status: 'FAILED', description: 'Backup full database ke S3 Bucket.' },
-];
+const RunHistory: React.FC<{ id: string; label: string; onBack: () => void }> = ({ id, label, onBack }) => {
+  const { data, loading, error, reload } = useAsync(() => jobsApi.runs(id), [id]);
+  return (
+    <div className="space-y-4">
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <Card title={`Riwayat: ${label}`}>
+        <p className="text-xs text-gray-500 mb-3">Hanya eksekusi yang memproses sesuatu, gagal, atau dipicu manual yang dicatat. Riwayat disimpan 30 hari.</p>
+        <StateBox loading={loading} error={error} onRetry={reload}>
+          {data && data.length === 0 ? (
+            <Empty>Belum ada riwayat tercatat.</Empty>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead className="text-gray-500 dark:text-slate-400"><tr><th className="py-2">Mulai</th><th>Pemicu</th><th>Status</th><th className="text-right">Diproses</th><th>Galat</th></tr></thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                {data?.map((r) => (
+                  <tr key={r.id}>
+                    <td className="py-2 whitespace-nowrap">{dateTimeId(r.startedAt)}</td>
+                    <td>{r.trigger === 'MANUAL' ? 'Manual' : 'Jadwal'}</td>
+                    <td className={r.status === 'OK' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>{r.status === 'OK' ? 'Berhasil' : 'Gagal'}</td>
+                    <td className="text-right font-mono">{r.affected}</td>
+                    <td className="text-xs text-red-600">{r.error ?? ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </StateBox>
+      </Card>
+    </div>
+  );
+};
 
 const CronManager: React.FC = () => {
-  const [jobs, setJobs] = useState<CronJob[]>(MOCK_JOBS);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const { data, loading, error, reload } = useAsync(() => jobsApi.list());
+  const [history, setHistory] = useState<{ id: string; label: string } | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [msg, setMsg] = useState('');
 
-  // Simulate realtime monitoring
-  useEffect(() => {
-    const interval = setInterval(() => {
-       setLastUpdated(new Date());
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  if (history) return <RunHistory id={history.id} label={history.label} onBack={() => setHistory(null)} />;
 
-  const handleManualRun = (id: string) => {
-    // Optimistic UI update
-    setJobs(prev => prev.map(job => 
-       job.id === id ? { ...job, status: 'RUNNING' } : job
-    ));
-    
-    // Simulate API call delay
-    setTimeout(() => {
-       setJobs(prev => prev.map(job => 
-          job.id === id ? { ...job, status: 'SUCCESS', lastRun: new Date().toLocaleString() } : job
-       ));
-    }, 2000);
+  const trigger = async (id: string) => {
+    setBusyId(id);
+    setMsg('');
+    try {
+      const r = await jobsApi.run(id);
+      setMsg(r.status === 'OK' ? `Selesai, ${r.affected} diproses.` : `Gagal: ${r.error ?? 'tidak diketahui'}`);
+      await reload();
+    } catch (e: any) {
+      setMsg(e?.response?.data?.message ?? 'Gagal menjalankan job.');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
     <div className="space-y-6">
-       <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-               <Activity className="mr-3 text-kodman-600" />
-               System Cron Jobs
-            </h2>
-            <p className="text-gray-500">Monitoring background tasks untuk operasional production.</p>
-          </div>
-          <div className="text-right text-xs text-gray-400">
-             Last Updated: <span className="font-mono">{lastUpdated.toLocaleTimeString()}</span>
-          </div>
-       </div>
-
-       {/* Status Summary */}
-       <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-             <div className="text-xs font-bold text-gray-500 uppercase">Total Jobs</div>
-             <div className="text-2xl font-bold text-gray-900">{jobs.length}</div>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg shadow-sm border border-green-100">
-             <div className="text-xs font-bold text-green-600 uppercase">Success Rate</div>
-             <div className="text-2xl font-bold text-green-700">98.5%</div>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
-             <div className="text-xs font-bold text-blue-600 uppercase">Active Threads</div>
-             <div className="text-2xl font-bold text-blue-700">1</div>
-          </div>
-          <div className="bg-red-50 p-4 rounded-lg shadow-sm border border-red-100">
-             <div className="text-xs font-bold text-red-600 uppercase">Failed Jobs</div>
-             <div className="text-2xl font-bold text-red-700">{jobs.filter(j => j.status === 'FAILED').length}</div>
-          </div>
-       </div>
-
-       {/* Job Table */}
-       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-             <thead className="bg-gray-50">
-                <tr>
-                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Name</th>
-                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule (Cron)</th>
-                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
-                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-             </thead>
-             <tbody className="bg-white divide-y divide-gray-200">
-                {jobs.map((job) => (
-                   <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                         <div className="text-sm font-bold text-gray-900">{job.name}</div>
-                         <div className="text-xs text-gray-500">{job.description}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                         <span className="px-2 py-1 rounded bg-gray-100 font-mono text-xs text-gray-600 border border-gray-300">
-                            {job.schedule}
-                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                         {job.status === 'SUCCESS' && <span className="flex items-center text-xs font-bold text-green-600"><CheckCircle size={14} className="mr-1"/> Success</span>}
-                         {job.status === 'FAILED' && <span className="flex items-center text-xs font-bold text-red-600"><AlertTriangle size={14} className="mr-1"/> Failed</span>}
-                         {job.status === 'RUNNING' && <span className="flex items-center text-xs font-bold text-blue-600"><RefreshCcw size={14} className="mr-1 animate-spin"/> Running</span>}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                         {job.lastRun}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                         <button 
-                           onClick={() => handleManualRun(job.id)}
-                           disabled={job.status === 'RUNNING'}
-                           className={`p-2 rounded hover:bg-gray-100 text-gray-500 transition ${job.status === 'RUNNING' ? 'opacity-50 cursor-not-allowed' : 'hover:text-kodman-600'}`}
-                           title="Run Now"
-                         >
-                            <Play size={16} />
-                         </button>
-                         <button className="p-2 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-900" title="View Logs">
-                            <Clock size={16} />
-                         </button>
-                      </td>
-                   </tr>
-                ))}
-             </tbody>
-          </table>
-       </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Activity className="mr-3 text-kodman-600" /> Job Berkala</h2>
+        <p className="text-gray-500 dark:text-slate-400">Tugas otomatis di server. Status terakhir dihitung sejak server dihidupkan; riwayat disimpan di database.</p>
+      </div>
+      {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
+      <StateBox loading={loading} error={error} onRetry={reload}>
+        <div className="grid gap-4">
+          {data?.map((j) => (
+            <Card key={j.id}>
+              <div className="flex justify-between items-start gap-4 flex-wrap">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-gray-900 dark:text-white">{j.label}</h3>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">{j.description}</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Tiap {j.everyMinutes} menit. Terakhir jalan: {j.lastTickAt ? dateTimeId(j.lastTickAt) : 'belum sejak server hidup'}
+                    {j.lastTickStatus === 'ERROR' && <span className="text-red-600 font-bold">, gagal: {j.lastError}</span>}
+                    {j.running && ', sedang berjalan'}
+                  </p>
+                  {j.lastRecordedRun && <p className="text-xs text-gray-400">Catatan terakhir: {dateTimeId(j.lastRecordedRun.startedAt)}, {j.lastRecordedRun.affected} diproses</p>}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setHistory({ id: j.id, label: j.label })} className="px-3 py-1 border rounded text-sm">Riwayat</button>
+                  <button disabled={busyId === j.id || j.running} onClick={() => void trigger(j.id)} className="px-3 py-1 bg-kodman-600 text-white rounded text-sm font-bold disabled:opacity-50">{busyId === j.id ? 'Menjalankan...' : 'Jalankan sekarang'}</button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </StateBox>
     </div>
   );
 };

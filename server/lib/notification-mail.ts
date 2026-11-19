@@ -46,21 +46,3 @@ export const sendPendingNotificationEmails = async (): Promise<number> => {
   }
   return sent;
 };
-
-let timer: NodeJS.Timeout | null = null;
-let running = false;
-export const startNotificationMailJob = (): void => {
-  if (timer) return;
-  timer = setInterval(async () => {
-    if (running) return;
-    running = true;
-    try {
-      await sendPendingNotificationEmails();
-    } catch (err: any) {
-      console.error(`[notifikasi] job gagal: ${err?.message}`);
-    } finally {
-      running = false;
-    }
-  }, 60_000);
-  timer.unref();
-};

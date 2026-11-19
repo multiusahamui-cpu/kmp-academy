@@ -149,21 +149,3 @@ export const reconcileConfirming = async (): Promise<number> => {
   }
   return n;
 };
-
-let timer: NodeJS.Timeout | null = null;
-let tick = 0;
-/** Job berkala tiap 60 detik: kedaluwarsa, debit tak pasti; tiap 5 menit juga VA. Satu proses saja (pm2 fork). */
-export const startOrderJobs = (): void => {
-  if (timer) return;
-  timer = setInterval(async () => {
-    tick += 1;
-    try {
-      await expireStaleOrders();
-      await reconcileConfirming();
-      if (tick % 5 === 0) await reconcileVaOrders();
-    } catch (err: any) {
-      console.error(`[bayar] job gagal: ${err?.message}`);
-    }
-  }, 60_000);
-  timer.unref();
-};

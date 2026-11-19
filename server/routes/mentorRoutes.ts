@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import * as mentor from "../controllers/mentorController";
 import { authenticateToken, requireRole } from "../middleware/auth";
@@ -6,16 +5,17 @@ import { authenticateToken, requireRole } from "../middleware/auth";
 const router = Router();
 
 router.use(authenticateToken);
-router.use(requireRole(["MENTOR", "ADMIN_SYSTEM"])); 
+router.use(requireRole(["MENTOR"]));
 
-router.get("/explorer", mentor.getExplorer);
 router.get("/classes", mentor.getClasses);
-router.get("/classes/:id/students", mentor.getClassStudents);
-
-router.post("/proposals", mentor.createProposal);
-
-router.put("/classes/:classId/grades", mentor.updateGrades);
-router.post("/classes/:classId/schedule", mentor.setSchedule);
-router.post("/classes/:classId/broadcast", mentor.broadcastMessage);
+router.post("/classes", mentor.createClass);
+router.get("/classes/:id", mentor.getClass);
+router.put("/classes/:id", mentor.updateClass);
+router.post("/classes/:id/code", mentor.regenerateCode);
+router.post("/classes/:id/members", mentor.addMember);
+router.delete("/classes/:id/members/:userId", mentor.removeMember);
+router.put("/classes/:id/members/:userId/grade", mentor.setGrade);
+router.post("/classes/:id/sessions", mentor.addSession);
+router.delete("/classes/:id/sessions/:sessionId", mentor.deleteSession);
 
 export default router;

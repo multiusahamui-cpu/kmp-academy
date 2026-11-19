@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as course from "../controllers/courseController";
 import * as authoring from "../controllers/courseAuthoringController";
 import * as category from "../controllers/categoryController";
+import * as report from "../controllers/reportController";
 import { authenticateToken, requireRole } from "../middleware/auth";
 import * as pricing from "../controllers/pricingController";
 import { promoLimiter, uploadLimiter } from "../lib/security";
@@ -15,6 +16,7 @@ const discountManager = [authenticateToken, requireRole(["CREATOR", "ADMIN_SYSTE
 
 // Publik (detail memeriksa sesi sendiri: hanya kursus terbit untuk umum)
 router.get("/", course.getCourses);
+router.get("/landing", course.getLandingSummary);
 router.get("/categories", category.getCategoriesList);
 router.post("/categories", ...categoryAdmin, category.createCategory);
 router.put("/categories/:id", ...categoryAdmin, category.updateCategory);
@@ -26,6 +28,7 @@ router.post("/reviews/:id/decision", ...reviewer, authoring.decideCourseReview);
 
 // Creator
 router.get("/creator/dashboard", ...creator, authoring.getCreatorCourses);
+router.get("/creator/summary", ...creator, report.getCreatorSummary);
 router.post("/", ...creator, authoring.createCourse);
 
 router.get("/:id", authoring.getCourseDetails);

@@ -1,4 +1,5 @@
 
+import { JOBS, findJob, getJobState, listRuns, runJob } from "../lib/job-runner";
 import { successResponse, errorResponse } from "../utils/response";
 import { db } from "../db";
 import { roleApplications, users } from "../schema/schema";
@@ -8,10 +9,6 @@ import { issueCard, notifyUser } from "../lib/cards";
 import { cardPrefixFor } from "@shared/card";
 
 // --- DASHBOARD ---
-export const getDashboardStats = async (req: any, res: any) => {
-  successResponse(res, { revenue: 1000000, users: 100 }, "Admin Stats");
-};
-
 // --- USER MANAGEMENT ---
 const USERS_PAGE_SIZE = 15;
 const TAB_ROLES: Record<string, string[]> = {
@@ -75,63 +72,6 @@ export const deleteUser = async (req: any, res: any) => {
   } catch (error) {
     errorResponse(res, "Delete failed", 500, error);
   }
-};
-
-// --- APPROVALS ---
-export const getApprovals = async (req: any, res: any) => {
-  try {
-    const { type } = req.params; // courses, proposals, roles
-    successResponse(res, [], `List of pending ${type}`);
-  } catch (error) {
-    errorResponse(res, "Fetch failed", 500, error);
-  }
-};
-
-export const processApproval = async (req: any, res: any) => {
-  try {
-    const { type, id: _id } = req.params;
-    const { action } = req.body; // APPROVE or REJECT
-    successResponse(res, null, `${type} ${action}ed`);
-  } catch (error) {
-    errorResponse(res, "Process failed", 500, error);
-  }
-};
-
-// --- HELPDESK ---
-export const getTickets = async (req: any, res: any) => {
-  successResponse(res, [], "Support Tickets");
-};
-
-export const replyTicket = async (req: any, res: any) => {
-  successResponse(res, null, "Reply sent");
-};
-
-export const closeTicket = async (req: any, res: any) => {
-  successResponse(res, null, "Ticket closed");
-};
-
-// --- SYSTEM ---
-export const getCronLogs = async (req: any, res: any) => {
-  successResponse(res, [], "Cron Logs");
-};
-
-export const triggerCron = async (req: any, res: any) => {
-  const { jobId } = req.params;
-  successResponse(res, null, `Cron ${jobId} triggered`);
-};
-
-// --- FINANCE ---
-export const getSettlements = async (req: any, res: any) => {
-  successResponse(res, [], "Settlements list");
-};
-
-export const processSettlement = async (req: any, res: any) => {
-  successResponse(res, null, "Settlement processed");
-};
-
-// --- DIRECTOR SPECIFIC (Re-exported here or separate) ---
-export const getStrategicReport = async (req: any, res: any) => {
-  successResponse(res, { period: "Oct 2023", growth: "15%" }, "Strategic Report");
 };
 
 // --- DAFTAR TUNGGU CALON MENTOR / CREATOR & PENERBITAN KARTU ---
@@ -230,5 +170,41 @@ export const issueUserCard = async (req: any, res: any) => {
     successResponse(res, { cardNumber: card.cardNumber }, "Kartu diterbitkan", 201);
   } catch (error) {
     errorResponse(res, "Gagal menerbitkan kartu", 500, error);
+  }
+};
+
+// --- JOB BERKALA ---
+export const listJobs = async (_req: any, res: any) => {
+  try {
+    const rows = await Promise.all(JOBS.map(async (j) => {
+      const st = getJobState(j.id)!;
+      const [last] = await listRuns(j.id, 1);
+      return { id: j.id, label: j.label, description: j.description, everyMinutes: j.everyMinutes, running: st.running, lastTickAt: st.lastRunAt, lastTickStatus: st.lastStatus, lastError: st.lastError, lastRecordedRun: last ?? null };
+    }));
+    successResponse(res, rows, "Daftar job");
+  } catch (error) {
+    errorResponse(res, "Gagal memuat job", 500, error);
+  }
+};
+
+export const listJobRuns = async (req: any, res: any) => {
+  try {
+    if (!findJob(String(req.params.jobId))) return errorResponse(res, "Job tidak ditemukan", 404);
+    successResponse(res, await listRuns(req.params.jobId, 50), "Riwayat job");
+  } catch (error) {
+    errorResponse(res, "Gagal memuat riwayat", 500, error);
+  }
+};
+
+export const runJobNow = async (req: any, res: any) => {
+  try {
+    const job = findJob(String(req.params.jobId));
+    if (!job) return errorResponse(res, "Job tidak ditemukan", 404);
+    const outcome = await runJob(job, "MANUAL", req.user.id);
+    if (outcome === "BUSY") return errorResponse(res, "Job sedang berjalan.", 409);
+    const st = getJobState(job.id)!;
+    successResponse(res, { status: st.lastStatus, affected: st.lastAffected, error: st.lastError }, "Job dijalankan");
+  } catch (error) {
+    errorResponse(res, "Gagal menjalankan job", 500, error);
   }
 };

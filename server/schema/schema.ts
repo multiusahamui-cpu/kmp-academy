@@ -474,3 +474,85 @@ export const certificates = academySchema.table("certificates", {
   unique("certificates_user_course_unique").on(t.userId, t.courseId),
   unique("certificates_serial_unique").on(t.serial),
 ]);
+
+// Tiket bantuan: pengguna membuka tiket, staf (Admin/Superadmin) membalas dan menutup.
+export const helpdeskTickets = academySchema.table("helpdesk_tickets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  subject: varchar("subject", { length: 150 }).notNull(),
+  // AKUN | PEMBAYARAN | KURSUS | SERTIFIKAT | LAINNYA (lihat shared/helpdesk.ts)
+  category: varchar("category", { length: 12 }).notNull(),
+  // OPEN | ANSWERED | CLOSED
+  status: varchar("status", { length: 10 }).notNull().default("OPEN"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  closedAt: timestamp("closed_at"),
+  closedBy: uuid("closed_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => ({
+  userIdx: index("helpdesk_tickets_user_idx").on(t.userId, t.updatedAt),
+  statusIdx: index("helpdesk_tickets_status_idx").on(t.status, t.updatedAt),
+}));
+
+export const helpdeskMessages = academySchema.table("helpdesk_messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ticketId: uuid("ticket_id").references(() => helpdeskTickets.id, { onDelete: "cascade" }).notNull(),
+  authorId: uuid("author_id").references(() => users.id).notNull(),
+  isStaff: boolean("is_staff").notNull().default(false),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  ticketIdx: index("helpdesk_messages_ticket_idx").on(t.ticketId, t.createdAt),
+}));
+
+// Riwayat eksekusi job berkala. Hanya dicatat bila ada yang diproses, gagal, atau dipicu manual.
+export const jobRuns = academySchema.table("job_runs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  jobId: varchar("job_id", { length: 40 }).notNull(),
+  trigger: varchar("trigger", { length: 10 }).notNull(), // SCHEDULE | MANUAL
+  status: varchar("status", { length: 8 }).notNull(), // OK | ERROR
+  affected: integer("affected").notNull().default(0),
+  error: text("error"),
+  startedAt: timestamp("started_at").notNull(),
+  finishedAt: timestamp("finished_at").notNull(),
+  triggeredBy: uuid("triggered_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => ({
+  jobIdx: index("job_runs_job_idx").on(t.jobId, t.startedAt),
+}));
+
+// Kelas Mentor (rombongan belajar). Siswa masuk lewat undangan Mentor atau kode gabung.
+export const mentorClasses = academySchema.table("mentor_classes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  mentorId: uuid("mentor_id").references(() => users.id).notNull(),
+  name: varchar("name", { length: 120 }).notNull(),
+  description: text("description"),
+  joinCode: varchar("join_code", { length: 8 }).notNull(),
+  archived: boolean("archived").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  codeUq: uniqueIndex("mentor_classes_join_code_uq").on(t.joinCode),
+  mentorIdx: index("mentor_classes_mentor_idx").on(t.mentorId),
+}));
+
+export const classMembers = academySchema.table("class_members", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  classId: uuid("class_id").references(() => mentorClasses.id, { onDelete: "cascade" }).notNull(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  grade: integer("grade"),
+  gradeNote: text("grade_note"),
+  gradedAt: timestamp("graded_at"),
+}, (t) => ({
+  memberUq: uniqueIndex("class_members_class_user_uq").on(t.classId, t.userId),
+  userIdx: index("class_members_user_idx").on(t.userId),
+}));
+
+export const classSessions = academySchema.table("class_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  classId: uuid("class_id").references(() => mentorClasses.id, { onDelete: "cascade" }).notNull(),
+  title: varchar("title", { length: 150 }).notNull(),
+  startsAt: timestamp("starts_at").notNull(),
+  meetingUrl: varchar("meeting_url", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  classIdx: index("class_sessions_class_idx").on(t.classId, t.startsAt),
+}));

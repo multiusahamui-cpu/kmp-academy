@@ -1,489 +1,277 @@
-import React, { useState } from "react";
-import { VoucherBatch } from "../../types";
-import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  Download,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Ticket,
-  Plus,
-} from "lucide-react";
-import {
-  MOCK_COURSES,
-  MOCK_TRANSACTIONS,
-  MOCK_SETTLEMENTS,
-} from "../../constants";
+import React, { useEffect, useState } from 'react';
+import { Download, Ticket, Wallet, TrendingUp, Search } from 'lucide-react';
+import { courseApi } from '../../services/api';
+import { reportsApi, type SaleRow } from '../../services/reports';
+import { Card, Empty, StateBox, Tile, dateId, dateTimeId, num, rupiah, useAsync } from '../../components/ReportBits';
 
-// Mock Voucher Data (Local for now as it's specific to generation)
-const MOCK_VOUCHERS: VoucherBatch[] = [
-  {
-    id: "VB-001",
-    sponsorName: "Koperasi Sejahtera Bersama",
-    courseId: "1",
-    courseTitle: "Mastering React & Vite Ecosystem",
-    totalCodes: 50,
-    usedCodes: 12,
-    generatedDate: "2023-10-01",
-    prefix: "KOP-SJB-",
-    status: "ACTIVE",
-  },
-];
+type Tab = 'SALES' | 'SETTLEMENTS' | 'VOUCHERS';
 
-const FinanceDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "TRANSACTIONS" | "SETTLEMENTS" | "VOUCHERS"
-  >("TRANSACTIONS");
-  const [transactions] = useState(MOCK_TRANSACTIONS);
-  const [settlements, setSettlements] = useState(MOCK_SETTLEMENTS);
-  const [vouchers, setVouchers] = useState(MOCK_VOUCHERS);
+const CHANNEL_LABEL: Record<string, string> = { DOMPET: 'Dompet', GRATIS: 'Gratis' };
 
-  // Voucher Generation State
-  const [isGeneratingVoucher, setIsGeneratingVoucher] = useState(false);
-  const [sponsorName, setSponsorName] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [qty, setQty] = useState(10);
-  const [prefix, setPrefix] = useState("KMP - ADNG-");
-
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-    }).format(amount);
-
-  const handleProcessSettlement = (id: string) => {
-    if (confirm("Proses pencairan dana ini ke dompet user?")) {
-      setSettlements((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: "PROCESSED" } : s)),
-      );
-    }
-  };
-
-  const handleGenerateVoucher = (e: React.FormEvent) => {
-    e.preventDefault();
-    const course = MOCK_COURSES.find((c) => c.id === selectedCourseId);
-    if (!course) return;
-
-    const newBatch: VoucherBatch = {
-      id: `VB-${Date.now()}`,
-      sponsorName,
-      courseId: course.id,
-      courseTitle: course.title,
-      totalCodes: qty,
-      usedCodes: 0,
-      generatedDate: new Date().toLocaleDateString("id-ID"),
-      prefix: prefix.toUpperCase(),
-      status: "ACTIVE",
-    };
-
-    setVouchers([newBatch, ...vouchers]);
-    setIsGeneratingVoucher(false);
-    setSponsorName("");
-    setQty(10);
-    alert(
-      `Berhasil generate ${qty} kode voucher untuk ${sponsorName}. Detail dikirim ke email admin.`,
-    );
-  };
-
-  const totalRevenue = transactions
-    .filter((t) => t.status === "PAID")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const pendingSettlement = settlements
-    .filter((s) => s.status === "PENDING")
-    .reduce((sum, s) => sum + s.amount, 0);
+const SalesTab: React.FC = () => {
+  const [q, setQ] = useState('');
+  const [term, setTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const { data, loading, error, reload } = useAsync(() => reportsApi.sales(term, page), [term, page]);
+  const [dlError, setDlError] = useState('');
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Laporan Keuangan
-          </h2>
-          <p className="text-gray-500 dark:text-slate-400">
-            Monitoring penjualan, settlement, dan voucher B2B.
-          </p>
-        </div>
-        <button className="px-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+    <div className="space-y-4">
+      <div className="flex gap-2 justify-between flex-wrap">
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setPage(1);
+            setTerm(q.trim());
+          }}
+        >
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari pembeli atau kursus" className="px-3 py-2 text-sm border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
+          <button type="submit" className="px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-lg text-sm" aria-label="Cari"><Search size={16} /></button>
+        </form>
+        <button
+          onClick={async () => {
+            setDlError('');
+            try { await reportsApi.downloadSalesCsv(); } catch { setDlError('Gagal mengunduh CSV.'); }
+          }}
+          className="px-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm font-medium flex items-center hover:bg-gray-50 dark:hover:bg-slate-700"
+        >
           <Download size={16} className="mr-2" /> Export CSV
         </button>
       </div>
+      {dlError && <p role="alert" className="text-sm text-red-600">{dlError}</p>}
+      <StateBox loading={loading} error={error} onRetry={reload}>
+        {data && data.rows.length === 0 ? (
+          <Empty>Belum ada penjualan{term ? ' yang cocok' : ''}.</Empty>
+        ) : (
+          data && (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                  <thead className="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
+                    <tr><th className="px-4 py-3">Waktu</th><th className="px-4 py-3">Pembeli</th><th className="px-4 py-3">Kursus</th><th className="px-4 py-3 text-right">Harga</th><th className="px-4 py-3 text-right">Diskon</th><th className="px-4 py-3 text-right">Dibayar</th><th className="px-4 py-3">Kanal</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                    {data.rows.map((r: SaleRow) => (
+                      <tr key={r.id}>
+                        <td className="px-4 py-3 whitespace-nowrap">{dateTimeId(r.at)}</td>
+                        <td className="px-4 py-3 text-gray-900 dark:text-white">{r.buyer}</td>
+                        <td className="px-4 py-3">{r.course}</td>
+                        <td className="px-4 py-3 text-right font-mono">{r.base_price == null ? '-' : rupiah(r.base_price)}</td>
+                        <td className="px-4 py-3 text-right font-mono">{r.discount_percent ? `${r.discount_percent}%` : '-'}</td>
+                        <td className="px-4 py-3 text-right font-mono font-bold text-gray-900 dark:text-white">{rupiah(r.amount_paid ?? 0)}</td>
+                        <td className="px-4 py-3">{CHANNEL_LABEL[r.channel] ?? r.channel}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1 border rounded disabled:opacity-40">Sebelumnya</button>
+                <span>Halaman {page}</span>
+                <button disabled={!data.hasMore} onClick={() => setPage(page + 1)} className="px-3 py-1 border rounded disabled:opacity-40">Berikutnya</button>
+              </div>
+            </>
+          )
+        )}
+      </StateBox>
+    </div>
+  );
+};
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
-              <ArrowUpRight size={24} />
-            </div>
-            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
-              +12.5%
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
-            Total Pendapatan Bersih
-          </p>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(totalRevenue)}
-          </h3>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600 dark:text-orange-400">
-              <ArrowDownLeft size={24} />
-            </div>
-            <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">
-              Pending
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
-            Settlement Tertunda
-          </p>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(pendingSettlement)}
-          </h3>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
-              <Ticket size={24} />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mb-1">
-            Total Voucher Aktif
-          </p>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {vouchers.reduce((acc, v) => acc + v.totalCodes, 0)}
-          </h3>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
-        <div className="flex border-b border-gray-200 dark:border-slate-800">
-          <button
-            onClick={() => setActiveTab("TRANSACTIONS")}
-            className={`flex-1 py-4 text-sm font-bold text-center border-b-2 transition ${activeTab === "TRANSACTIONS" ? "border-kodman-600 text-kodman-600 dark:text-kodman-400" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-          >
-            Riwayat Penjualan (Inbound)
-          </button>
-          <button
-            onClick={() => setActiveTab("SETTLEMENTS")}
-            className={`flex-1 py-4 text-sm font-bold text-center border-b-2 transition ${activeTab === "SETTLEMENTS" ? "border-kodman-600 text-kodman-600 dark:text-kodman-400" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-          >
-            Settlement & Payout (Outbound)
-          </button>
-          <button
-            onClick={() => setActiveTab("VOUCHERS")}
-            className={`flex-1 py-4 text-sm font-bold text-center border-b-2 transition ${activeTab === "VOUCHERS" ? "border-kodman-600 text-kodman-600 dark:text-kodman-400" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-          >
-            B2B & Voucher Generator
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {activeTab === "TRANSACTIONS" && (
+const SettlementsTab: React.FC = () => {
+  const { data, loading, error, reload } = useAsync(() => reportsApi.settlements());
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-gray-600 dark:text-slate-300 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        Daftar ini berisi pencairan saldo akun yang ditutup. Skema bagi hasil Creator belum ditetapkan, jadi belum ada pencairan royalti di sini.
+      </p>
+      <StateBox loading={loading} error={error} onRetry={reload}>
+        {data && data.length === 0 ? (
+          <Empty>Belum ada pencairan.</Empty>
+        ) : (
+          data && (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-500 dark:text-slate-400">
                 <thead className="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
-                  <tr>
-                    <th className="px-6 py-3">ID Transaksi</th>
-                    <th className="px-6 py-3">Item Pembelian</th>
-                    <th className="px-6 py-3">Pembeli</th>
-                    <th className="px-6 py-3">Jumlah</th>
-                    <th className="px-6 py-3">Metode</th>
-                    <th className="px-6 py-3">Status</th>
-                  </tr>
+                  <tr><th className="px-4 py-3">Tanggal transfer</th><th className="px-4 py-3">Penerima</th><th className="px-4 py-3 text-right">Jumlah</th><th className="px-4 py-3">Ref. bank</th><th className="px-4 py-3">Diproses oleh</th><th className="px-4 py-3">Catatan</th></tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                  {transactions.map((trx) => (
-                    <tr
-                      key={trx.id}
-                      className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800/50"
-                    >
-                      <td className="px-6 py-4 font-mono font-medium text-gray-900 dark:text-white">
-                        {trx.id}
-                        <div className="text-[10px] text-gray-400 font-sans mt-1">
-                          {trx.date}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-bold text-gray-800 dark:text-slate-200">
-                        {trx.itemName}
-                      </td>
-                      <td className="px-6 py-4">{trx.buyerName}</td>
-                      <td className="px-6 py-4 font-mono text-gray-900 dark:text-white">
-                        {formatCurrency(trx.amount)}
-                      </td>
-                      <td className="px-6 py-4">{trx.paymentMethod}</td>
-                      <td className="px-6 py-4">
-                        {trx.status === "PAID" && (
-                          <span className="text-green-600 font-bold text-xs bg-green-100 px-2 py-1 rounded-full">
-                            Lunas
-                          </span>
-                        )}
-                        {trx.status === "PENDING" && (
-                          <span className="text-orange-600 font-bold text-xs bg-orange-100 px-2 py-1 rounded-full">
-                            Menunggu
-                          </span>
-                        )}
-                        {trx.status === "FAILED" && (
-                          <span className="text-red-600 font-bold text-xs bg-red-100 px-2 py-1 rounded-full">
-                            Gagal
-                          </span>
-                        )}
-                      </td>
+                  {data.map((s) => (
+                    <tr key={s.id}>
+                      <td className="px-4 py-3">{dateId(s.transfer_date)}</td>
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{s.recipient}</td>
+                      <td className="px-4 py-3 text-right font-mono font-bold">{rupiah(s.amount)}</td>
+                      <td className="px-4 py-3 font-mono">{s.bank_ref}</td>
+                      <td className="px-4 py-3">{s.settled_by_name ?? '-'}</td>
+                      <td className="px-4 py-3">{s.note ?? '-'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
+          )
+        )}
+      </StateBox>
+    </div>
+  );
+};
 
-          {activeTab === "SETTLEMENTS" && (
-            <div>
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-lg flex items-start gap-3">
-                <AlertCircle className="flex-shrink-0 mt-0.5" size={18} />
-                <p className="text-sm">
-                  Dana &quot;Pending&quot; adalah akumulasi bagi hasil (Royalti
-                  Creator & Fee Mentor) yang belum dicairkan ke dompet digital
-                  mereka. Pastikan saldo Payment Gateway cukup sebelum memproses
-                  pencairan.
-                </p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500 dark:text-slate-400">
-                  <thead className="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
-                    <tr>
-                      <th className="px-6 py-3">ID Settlement</th>
-                      <th className="px-6 py-3">Penerima Dana</th>
-                      <th className="px-6 py-3">Keterangan</th>
-                      <th className="px-6 py-3">Jumlah</th>
-                      <th className="px-6 py-3">Status</th>
-                      <th className="px-6 py-3 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                    {settlements.map((set) => (
-                      <tr
-                        key={set.id}
-                        className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800/50"
-                      >
-                        <td className="px-6 py-4 font-mono font-medium text-gray-900 dark:text-white">
-                          {set.id}
-                          <div className="text-[10px] text-gray-400 font-sans mt-1">
-                            {set.date}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-white">
-                            {set.recipientName}
-                          </div>
-                          <div className="text-xs uppercase tracking-wider font-bold text-kodman-600 mt-1">
-                            {set.recipientRole}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 dark:text-slate-400">
-                          {set.details}
-                        </td>
-                        <td className="px-6 py-4 font-mono font-bold text-gray-900 dark:text-white">
-                          {formatCurrency(set.amount)}
-                        </td>
-                        <td className="px-6 py-4">
-                          {set.status === "PROCESSED" ? (
-                            <span className="flex items-center text-green-600 font-bold text-xs">
-                              <CheckCircle size={14} className="mr-1" />{" "}
-                              Terkirim
-                            </span>
-                          ) : (
-                            <span className="flex items-center text-orange-600 font-bold text-xs">
-                              <Clock size={14} className="mr-1" /> Menunggu
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          {set.status === "PENDING" && (
-                            <button
-                              onClick={() => handleProcessSettlement(set.id)}
-                              className="px-3 py-1.5 bg-kodman-600 hover:bg-kodman-700 text-white rounded text-xs font-bold shadow-sm transition"
-                            >
-                              Proses Cair
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+interface CourseOpt { id: string; title: string }
 
-          {activeTab === "VOUCHERS" && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">
-                    B2B Voucher Generator
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Buat kode aktivasi massal untuk Sponsor (Koperasi/Instansi).
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsGeneratingVoucher(!isGeneratingVoucher)}
-                  className="px-4 py-2 bg-kodman-600 text-white rounded font-bold text-sm flex items-center hover:bg-kodman-700"
-                >
-                  <Plus size={16} className="mr-2" /> Generate Bulk Voucher
-                </button>
-              </div>
+const VouchersTab: React.FC = () => {
+  const { data, loading, error, reload } = useAsync(() => reportsApi.voucherBatches());
+  const [courses, setCourses] = useState<CourseOpt[]>([]);
+  const [open, setOpen] = useState(false);
+  const [courseId, setCourseId] = useState('');
+  const [sponsor, setSponsor] = useState('');
+  const [count, setCount] = useState(10);
+  const [percent, setPercent] = useState(100);
+  const [startsAt, setStartsAt] = useState('');
+  const [endsAt, setEndsAt] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [codes, setCodes] = useState<string[] | null>(null);
 
-              {isGeneratingVoucher && (
-                <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700 mb-6 animate-fade-in-down">
-                  <form onSubmit={handleGenerateVoucher} className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                          Nama Sponsor / Koperasi
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 rounded"
-                          placeholder="Contoh: Koperasi Makmur Jaya"
-                          value={sponsorName}
-                          onChange={(e) => setSponsorName(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                          Prefix Kode
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 rounded font-mono uppercase"
-                          placeholder="KOP-MAKMUR-"
-                          value={prefix}
-                          onChange={(e) => setPrefix(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                          Pilih Kursus
-                        </label>
-                        <select
-                          required
-                          className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 rounded"
-                          value={selectedCourseId}
-                          onChange={(e) => setSelectedCourseId(e.target.value)}
-                        >
-                          <option value="">-- Pilih Kursus --</option>
-                          {MOCK_COURSES.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.title}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                          Jumlah Kode (Slot)
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="500"
-                          required
-                          className="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 rounded"
-                          value={qty}
-                          onChange={(e) => setQty(Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsGeneratingVoucher(false)}
-                        className="px-4 py-2 text-gray-600"
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-6 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700"
-                      >
-                        Generate Codes
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
+  useEffect(() => {
+    courseApi.getAll().then((r) => setCourses((r.data.data as CourseOpt[]).map((c) => ({ id: c.id, title: c.title })))).catch(() => setCourses([]));
+  }, []);
 
-              <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 overflow-hidden">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 dark:bg-slate-800 text-gray-500 uppercase font-bold text-xs">
-                    <tr>
-                      <th className="px-6 py-3">Batch ID</th>
-                      <th className="px-6 py-3">Sponsor</th>
-                      <th className="px-6 py-3">Kursus</th>
-                      <th className="px-6 py-3">Terpakai</th>
-                      <th className="px-6 py-3 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                    {vouchers.map((batch) => (
-                      <tr
-                        key={batch.id}
-                        className="hover:bg-gray-50 dark:hover:bg-slate-800/50"
-                      >
-                        <td className="px-6 py-4 font-mono font-medium">
-                          {batch.id}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900 dark:text-white">
-                            {batch.sponsorName}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {batch.generatedDate}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600 dark:text-slate-300 truncate max-w-xs">
-                          {batch.courseTitle}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-24 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-purple-600 h-2 rounded-full"
-                                style={{
-                                  width: `${(batch.usedCodes / batch.totalCodes) * 100}%`,
-                                }}
-                              ></div>
-                            </div>
-                            <span className="text-xs font-bold">
-                              {batch.usedCodes}/{batch.totalCodes}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-blue-600 hover:underline flex items-center justify-end w-full">
-                            <Download size={14} className="mr-1" /> Unduh CSV
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError('');
+    if (!courseId) return setFormError('Pilih kursus.');
+    if (!startsAt || !endsAt) return setFormError('Isi tanggal mulai dan berakhir.');
+    setBusy(true);
+    try {
+      const res = await reportsApi.createVoucherBatch(courseId, {
+        count, percent, reason: sponsor.trim(),
+        startsAt: new Date(startsAt).toISOString(), endsAt: new Date(endsAt).toISOString(),
+      });
+      setCodes(res.codes);
+      setOpen(false);
+      setSponsor('');
+      await reload();
+    } catch (err: any) {
+      setFormError(err?.response?.data?.message ?? 'Gagal membuat voucher.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const input = 'w-full px-3 py-2 text-sm border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white';
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-600 dark:text-slate-300">Kode sekali pakai untuk sponsor atau mitra B2B. Daftar kode hanya ditampilkan sekali setelah dibuat.</p>
+        <button onClick={() => setOpen(!open)} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold flex items-center"><Ticket size={16} className="mr-2" /> Buat batch</button>
       </div>
+
+      {open && (
+        <form onSubmit={submit} className="grid md:grid-cols-2 gap-3 p-4 border rounded-lg dark:border-slate-700">
+          <label className="text-sm md:col-span-2">Kursus
+            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className={input}>
+              <option value="">Pilih kursus</option>
+              {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+          </label>
+          <label className="text-sm md:col-span-2">Sponsor / alasan (wajib)
+            <input value={sponsor} onChange={(e) => setSponsor(e.target.value)} className={input} placeholder="Mis. Koperasi Sejahtera Bersama" />
+          </label>
+          <label className="text-sm">Jumlah kode (maks 200)
+            <input type="number" min={1} max={200} value={count} onChange={(e) => setCount(Number(e.target.value))} className={input} />
+          </label>
+          <label className="text-sm">Diskon (%)
+            <input type="number" min={1} max={100} value={percent} onChange={(e) => setPercent(Number(e.target.value))} className={input} />
+          </label>
+          <label className="text-sm">Berlaku mulai
+            <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className={input} />
+          </label>
+          <label className="text-sm">Berakhir
+            <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={input} />
+          </label>
+          {formError && <p role="alert" className="text-sm text-red-600 md:col-span-2">{formError}</p>}
+          <button type="submit" disabled={busy} className="md:col-span-2 px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Membuat...' : 'Buat kode'}</button>
+        </form>
+      )}
+
+      {codes && (
+        <div className="p-4 border border-green-300 bg-green-50 dark:bg-green-900/20 rounded-lg space-y-2">
+          <p className="text-sm font-bold text-green-800 dark:text-green-300">{codes.length} kode dibuat. Salin sekarang, daftar ini tidak ditampilkan lagi.</p>
+          <textarea readOnly rows={6} value={codes.join('\n')} className="w-full font-mono text-xs p-2 border rounded dark:bg-slate-800 dark:text-white" />
+          <div className="flex gap-2">
+            <button onClick={() => void navigator.clipboard?.writeText(codes.join('\n'))} className="px-3 py-1 border rounded text-sm">Salin</button>
+            <button onClick={() => setCodes(null)} className="px-3 py-1 border rounded text-sm">Tutup</button>
+          </div>
+        </div>
+      )}
+
+      <StateBox loading={loading} error={error} onRetry={reload}>
+        {data && data.length === 0 ? (
+          <Empty>Belum ada batch voucher.</Empty>
+        ) : (
+          data && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                <thead className="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
+                  <tr><th className="px-4 py-3">Dibuat</th><th className="px-4 py-3">Kursus</th><th className="px-4 py-3">Sponsor</th><th className="px-4 py-3 text-right">Diskon</th><th className="px-4 py-3 text-right">Terpakai</th><th className="px-4 py-3">Berlaku</th><th className="px-4 py-3">Status</th></tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                  {data.map((b) => (
+                    <tr key={b.id}>
+                      <td className="px-4 py-3 whitespace-nowrap">{dateId(b.created_at)}<div className="text-xs text-gray-400">{b.created_by}</div></td>
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{b.course_title}</td>
+                      <td className="px-4 py-3">{b.reason ?? '-'}</td>
+                      <td className="px-4 py-3 text-right font-mono">{b.percent}%</td>
+                      <td className="px-4 py-3 text-right font-mono">{num(b.used_codes)}/{num(b.total_codes)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">{dateId(b.starts_at)} - {dateId(b.ends_at)}</td>
+                      <td className="px-4 py-3">{b.cancelled ? 'Dibatalkan' : new Date(b.ends_at) < new Date() ? 'Berakhir' : 'Aktif'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+      </StateBox>
+    </div>
+  );
+};
+
+const FinanceDashboard: React.FC = () => {
+  const [tab, setTab] = useState<Tab>('SALES');
+  const summary = useAsync(() => reportsApi.financeSummary());
+  const tabs: [Tab, string][] = [['SALES', 'Riwayat Penjualan'], ['SETTLEMENTS', 'Pencairan Saldo'], ['VOUCHERS', 'Voucher B2B']];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Laporan Keuangan</h2>
+        <p className="text-gray-500 dark:text-slate-400">Penjualan, pencairan, dan voucher, dihitung langsung dari data.</p>
+      </div>
+
+      <StateBox loading={summary.loading} error={summary.error} onRetry={summary.reload}>
+        {summary.data && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Tile title="Pendapatan total" value={rupiah(summary.data.revenueTotal)} hint={`${num(summary.data.salesCount)} pendaftaran`} icon={<TrendingUp size={18} />} />
+            <Tile title="Pendapatan bulan ini" value={rupiah(summary.data.revenueThisMonth)} />
+            <Tile title="Total diskon diberikan" value={rupiah(summary.data.discountTotal)} hint={`${num(summary.data.freeEnrollments)} pendaftaran gratis`} />
+            <Tile title="Isi saldo menunggu verifikasi" value={rupiah(summary.data.verifyingAmount)} hint={`${num(summary.data.verifyingCount)} transaksi. Isi saldo berhasil: ${rupiah(summary.data.topupTotal)}`} icon={<Wallet size={18} />} />
+          </div>
+        )}
+      </StateBox>
+
+      <Card>
+        <div className="flex border-b border-gray-200 dark:border-slate-800 mb-4">
+          {tabs.map(([k, label]) => (
+            <button key={k} onClick={() => setTab(k)} className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${tab === k ? 'border-kodman-600 text-kodman-600 dark:text-kodman-400' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>{label}</button>
+          ))}
+        </div>
+        {tab === 'SALES' && <SalesTab />}
+        {tab === 'SETTLEMENTS' && <SettlementsTab />}
+        {tab === 'VOUCHERS' && <VouchersTab />}
+      </Card>
     </div>
   );
 };
