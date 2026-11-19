@@ -10,7 +10,7 @@
  */
 
 export type ConfigType = "boolean" | "integer" | "text" | "longtext" | "email" | "phone";
-export type ConfigGroupId = "umum" | "keamanan" | "pembelajaran" | "pembayaran";
+export type ConfigGroupId = "umum" | "keamanan" | "pembelajaran" | "pembayaran" | "bagihasil";
 
 export interface ConfigDefinition {
   key: string;
@@ -34,6 +34,7 @@ export const CONFIG_GROUPS: { id: ConfigGroupId; label: string; description: str
   { id: "keamanan", label: "Keamanan Sesi", description: "Masa berlaku login, auto-logout, dan aturan password." },
   { id: "pembelajaran", label: "Pembelajaran", description: "Nilai bawaan ujian dan batas unggah materi." },
   { id: "pembayaran", label: "Pembayaran", description: "Rekening tujuan transfer manual. Tidak ditampilkan ke publik; hanya kepada pemilik order." },
+  { id: "bagihasil", label: "Bagi Hasil", description: "Pembagian hasil penjualan kursus antara Creator pemilik kursus dan Lembaga. Berlaku untuk pendaftaran berikutnya." },
 ];
 
 export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
@@ -132,6 +133,26 @@ export const CONFIG_DEFINITIONS: ConfigDefinition[] = [
     label: "Nama pemilik rekening",
     description: "Nama pemilik rekening sebagaimana tercatat di bank.",
     defaultValue: "", maxLength: 100,
+  },
+
+  // ── Bagi Hasil ──
+  {
+    key: "creator_share_percent", group: "bagihasil", type: "integer", isPublic: false,
+    label: "Bagian Creator pemilik kursus",
+    description: "Persentase hasil penjualan untuk Creator pemilik kursus. Sisanya untuk Lembaga KMP Academy. Dicatat per pendaftaran saat terjadi; mengubah angka ini tidak mengubah pendaftaran yang sudah ada.",
+    defaultValue: "70", min: 0, max: 100, unit: "%",
+  },
+  {
+    key: "workshop_owner_percent", group: "bagihasil", type: "integer", isPublic: false,
+    label: "Workshop: bagian pemilik materi",
+    description: "Persentase hasil penjualan workshop untuk Creator pemilik materi. Dicatat per pendaftaran saat terjadi.",
+    defaultValue: "60", min: 0, max: 100, unit: "%",
+  },
+  {
+    key: "workshop_mentor_percent", group: "bagihasil", type: "integer", isPublic: false,
+    label: "Workshop: bagian Mentor",
+    description: "Persentase hasil penjualan workshop untuk Mentor pengampu. Sisanya (setelah bagian pemilik materi dan Mentor) untuk Lembaga. Bila jumlah dengan bagian pemilik melebihi 100, bagian Mentor dipangkas.",
+    defaultValue: "25", min: 0, max: 100, unit: "%",
   },
 ];
 

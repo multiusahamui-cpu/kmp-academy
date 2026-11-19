@@ -4,6 +4,7 @@ import { db } from "../db";
 import { classMembers, classSessions, mentorClasses, users } from "../schema/schema";
 import { successResponse, errorResponse } from "../utils/response";
 import { notifyUser } from "../lib/cards";
+import { requireAcceptance } from "./legalController";
 import { generateJoinCode, normalizeJoinCode, validateClassInput, validateGrade, validateSessionInput } from "@shared/classes";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -19,7 +20,7 @@ const ownClass = async (req: any, res: any, idParam = "id") => {
   return c;
 };
 
-const newUniqueCode = async (): Promise<string> => {
+export const newUniqueCode = async (): Promise<string> => {
   for (let i = 0; i < 5; i += 1) {
     const code = generateJoinCode((m) => crypto.randomInt(m));
     const [hit] = await db.select({ id: mentorClasses.id }).from(mentorClasses).where(eq(mentorClasses.joinCode, code)).limit(1);
@@ -31,7 +32,7 @@ const newUniqueCode = async (): Promise<string> => {
 export const getClasses = async (req: any, res: any) => {
   try {
     const rows = await db.select({
-      id: mentorClasses.id, name: mentorClasses.name, description: mentorClasses.description, joinCode: mentorClasses.joinCode, archived: mentorClasses.archived, createdAt: mentorClasses.createdAt,
+      id: mentorClasses.id, name: mentorClasses.name, description: mentorClasses.description, joinCode: mentorClasses.joinCode, archived: mentorClasses.archived, createdAt: mentorClasses.createdAt, courseId: mentorClasses.courseId,
       members: sql<number>`(select count(*)::int from academy.class_members m where m.class_id = ${sql.raw('"academy"."mentor_classes"."id"')})`,
       nextSession: sql<string | null>`(select min(s.starts_at) from academy.class_sessions s where s.class_id = ${sql.raw('"academy"."mentor_classes"."id"')} and s.starts_at >= now())`,
     }).from(mentorClasses).where(eq(mentorClasses.mentorId, req.user.id)).orderBy(desc(mentorClasses.createdAt));
@@ -43,6 +44,7 @@ export const getClasses = async (req: any, res: any) => {
 
 export const createClass = async (req: any, res: any) => {
   try {
+    if (!(await requireAcceptance(req, res, "MENTOR_AGREEMENT"))) return;
     const v = validateClassInput(req.body);
     if (!v.ok) return errorResponse(res, v.message, 400);
     let created: { id: string } | undefined;
@@ -105,6 +107,7 @@ export const addMember = async (req: any, res: any) => {
     const c = await ownClass(req, res);
     if (!c) return;
     if (c.archived) return errorResponse(res, "Kelas sudah diarsipkan.", 409);
+    if (c.courseId) return errorResponse(res, "Peserta workshop berbayar masuk lewat pembelian kursus.", 409);
     const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
     if (!email) return errorResponse(res, "Email wajib diisi.", 400);
     const [u] = await db.select({ id: users.id, role: users.role }).from(users).where(sql`lower(${users.email}) = ${email}`).limit(1);
@@ -196,6 +199,7 @@ export const joinByCode = async (req: any, res: any) => {
     const [c] = code ? await db.select().from(mentorClasses).where(and(eq(mentorClasses.joinCode, code), eq(mentorClasses.archived, false))).limit(1) : [];
     if (!c) return errorResponse(res, "Kode kelas tidak valid.", 400);
     if (c.mentorId === req.user.id) return errorResponse(res, "Anda adalah Mentor kelas ini.", 400);
+    if (c.courseId) return errorResponse(res, "Kode kelas tidak valid.", 400); // workshop berbayar: hanya lewat pembelian
     const r = await db.insert(classMembers).values({ classId: c.id, userId: req.user.id }).onConflictDoNothing().returning({ id: classMembers.id });
     if (r.length === 0) return errorResponse(res, "Anda sudah ada di kelas ini.", 409);
     successResponse(res, { id: c.id, name: c.name }, "Berhasil bergabung", 201);

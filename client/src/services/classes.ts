@@ -1,6 +1,6 @@
 import api from './api';
 
-export interface MentorClassRow { id: string; name: string; description: string | null; joinCode: string; archived: boolean; createdAt: string; members: number; nextSession: string | null }
+export interface MentorClassRow { id: string; name: string; description: string | null; joinCode: string; courseId: string | null; archived: boolean; createdAt: string; members: number; nextSession: string | null }
 export interface ClassMember { userId: string; name: string; email: string; joinedAt: string; grade: number | null; gradeNote: string | null; gradedAt: string | null }
 export interface ClassSession { id: string; title: string; startsAt: string; meetingUrl: string | null }
 export interface ClassDetail { class: MentorClassRow; members: ClassMember[]; sessions: ClassSession[] }

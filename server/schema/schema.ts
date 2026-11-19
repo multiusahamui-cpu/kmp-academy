@@ -144,6 +144,14 @@ export const enrollments = academySchema.table("enrollments", {
   discountPercent: integer("discount_percent"),
   discountId: uuid("discount_id"),
   amountPaid: integer("amount_paid"),
+  // Pembagian hasil dibekukan saat mendaftar (null = sebelum fitur bagi hasil / gratis tanpa nilai).
+  creatorSharePercent: integer("creator_share_percent"),
+  creatorShare: integer("creator_share"),
+  platformShare: integer("platform_share"),
+  // Khusus workshop: Mentor pengampu dan bagiannya (creator_share = bagian pemilik materi).
+  mentorId: uuid("mentor_id").references(() => users.id, { onDelete: "set null" }),
+  mentorSharePercent: integer("mentor_share_percent"),
+  mentorShare: integer("mentor_share"),
 }, (t) => [unique("enrollments_user_course_unique").on(t.userId, t.courseId)]);
 
 // Wishlists Table
@@ -527,6 +535,8 @@ export const mentorClasses = academySchema.table("mentor_classes", {
   description: text("description"),
   joinCode: varchar("join_code", { length: 8 }).notNull(),
   archived: boolean("archived").notNull().default(false),
+  // Terisi bila kelas ini adalah workshop berbayar: anggota hanya masuk lewat pembelian kursus tersebut.
+  courseId: uuid("course_id").references(() => courses.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   codeUq: uniqueIndex("mentor_classes_join_code_uq").on(t.joinCode),
@@ -555,4 +565,94 @@ export const classSessions = academySchema.table("class_sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => ({
   classIdx: index("class_sessions_class_idx").on(t.classId, t.startsAt),
+}));
+
+// Laporan manajemen berkala: dibuat Admin (angka dibekukan saat dibuat), dibaca Direktur.
+export const managementReports = academySchema.table("management_reports", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  kind: varchar("kind", { length: 8 }).notNull(), // WEEKLY | MONTHLY
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  snapshot: jsonb("snapshot").$type<Record<string, number>>().notNull(),
+  note: text("note"),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  readAt: timestamp("read_at"),
+  readBy: uuid("read_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => ({
+  createdIdx: index("management_reports_created_idx").on(t.createdAt),
+}));
+
+// Siaran Direktur ke kelompok pengguna (masuk sebagai notifikasi INFO).
+export const broadcasts = academySchema.table("broadcasts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+  title: varchar("title", { length: 120 }).notNull(),
+  body: text("body").notNull(),
+  audience: varchar("audience", { length: 10 }).notNull(),
+  recipients: integer("recipients").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Sanksi mitra oleh Direktur. SUSPEND membekukan akun (users.status) sampai dicabut.
+export const partnerSanctions = academySchema.table("partner_sanctions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  kind: varchar("kind", { length: 10 }).notNull(), // WARNING | SUSPEND
+  reason: text("reason").notNull(),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  liftedAt: timestamp("lifted_at"),
+  liftedBy: uuid("lifted_by").references(() => users.id, { onDelete: "set null" }),
+  liftNote: text("lift_note"),
+}, (t) => ({
+  userIdx: index("partner_sanctions_user_idx").on(t.userId, t.createdAt),
+}));
+
+// Dokumen hukum berversi. Versi berlaku = versi PUBLISHED tertinggi per jenis. Draf awal dibuat dari kode.
+export const legalDocuments = academySchema.table("legal_documents", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  kind: varchar("kind", { length: 20 }).notNull(), // TERMS | PRIVACY | MENTOR_AGREEMENT | CREATOR_AGREEMENT
+  version: integer("version").notNull(),
+  title: varchar("title", { length: 150 }).notNull(),
+  body: text("body").notNull(),
+  status: varchar("status", { length: 10 }).notNull().default("DRAFT"), // DRAFT | PUBLISHED
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  publishedBy: uuid("published_by").references(() => users.id, { onDelete: "set null" }),
+  publishedAt: timestamp("published_at"),
+}, (t) => ({
+  kindVersionUq: uniqueIndex("legal_documents_kind_version_uq").on(t.kind, t.version),
+}));
+
+// Persetujuan pengguna atas versi dokumen tertentu (tidak pernah diubah).
+export const legalAcceptances = academySchema.table("legal_acceptances", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  documentId: uuid("document_id").references(() => legalDocuments.id).notNull(),
+  acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+}, (t) => ({
+  userDocUq: uniqueIndex("legal_acceptances_user_doc_uq").on(t.userId, t.documentId),
+}));
+
+// Proposal workshop: Mentor mengajukan dari kursus mandiri terbit; Admin menyetujui, sistem membuat kursus WORKSHOP dan kelasnya.
+export const workshopProposals = academySchema.table("workshop_proposals", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sourceCourseId: uuid("source_course_id").references(() => courses.id).notNull(),
+  mentorId: uuid("mentor_id").references(() => users.id).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  status: varchar("status", { length: 10 }).notNull().default("PENDING"), // PENDING | APPROVED | REJECTED | WITHDRAWN
+  decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at"),
+  decisionNote: text("decision_note"),
+  workshopCourseId: uuid("workshop_course_id").references(() => courses.id, { onDelete: "set null" }),
+  classId: uuid("class_id").references(() => mentorClasses.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  mentorIdx: index("workshop_proposals_mentor_idx").on(t.mentorId, t.createdAt),
+  statusIdx: index("workshop_proposals_status_idx").on(t.status, t.createdAt),
+  pendingUq: uniqueIndex("workshop_proposals_pending_uq").on(t.mentorId, t.sourceCourseId).where(sql`status = 'PENDING'`),
 }));

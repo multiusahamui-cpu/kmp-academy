@@ -1,3 +1,4 @@
+import { requireAcceptance } from "./legalController";
 import crypto from "node:crypto";
 import multer from "multer";
 import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
@@ -533,6 +534,7 @@ export const requestPublish = async (req: any, res: any) => {
   try {
     const course = await loadOwned(req, res, true);
     if (!course) return;
+    if (!(await requireAcceptance(req, res, "CREATOR_AGREEMENT"))) return;
     const accept = req.body?.acceptLicense === true;
 
     const result = await db.transaction(async (tx) => {

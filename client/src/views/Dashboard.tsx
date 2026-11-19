@@ -17,6 +17,7 @@ import IdentityCard from "../components/IdentityCard";
 import { useProfile } from "../services/profile";
 import { reportsApi } from "../services/reports";
 import { classesApi } from "../services/classes";
+import ManagementReports from "../components/ManagementReports";
 import { Bars, Card, Empty, StateBox, dateId, dateTimeId, num, rupiah, uptimeLabel, useAsync } from "../components/ReportBits";
 
 interface DashboardProps {
@@ -370,12 +371,18 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
     <StateBox loading={loading} error={error} onRetry={reload}>
       {data && (
         <div className="space-y-6">
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             <StatCard
               title="Total Penjualan"
               value={rupiah(data.salesTotal)}
               icon={<TrendingUp className="text-green-500" />}
               change={`${rupiah(data.salesThisMonth)} bulan ini`}
+            />
+            <StatCard
+              title={`Bagian Anda (${data.sharePercent}%)`}
+              value={rupiah(data.earningsTotal)}
+              icon={<Wallet className="text-kodman-500" />}
+              change={`${rupiah(data.earningsThisMonth)} bulan ini`}
             />
             <StatCard
               title="Siswa Terdaftar"
@@ -416,10 +423,10 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
               title="Penjualan 7 Hari Terakhir"
               right={
                 <button
-                  onClick={() => onNavigate("wallet")}
-                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold flex items-center"
+                  onClick={() => onNavigate("my-courses")}
+                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold"
                 >
-                  <Wallet size={12} className="mr-1" /> Dompet Saya
+                  Atur harga dan diskon
                 </button>
               }
             >
@@ -431,6 +438,23 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
                 }))}
                 height={128}
               />
+              <p className="text-xs text-gray-500 mt-3">Harga ditetapkan Anda per kursus. Diskon dengan jadwal mulai dan berakhir diatur di tab Promo pada tiap kursus.</p>
+            </Card>
+
+            <Card
+              title="Dompet"
+              right={
+                <button
+                  onClick={() => onNavigate("wallet")}
+                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold flex items-center"
+                >
+                  <Wallet size={12} className="mr-1" /> Dompet Saya
+                </button>
+              }
+            >
+              <p className="text-sm text-gray-600 dark:text-slate-300">
+                Bagian Anda dari penjualan dicatat per pendaftaran dengan persentase yang berlaku saat itu. Pencairan ke Dompet belum tersedia.
+              </p>
             </Card>
           </div>
         </div>
@@ -471,6 +495,8 @@ const AdminDashboard = () => {
               change="Sejak restart terakhir"
             />
           </div>
+
+          <ManagementReports canGenerate />
 
           <Card title="Antrean Operasional">
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

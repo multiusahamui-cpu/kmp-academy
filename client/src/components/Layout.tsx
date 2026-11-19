@@ -159,7 +159,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "system-config", label: "Konfigurasi Sistem", icon: SlidersHorizontal },
           { id: "settings", label: "App Settings", icon: Settings },
-          { id: "policy", label: "Kebijakan Utama", icon: ShieldAlert },
+          { id: "policy", label: "Dokumen Hukum", icon: ShieldAlert },
           { isDivider: true },
           profileItem,
         ];
@@ -181,6 +181,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "communication", label: "Komunikasi Publik", icon: Megaphone },
+          { id: "policy", label: "Dokumen Hukum", icon: ShieldAlert },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
           {
@@ -232,7 +233,7 @@ export const Layout: React.FC<LayoutProps> = ({
         return [
           dashboardItem,
           { isDivider: true, sectionTitle: "Area Mentor" }, // Separator
-          { id: "explore-content", label: "Eksplorasi Materi", icon: Compass },
+          { id: "explore-content", label: "Workshop", icon: Compass },
           { id: "my-classes", label: "Rombongan Belajar", icon: Users },
 
           { isDivider: true, sectionTitle: "Area Student" }, // Separator

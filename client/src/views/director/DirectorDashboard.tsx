@@ -1,6 +1,8 @@
 import React from 'react';
 import { reportsApi } from '../../services/reports';
-import { Bars, Card, Empty, StateBox, Tile, num, rupiah, uptimeLabel, useAsync } from '../../components/ReportBits';
+import ManagementReports from '../../components/ManagementReports';
+import BroadcastPanel from '../../components/BroadcastPanel';
+import { Bars, Card, StateBox, Tile, num, rupiah, uptimeLabel, useAsync } from '../../components/ReportBits';
 
 const DirectorDashboard: React.FC = () => {
   const stats = useAsync(() => reportsApi.stats());
@@ -43,9 +45,8 @@ const DirectorDashboard: React.FC = () => {
         )}
       </StateBox>
 
-      <Card title="Laporan manajemen dan siaran">
-        <Empty>Laporan dari Admin dan siaran ke seluruh pengguna belum aktif.</Empty>
-      </Card>
+      <ManagementReports canMarkRead />
+      <BroadcastPanel />
     </div>
   );
 };

@@ -1,7 +1,10 @@
 // Inti pembelian kursus: reservasi harga/promo, pemenuhan enrollment, dan pelepasan reservasi.
 // Semua fungsi berjalan di dalam transaksi pemanggil (tx).
+import { splitRevenue } from "@shared/revenue";
+import { splitWorkshopRevenue } from "@shared/workshop";
+import { getConfigInt } from "./system-config";
 import { and, eq, gt, isNull, lte, sql } from "drizzle-orm";
-import { courseDiscounts, discountRedemptions, enrollments } from "../schema/schema";
+import { classMembers, courseDiscounts, discountRedemptions, enrollments, mentorClasses } from "../schema/schema";
 import { issueCard, notifyUser } from "./cards";
 import { bestAutoDiscount, isDiscountActive, quotePrice, type PriceQuote } from "@shared/pricing";
 
@@ -66,12 +69,27 @@ export interface FulfillInput {
 
 /** Membuat enrollment dengan salinan harga, dan menerbitkan kartu student pada kursus pertama. Null bila sudah terdaftar. */
 export const fulfillCourse = async (tx: Tx, f: FulfillInput): Promise<{ enrollmentId: string; cardNumber: string | null } | null> => {
+  // Kursus WORKSHOP punya kelas Mentor: hasil dibagi pemilik materi / Mentor / Lembaga.
+  const [wsClass] = await tx.select({ id: mentorClasses.id, mentorId: mentorClasses.mentorId, name: mentorClasses.name }).from(mentorClasses)
+    .where(and(eq(mentorClasses.courseId, f.courseId), eq(mentorClasses.archived, false))).limit(1);
+  let shares: { creatorSharePercent: number; creatorShare: number; platformShare: number; mentorId?: string; mentorSharePercent?: number; mentorShare?: number };
+  if (wsClass) {
+    const w = splitWorkshopRevenue(f.amountPaid, await getConfigInt("workshop_owner_percent"), await getConfigInt("workshop_mentor_percent"));
+    shares = { creatorSharePercent: w.ownerPercent, creatorShare: w.owner, platformShare: w.platform, mentorId: wsClass.mentorId, mentorSharePercent: w.mentorPercent, mentorShare: w.mentor };
+  } else {
+    const split = splitRevenue(f.amountPaid, await getConfigInt("creator_share_percent"));
+    shares = { creatorSharePercent: split.percent, creatorShare: split.creator, platformShare: split.platform };
+  }
   const [enr] = await tx
     .insert(enrollments)
-    .values({ userId: f.userId, courseId: f.courseId, basePrice: f.basePrice, discountPercent: f.discountPercent, discountId: f.discountId, amountPaid: f.amountPaid })
+    .values({ userId: f.userId, courseId: f.courseId, basePrice: f.basePrice, discountPercent: f.discountPercent, discountId: f.discountId, amountPaid: f.amountPaid, ...shares })
     .onConflictDoNothing()
     .returning({ id: enrollments.id });
   if (!enr) return null;
+  if (wsClass && wsClass.mentorId !== f.userId) {
+    await tx.insert(classMembers).values({ classId: wsClass.id, userId: f.userId }).onConflictDoNothing();
+    await notifyUser(tx, f.userId, "Anda masuk kelas workshop", `Anda terdaftar di kelas ${wsClass.name}. Jadwal sesi ada di menu Kelas.`, "BELAJAR");
+  }
   let cardNumber: string | null = null;
   if (f.role === "STUDENT") {
     const card = await issueCard(tx, f.userId, null);

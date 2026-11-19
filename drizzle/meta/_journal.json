@@ -113,6 +113,41 @@
       "when": 1795057443698,
       "tag": "0015_mentor_classes",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795058385489,
+      "tag": "0016_management_broadcasts",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795059393942,
+      "tag": "0017_revenue_share",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795059571409,
+      "tag": "0018_partner_sanctions",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795060200889,
+      "tag": "0019_legal_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1795060642150,
+      "tag": "0020_workshop",
+      "breakpoints": true
     }
   ]
 }

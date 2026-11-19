@@ -10,6 +10,7 @@ export interface AdminStats {
 
 export interface FinanceSummary {
   revenueTotal: number; revenueThisMonth: number; discountTotal: number; freeEnrollments: number; salesCount: number;
+  creatorShareTotal: number; mentorShareTotal: number; platformShareTotal: number; platformShareThisMonth: number; creatorSharePercent: number;
   topupTotal: number; verifyingAmount: number; verifyingCount: number;
 }
 export interface SaleRow { id: string; at: string | null; buyer: string; course: string; base_price: number | null; discount_percent: number | null; amount_paid: number | null; channel: string }
@@ -34,7 +35,7 @@ export interface QualityReport {
 }
 
 export interface CreatorSummary {
-  salesTotal: number; salesThisMonth: number; students: number; averageRating: number; totalReviews: number;
+  salesTotal: number; salesThisMonth: number; students: number; earningsTotal: number; earningsThisMonth: number; sharePercent: number; averageRating: number; totalReviews: number;
   content: { id: string; title: string; status: string; updatedAt: string | null }[];
   last7Days: { date: string; revenue: number }[];
 }

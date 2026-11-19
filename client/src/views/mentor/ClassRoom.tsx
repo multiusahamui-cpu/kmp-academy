@@ -39,19 +39,25 @@ const ClassDetailView: React.FC<{ id: string; onBack: () => void; onChanged: () 
                 {data.class.archived && <p className="text-xs text-red-600 font-bold mt-1">Diarsipkan</p>}
               </div>
               <div className="text-right text-sm">
-                <p className="text-gray-500">Kode gabung</p>
-                <p className="font-mono text-lg font-bold tracking-widest">{data.class.joinCode}</p>
-                <button onClick={() => confirm('Ganti kode? Kode lama tidak berlaku lagi.') && void act(() => classesApi.newCode(id), 'Kode diganti.')} className="text-xs underline text-gray-500">Ganti kode</button>
+                {data.class.courseId ? (
+                  <p className="text-xs text-gray-500 max-w-[14rem]">Workshop berbayar: peserta masuk otomatis setelah membeli kursusnya.</p>
+                ) : (
+                  <>
+                    <p className="text-gray-500">Kode gabung</p>
+                    <p className="font-mono text-lg font-bold tracking-widest">{data.class.joinCode}</p>
+                    <button onClick={() => confirm('Ganti kode? Kode lama tidak berlaku lagi.') && void act(() => classesApi.newCode(id), 'Kode diganti.')} className="text-xs underline text-gray-500">Ganti kode</button>
+                  </>
+                )}
                 <button onClick={() => void act(() => classesApi.update(id, { name: data.class.name, description: data.class.description ?? '', archived: !data.class.archived }))} className="text-xs underline text-gray-500 ml-3">{data.class.archived ? 'Aktifkan' : 'Arsipkan'}</button>
               </div>
             </div>
             {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
 
             <Card title={`Anggota (${num(data.members.length)})`}>
-              <form className="flex gap-2 mb-4" onSubmit={(e) => { e.preventDefault(); void act(() => classesApi.addMember(id, email), 'Siswa ditambahkan.').then(() => setEmail('')); }}>
+              {!data.class.courseId && <form className="flex gap-2 mb-4" onSubmit={(e) => { e.preventDefault(); void act(() => classesApi.addMember(id, email), 'Siswa ditambahkan.').then(() => setEmail('')); }}>
                 <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email siswa terdaftar" className={input} />
                 <button type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold shrink-0">Tambah</button>
-              </form>
+              </form>}
               {data.members.length === 0 ? (
                 <Empty>Belum ada anggota. Tambahkan lewat email atau bagikan kode gabung.</Empty>
               ) : (

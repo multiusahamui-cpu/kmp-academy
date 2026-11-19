@@ -2,6 +2,7 @@ import app from "./App";
 import { checkConnection } from "./db";
 import { connectSessionStore } from "./lib/session";
 import { startJobScheduler } from "./lib/job-runner";
+import { ensureLegalDrafts } from "./controllers/legalController";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -28,6 +29,13 @@ const startServer = async () => {
   } catch (err) {
     console.error("FATAL: Redis tidak dapat dihubungi.", err);
     process.exit(1);
+  }
+
+  // 1b2. Draf awal dokumen hukum (hanya bila belum ada)
+  try {
+    await ensureLegalDrafts();
+  } catch (err) {
+    console.error("Gagal menyiapkan draf dokumen hukum:", err);
   }
 
   // 1c. Job berkala (kedaluwarsa order, rekonsiliasi debit/VA, email notifikasi); riwayatnya di tabel job_runs

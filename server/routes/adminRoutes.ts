@@ -1,4 +1,5 @@
 
+import * as workshop from "../controllers/workshopController";
 import { Router } from "express";
 import * as admin from "../controllers/adminController";
 import { authenticateToken, requireRole } from "../middleware/auth";
@@ -6,6 +7,8 @@ import * as deletion from "../controllers/accountDeletionController";
 import { uploadLimiter } from "../lib/security";
 import * as payAdmin from "../controllers/adminPaymentController";
 import * as report from "../controllers/reportController";
+import * as mgmt from "../controllers/managementController";
+import * as partner from "../controllers/partnerController";
 
 const router = Router();
 
@@ -30,6 +33,9 @@ router.get("/payment-orders/:id/proof", requireRole(["ADMIN_SYSTEM"]), payAdmin.
 router.post("/payment-orders/:id/decision", requireRole(["ADMIN_SYSTEM"]), payAdmin.decidePaymentOrder);
 
 // Penghapusan akun individual: diputuskan Admin atau Direktur; saldo diselesaikan Admin; arsip hanya baca
+router.get("/workshop-proposals", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.listProposals);
+router.post("/workshop-proposals/:id/approve", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.approveProposal);
+router.post("/workshop-proposals/:id/reject", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.rejectProposal);
 router.get("/account-deletions", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.listDeletions);
 router.post("/account-deletions/:id/decision", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), deletion.decideDeletion);
 router.post("/account-deletions/:id/settlement", requireRole(["ADMIN_SYSTEM"]), uploadLimiter, deletion.proofUploadMiddleware, deletion.settleBalance);
@@ -40,6 +46,20 @@ router.get("/archived-accounts", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), dele
 router.get("/jobs", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listJobs);
 router.get("/jobs/:jobId/runs", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.listJobRuns);
 router.post("/jobs/:jobId/run", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admin.runJobNow);
+// Laporan manajemen (dibuat Admin, dibaca Direktur) dan siaran Direktur
+router.post("/management-reports", requireRole(["ADMIN_SYSTEM"]), mgmt.createReport);
+router.get("/management-reports", requireRole(["ADMIN_SYSTEM", "DIRECTOR", "SUPERADMIN"]), mgmt.listReports);
+router.get("/management-reports/:id", requireRole(["ADMIN_SYSTEM", "DIRECTOR", "SUPERADMIN"]), mgmt.getReport);
+router.put("/management-reports/:id/read", requireRole(["DIRECTOR"]), mgmt.markReportRead);
+router.post("/broadcasts", requireRole(["DIRECTOR"]), mgmt.createBroadcast);
+router.get("/broadcasts", requireRole(["DIRECTOR", "SUPERADMIN"]), mgmt.listBroadcasts);
+
+// Tata kelola mitra: hanya Direktur
+router.get("/partners", requireRole(["DIRECTOR"]), partner.listPartners);
+router.get("/partners/:id/sanctions", requireRole(["DIRECTOR"]), partner.listSanctions);
+router.post("/partners/:id/sanctions", requireRole(["DIRECTOR"]), partner.createSanction);
+router.put("/sanctions/:sid/lift", requireRole(["DIRECTOR"]), partner.liftSanction);
+
 // Keuangan (data nyata; bagi hasil Creator belum ditetapkan sehingga belum ada pencairan royalti)
 const finance = requireRole(["ADMIN_SYSTEM", "SUPERADMIN", "DIRECTOR"]);
 router.get("/finance/summary", finance, report.getFinanceSummary);

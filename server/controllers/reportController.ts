@@ -4,6 +4,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { successResponse, errorResponse } from "../utils/response";
+import { getConfigInt } from "../lib/system-config";
 
 const rowsOf = <T>(r: any): T[] => (r?.rows ?? r) as T[];
 const run = async <T>(q: ReturnType<typeof sql>): Promise<T[]> => rowsOf<T>(await db.execute(q));
@@ -74,7 +75,11 @@ export const getFinanceSummary = async (_req: any, res: any) => {
       coalesce(sum(e.amount_paid) filter (where ${ENR_AT} >= ${MONTH_START}), 0)::bigint as revenue_month,
       coalesce(sum(greatest(coalesce(e.base_price, 0) - coalesce(e.amount_paid, 0), 0)), 0)::bigint as discount_total,
       count(*) filter (where coalesce(e.amount_paid, 0) = 0)::int as free_count,
-      count(*)::int as sales_count
+      count(*)::int as sales_count,
+      coalesce(sum(e.creator_share), 0)::bigint as creator_share_total,
+      coalesce(sum(e.platform_share), 0)::bigint as platform_share_total,
+      coalesce(sum(e.mentor_share), 0)::bigint as mentor_share_total,
+      coalesce(sum(e.platform_share) filter (where ${ENR_AT} >= ${MONTH_START}), 0)::bigint as platform_share_month
       from academy.enrollments e`);
     const [p] = await run<any>(sql`select
       coalesce(sum(amount) filter (where kind = 'TOPUP' and status = 'PAID'), 0)::bigint as topup_total,
@@ -84,6 +89,8 @@ export const getFinanceSummary = async (_req: any, res: any) => {
     successResponse(res, {
       revenueTotal: num(s?.revenue_total), revenueThisMonth: num(s?.revenue_month), discountTotal: num(s?.discount_total),
       freeEnrollments: num(s?.free_count), salesCount: num(s?.sales_count),
+      creatorShareTotal: num(s?.creator_share_total), platformShareTotal: num(s?.platform_share_total), mentorShareTotal: num(s?.mentor_share_total), platformShareThisMonth: num(s?.platform_share_month),
+      creatorSharePercent: await getConfigInt("creator_share_percent"),
       topupTotal: num(p?.topup_total), verifyingAmount: num(p?.verifying_amount), verifyingCount: num(p?.verifying_count),
     }, "Ringkasan keuangan");
   } catch (error) {
@@ -246,7 +253,9 @@ export const getCreatorSummary = async (req: any, res: any) => {
     const [s] = await run<any>(sql`select
       coalesce(sum(e.amount_paid), 0)::bigint as total,
       coalesce(sum(e.amount_paid) filter (where ${ENR_AT} >= ${MONTH_START}), 0)::bigint as month,
-      count(distinct e.user_id)::int as students
+      count(distinct e.user_id)::int as students,
+      coalesce(sum(e.creator_share), 0)::bigint as earn_total,
+      coalesce(sum(e.creator_share) filter (where ${ENR_AT} >= ${MONTH_START}), 0)::bigint as earn_month
       from academy.enrollments e join academy.courses c on c.id = e.course_id where c.instructor_id = ${uid}`);
     const [r] = await run<any>(sql`select coalesce(sum(rating * total_reviews)::float / nullif(sum(total_reviews), 0), 0) as x10, coalesce(sum(total_reviews), 0)::int as n
       from academy.courses where instructor_id = ${uid} and total_reviews > 0`);
@@ -262,6 +271,7 @@ export const getCreatorSummary = async (req: any, res: any) => {
     });
     successResponse(res, {
       salesTotal: num(s?.total), salesThisMonth: num(s?.month), students: num(s?.students),
+      earningsTotal: num(s?.earn_total), earningsThisMonth: num(s?.earn_month), sharePercent: await getConfigInt("creator_share_percent"),
       averageRating: num(r?.x10) / 10, totalReviews: num(r?.n),
       content: content.map((c) => ({ id: c.id, title: c.title, status: c.status, updatedAt: c.updated_at })),
       last7Days: last7,

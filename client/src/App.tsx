@@ -6,6 +6,8 @@ import { UserRole, CartItem, Course, CourseType, WishlistItem, toUserRole } from
 import LandingPage from './views/LandingPage';
 import Dashboard from './views/Dashboard';
 import AppSettings from './views/admin/AppSettings';
+import LegalManager from './views/admin/LegalManager';
+import LegalGate from './components/LegalGate';
 import UserManagement from './views/admin/UserManagement';
 import CronManager from './views/admin/CronManager';
 import ProposalManager from './views/admin/ProposalManager';
@@ -368,7 +370,7 @@ const App: React.FC = () => {
       case 'settings':
         return <AppSettings />;
       case 'policy':
-        return <AppSettings isPolicyMode />;
+        return <LegalManager canPublish={currentRole === UserRole.DIRECTOR} />;
       case 'users':
         return <UserManagement />;
       case 'course-reviews':
@@ -465,6 +467,7 @@ const App: React.FC = () => {
           {renderContent()}
         </Layout>
       )}
+      <LegalGate role={currentRole} onLogout={() => handleRoleChange(UserRole.PUBLIC)} />
       {SHOW_ROLE_SWITCHER && (
         <RoleSwitcher currentRole={currentRole} onChange={handleRoleChange} />
       )}

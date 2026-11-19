@@ -84,7 +84,7 @@ const SettlementsTab: React.FC = () => {
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600 dark:text-slate-300 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        Daftar ini berisi pencairan saldo akun yang ditutup. Skema bagi hasil Creator belum ditetapkan, jadi belum ada pencairan royalti di sini.
+        Daftar ini berisi pencairan saldo akun yang ditutup. Bagi hasil Creator sudah dicatat per pendaftaran (lihat kartu Bagian Creator), tetapi pencairannya ke Creator belum tersedia di sini.
       </p>
       <StateBox loading={loading} error={error} onRetry={reload}>
         {data && data.length === 0 ? (
@@ -254,6 +254,9 @@ const FinanceDashboard: React.FC = () => {
       <StateBox loading={summary.loading} error={summary.error} onRetry={summary.reload}>
         {summary.data && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Tile title="Bagian Lembaga" value={rupiah(summary.data.platformShareTotal)} hint={`${rupiah(summary.data.platformShareThisMonth)} bulan ini. Kursus mandiri: Creator ${summary.data.creatorSharePercent}%, Lembaga ${100 - summary.data.creatorSharePercent}%. Workshop mengikuti pengaturan Bagi Hasil.`} />
+            <Tile title="Bagian Creator" value={rupiah(summary.data.creatorShareTotal)} hint="Total hak Creator / pemilik materi dari penjualan" />
+            <Tile title="Bagian Mentor" value={rupiah(summary.data.mentorShareTotal)} hint="Total hak Mentor dari workshop" />
             <Tile title="Pendapatan total" value={rupiah(summary.data.revenueTotal)} hint={`${num(summary.data.salesCount)} pendaftaran`} icon={<TrendingUp size={18} />} />
             <Tile title="Pendapatan bulan ini" value={rupiah(summary.data.revenueThisMonth)} />
             <Tile title="Total diskon diberikan" value={rupiah(summary.data.discountTotal)} hint={`${num(summary.data.freeEnrollments)} pendaftaran gratis`} />
