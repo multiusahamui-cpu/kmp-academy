@@ -176,6 +176,20 @@
       "when": 1795066788018,
       "tag": "0024_payout_proofs",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795068250688,
+      "tag": "0025_kyc_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795068717352,
+      "tag": "0026_certificate_pdf_url",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { randomInt } from "node:crypto";
 import { and, asc, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../db";
+import { ensureCertificatePdf } from "../lib/certificate-service";
 import { certificates, courseExamQuestions, courseModules, courses, enrollments, examAttempts, moduleProgress, users } from "../schema/schema";
 import { notifyUser } from "../lib/cards";
 import { successResponse, errorResponse } from "../utils/response";
@@ -151,6 +152,7 @@ export const completeModule = async (req: any, res: any) => {
     });
 
     if ("notFound" in result) return errorResponse(res, result.notFound, 404);
+    if (result.certificate?.created) void ensureCertificatePdf(result.certificate.id); // PDF dibuat di latar belakang setelah transaksi selesai
     successResponse(res, result, "Modul ditandai selesai");
   } catch (error) {
     errorResponse(res, "Gagal menyimpan progres", 500, error);
@@ -250,6 +252,7 @@ export const submitExam = async (req: any, res: any) => {
     });
 
     if ("status" in result) return errorResponse(res, result.message, result.status);
+    if (result.data.certificate) void ensureCertificatePdf(result.data.certificate.id);
     successResponse(res, result.data, result.data.passed ? "Selamat, Anda lulus." : "Ujian selesai.");
   } catch (error) {
     errorResponse(res, "Gagal mengirim jawaban", 500, error);
@@ -263,8 +266,10 @@ export const submitExam = async (req: any, res: any) => {
 export const listMyCertificates = async (req: any, res: any) => {
   try {
     const rows = await db.select().from(certificates).where(eq(certificates.userId, req.user.id)).orderBy(desc(certificates.issuedAt));
+    // Sertifikat lama atau yang gagal dibuat PDF-nya dilengkapi saat dibuka (paling banyak 5 per permintaan).
+    for (const c of rows.filter((r) => !r.pdfUrl).slice(0, 5)) c.pdfUrl = await ensureCertificatePdf(c.id);
     successResponse(res, rows.map((c) => ({
-      id: c.id, serial: c.serial, courseId: c.courseId, courseTitle: c.courseTitle, courseType: c.courseType, studentName: c.studentName,
+      pdfUrl: c.pdfUrl, id: c.id, serial: c.serial, courseId: c.courseId, courseTitle: c.courseTitle, courseType: c.courseType, studentName: c.studentName,
       instructorName: c.instructorName, grade: c.grade, kind: c.kind, issuedAt: c.issuedAt,
     })), "Sertifikat saya");
   } catch (error) {

@@ -1,6 +1,7 @@
 
 import * as workshop from "../controllers/workshopController";
 import * as payout from "../controllers/payoutController";
+import * as kyc from "../controllers/kycController";
 import { Router } from "express";
 import * as admin from "../controllers/adminController";
 import { authenticateToken, requireRole } from "../middleware/auth";
@@ -38,6 +39,12 @@ router.post("/workshop-proposals/:id/reject", requireRole(["ADMIN_SYSTEM", "DIRE
 // Pencairan bagi hasil bulanan: Admin memposting dan mencatat transfer, Direktur menyetujui.
 router.get("/payouts", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.overview);
 router.post("/payouts/post", requireRole(["ADMIN_SYSTEM"]), payout.postNow);
+// Verifikasi KYC (Admin Sistem): antrean, berkas privat (dicatat), keputusan
+router.get("/kyc", requireRole(["ADMIN_SYSTEM"]), kyc.adminList);
+router.get("/kyc/:id/file/:file", requireRole(["ADMIN_SYSTEM"]), kyc.adminFile);
+router.get("/kyc/:id/nik", requireRole(["ADMIN_SYSTEM"]), kyc.adminNik);
+router.post("/kyc/:id/approve", requireRole(["ADMIN_SYSTEM"]), kyc.adminApprove);
+router.post("/kyc/:id/reject", requireRole(["ADMIN_SYSTEM"]), kyc.adminReject);
 router.get("/payouts/archive", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.archive);
 router.post("/payouts/payees/:pid/pay", requireRole(["ADMIN_SYSTEM"]), uploadLimiter, payout.payProofMiddleware, payout.pay);
 router.get("/payouts/payees/:pid/proof", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), payout.adminProof);

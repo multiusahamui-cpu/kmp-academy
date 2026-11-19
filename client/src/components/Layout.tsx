@@ -200,6 +200,7 @@ export const Layout: React.FC<LayoutProps> = ({
           dashboardItem,
           { isDivider: true, sectionTitle: "Administration" },
           { id: "finance", label: "Keuangan & Settlement", icon: Banknote },
+          { id: "kyc-review", label: "Verifikasi KYC", icon: ShieldCheck },
           { id: "payouts", label: "Pencairan Bagi Hasil", icon: Wallet },
           { id: "categories", label: "Manajemen Kategori", icon: Tags },
           { id: "proposals", label: "Approval Center", icon: FileCheck },

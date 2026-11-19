@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import { UserRole, Certificate, KYCStatus } from "../../types";
 import { CertificateDto, learningApi, mapCertificate } from "../../services/learning";
 import {
-  User,
   Shield,
   Briefcase,
   Award,
   CheckCircle,
   Clock,
   FileCheck,
-  Fingerprint,
   Linkedin,
   Lock,
   Globe,
 } from "lucide-react";
+import KycPanel from "../../components/KycPanel";
+import { kycApi, type MyKyc } from "../../services/kyc";
 import CertificateTemplate from "../../components/CertificateTemplate";
 import ChangePasswordForm from "../../components/ChangePasswordForm";
 import DeleteAccountPanel from "../../components/DeleteAccountPanel";
@@ -34,7 +34,11 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
     "NONE",
   );
   const [viewCert, setViewCert] = useState<Certificate | null>(null);
-  const [kycStatus, setKycStatus] = useState<KYCStatus>(KYCStatus.UNVERIFIED);
+  const [kycData, setKycData] = useState<MyKyc | null>(null);
+  const loadKyc = async () => { try { setKycData(await kycApi.me()); } catch { setKycData(null); } };
+  useEffect(() => { void loadKyc(); }, []);
+  // KYC dianggap beres bila terverifikasi di Academy, atau anggota digitalcoop.id dengan KYC lengkap.
+  const kycStatus: KYCStatus = kycData?.status === 'VERIFIED' || kycData?.exempt ? KYCStatus.VERIFIED : kycData?.status === 'PENDING' ? KYCStatus.PENDING : KYCStatus.UNVERIFIED;
 
   // LinkedIn KMP - ADNG State
   const [isJobSeekerActive, setIsJobSeekerActive] = useState(false);
@@ -65,16 +69,6 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
     }
     setRequestStatus("PENDING");
     alert(`Pengajuan untuk menjadi ${role} berhasil dikirim ke Admin!`);
-  };
-
-  const handleUploadKYC = (e: React.FormEvent) => {
-    e.preventDefault();
-    setKycStatus(KYCStatus.PENDING);
-    // Simulate Admin Approval after 2 seconds for Demo UX
-    setTimeout(() => {
-      setKycStatus(KYCStatus.VERIFIED);
-      alert("Demo: KYC Otomatis Diverifikasi untuk testing fitur!");
-    }, 2000);
   };
 
   const toggleJobSeeker = () => {
@@ -204,98 +198,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                 )}
               </div>
 
-              {kycStatus === KYCStatus.VERIFIED ? (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
-                  <div className="w-16 h-16 bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={32} />
-                  </div>
-                  <h4 className="text-xl font-bold text-green-800 dark:text-green-300 mb-2">
-                    Akun Terverifikasi
-                  </h4>
-                  <p className="text-green-700 dark:text-green-400">
-                    {isStudent
-                      ? "Identitas Valid! Silakan menuju menu 'Karir & Industry Hub' untuk mengaktifkan profil Job Seeker Anda."
-                      : "Terima kasih! Identitas Anda telah valid. Anda dapat mengakses fitur pencairan dana."}
-                  </p>
-                </div>
-              ) : kycStatus === KYCStatus.PENDING ? (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8 text-center">
-                  <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-800 text-yellow-600 dark:text-yellow-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Clock size={32} />
-                  </div>
-                  <h4 className="text-xl font-bold text-yellow-800 dark:text-yellow-300 mb-2">
-                    Sedang Ditinjau Admin
-                  </h4>
-                  <p className="text-yellow-700 dark:text-yellow-400">
-                    Data Anda sedang dalam proses validasi. Estimasi waktu 1x24
-                    jam kerja.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleUploadKYC} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-lg p-6 text-center hover:bg-gray-50 dark:hover:bg-slate-800 transition cursor-pointer">
-                      <Fingerprint
-                        className="mx-auto text-gray-400 mb-3"
-                        size={40}
-                      />
-                      <p className="font-bold text-gray-700 dark:text-slate-300 text-sm">
-                        Upload Foto KTP
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Klik untuk memilih file (JPG/PNG)
-                      </p>
-                      <input type="file" className="hidden" />
-                    </div>
-                    <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-lg p-6 text-center hover:bg-gray-50 dark:hover:bg-slate-800 transition cursor-pointer">
-                      <User className="mx-auto text-gray-400 mb-3" size={40} />
-                      <p className="font-bold text-gray-700 dark:text-slate-300 text-sm">
-                        Upload Selfie dengan KTP
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Klik untuk memilih file (JPG/PNG)
-                      </p>
-                      <input type="file" className="hidden" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                      Nomor Induk Kependudukan (NIK)
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded font-mono"
-                      placeholder="16 digit NIK"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                      Nomor NPWP (Opsional)
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded font-mono"
-                      placeholder="15/16 digit NPWP"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Upload NPWP agar pajak royalti lebih rendah (Sesuai PPh
-                      21).
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-200 dark:border-slate-800">
-                    <button
-                      type="submit"
-                      className="px-6 py-2 bg-kodman-600 text-white rounded font-bold hover:bg-kodman-700 shadow-md"
-                    >
-                      Kirim Data Verifikasi
-                    </button>
-                  </div>
-                </form>
-              )}
+              {kycData ? <KycPanel kyc={kycData} onChanged={() => void loadKyc()} /> : <p className="text-sm text-gray-500">Memuat status KYC...</p>}
             </div>
           )}
 
@@ -581,6 +484,16 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                         >
                           <FileCheck size={12} className="mr-1" /> Lihat / Cetak
                         </button>
+                        {cert.pdfUrl && (
+                          <a
+                            href={cert.pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-kodman-600 dark:text-kodman-400 hover:underline"
+                          >
+                            Unduh PDF
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>

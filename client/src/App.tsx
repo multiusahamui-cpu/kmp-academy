@@ -8,6 +8,7 @@ import Dashboard from './views/Dashboard';
 import AppSettings from './views/admin/AppSettings';
 import LegalManager from './views/admin/LegalManager';
 import PayoutManager from './views/admin/PayoutManager';
+import KycManager from './views/admin/KycManager';
 import PayoutMine from './views/PayoutMine';
 import LegalGate from './components/LegalGate';
 import UserManagement from './views/admin/UserManagement';
@@ -389,6 +390,8 @@ const App: React.FC = () => {
         return <FinanceDashboard />;
       case 'categories':
         return <CategoryManager />; 
+      case 'kyc-review':
+        return <KycManager />;
       case 'payouts':
         return <PayoutManager role={currentRole === UserRole.DIRECTOR ? 'DIRECTOR' : 'ADMIN_SYSTEM'} />;
       case 'my-payouts':

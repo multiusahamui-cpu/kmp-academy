@@ -481,6 +481,8 @@ export const certificates = academySchema.table("certificates", {
   courseType: varchar("course_type", { length: 20 }).notNull(),
   instructorName: varchar("instructor_name", { length: 255 }).notNull(),
   grade: integer("grade"),
+  // PDF di R2 publik (certificates/<serial>.pdf). Hanya URL yang disimpan; kosong = belum dibuat (dibuat otomatis).
+  pdfUrl: text("pdf_url"),
   issuedAt: timestamp("issued_at").defaultNow().notNull(),
 }, (t) => [
   unique("certificates_user_course_unique").on(t.userId, t.courseId),
@@ -727,3 +729,38 @@ export const payoutPayees = academySchema.table("payout_payees", {
   batchUserUq: uniqueIndex("payout_payees_batch_user_uq").on(t.batchId, t.userId),
   userIdx: index("payout_payees_user_idx").on(t.userId),
 }));
+
+// KYC: satu catatan per pengguna. Foto KTP/selfie di R2 privat (hanya kuncinya di sini); NIK terenkripsi AES-256-GCM.
+// Catatan keuangan/identitas permanen: ikut dipertahankan saat restore (berkas R2 tidak ikut, lihat runbook).
+export const kycRecords = academySchema.table("kyc_records", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  status: varchar("status", { length: 12 }).notNull(), // PENDING | VERIFIED | REJECTED
+  source: varchar("source", { length: 12 }).notNull(), // MANUAL | DIGITALCOOP
+  fullName: varchar("full_name", { length: 150 }).notNull(),
+  nikEnc: text("nik_enc").notNull(),
+  nikLast4: varchar("nik_last4", { length: 4 }).notNull(),
+  nikFingerprint: varchar("nik_fingerprint", { length: 64 }).notNull(),
+  ktpKey: text("ktp_key").notNull(),
+  ktpMime: varchar("ktp_mime", { length: 40 }).notNull(),
+  selfieKey: text("selfie_key").notNull(),
+  selfieMime: varchar("selfie_mime", { length: 40 }).notNull(),
+  rejectNote: text("reject_note"),
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => ({
+  userUq: uniqueIndex("kyc_records_user_uq").on(t.userId),
+  // Satu NIK hanya boleh terverifikasi/menunggu di satu akun.
+  nikUq: uniqueIndex("kyc_records_nik_active_uq").on(t.nikFingerprint).where(sql`status <> 'REJECTED'`),
+  statusIdx: index("kyc_records_status_idx").on(t.status),
+}));
+
+// Jejak setiap pembukaan berkas KYC oleh staf (tidak pernah diubah/dihapus aplikasi).
+export const kycAccessLog = academySchema.table("kyc_access_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  recordId: uuid("record_id").references(() => kycRecords.id).notNull(),
+  actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+  file: varchar("file", { length: 10 }).notNull(), // ktp | selfie | nik
+  at: timestamp("at").defaultNow().notNull(),
+});

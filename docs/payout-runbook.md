@@ -22,5 +22,11 @@
 - Akses bukti: Admin/Direktur, atau penerima untuk bukti miliknya sendiri (via server, tidak ada URL publik).
 
 ## Catatan
-- Sertifikat saat ini berupa baris DB yang dirender di klien, bukan berkas R2. Menyimpan PDF sertifikat di R2 adalah pekerjaan terpisah.
-- Setelah deploy: `pnpm db:migrate` sampai 0024, cek job `payout-posting` di System Cron Jobs, pastikan SMTP dan R2 privat terkonfigurasi, buat cadangan baru.
+- Sertifikat: PDF dibuat server saat terbit dan disimpan di R2 PUBLIK `certificates/<nomor-huruf-kecil>.pdf`; database hanya menyimpan URL di `certificates.pdf_url`. Sertifikat lama atau yang gagal dibuat dilengkapi otomatis saat pemilik membuka daftar sertifikatnya. Bila berkas di R2 hilang, kosongkan `pdf_url` baris terkait (`update academy.certificates set pdf_url = null where ...`) agar dibuat ulang. Nama dengan huruf di luar Latin-1 tampil sebagai `?` di PDF.
+- Setelah deploy: `pnpm db:migrate` sampai 0026, cek job `payout-posting` di System Cron Jobs, pastikan SMTP dan R2 privat terkonfigurasi, isi `KYC_ENCRYPTION_KEY` di .env server, buat cadangan baru.
+
+## KYC (R2 privat)
+- Foto KTP dan selfie: R2 PRIVAT, prefix `kyc/<userId>/`. Sama seperti bukti bayar, restore database tidak memulihkan berkas: sertakan prefix ini di cadangan bucket dan jangan beri lifecycle kedaluwarsa.
+- NIK dienkripsi AES-256-GCM dengan `KYC_ENCRYPTION_KEY` (64 hex, buat dengan `openssl rand -hex 32`) di `.env` server. Simpan kunci di tempat TERPISAH dari cadangan database. Kunci hilang = NIK tidak dapat dibaca lagi. Tanpa kunci, fitur KYC mengembalikan 503.
+- Pembukaan foto/NIK oleh Admin tercatat di `kyc_access_log`. Admin Sistem saja yang dapat membukanya.
+- Tombol "Ambil data KYC dari digitalcoop.id" butuh endpoint di repo garuda-superapp: lihat `docs/SPEC-BRIDGE-KYC-DIGITALCOOP.md`.

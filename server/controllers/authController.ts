@@ -309,16 +309,3 @@ export const deleteAvatar = async (req: any, res: any) => {
     errorResponse(res, "Gagal menghapus foto profil", 500, error);
   }
 };
-
-export const submitKYC = async (req: any, res: any) => {
-  try {
-    // Handle KYC Upload Logic
-    successResponse(res, null, "KYC submitted successfully");
-  } catch (error) {
-    errorResponse(res, "KYC submission failed", 500, error);
-  }
-};
-
-export const getKycStatus = async (req: any, res: any) => {
-  successResponse(res, { status: "VERIFIED" }, "KYC Status");
-};

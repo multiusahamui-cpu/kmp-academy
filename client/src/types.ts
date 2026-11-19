@@ -129,6 +129,8 @@ export interface Certificate {
   issueDate: string;
   grade: number;
   signatureUrl?: string; // Mock URL
+  /** PDF resmi di penyimpanan publik; kosong bila belum dibuat. */
+  pdfUrl?: string | null;
   /** Nomor resmi sertifikat (KMPA-tahun-kode) untuk verifikasi publik. */
   serial?: string;
   /** EXAM = lulus ujian, COMPLETION = menyelesaikan materi, PARTICIPATION = keikutsertaan (kursus sertifikasi). */

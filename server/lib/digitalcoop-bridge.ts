@@ -17,6 +17,15 @@ export interface ProfilDigitalcoop {
   bolehMasuk: boolean;
 }
 
+/** Data KYC anggota (spesifikasi: docs/SPEC-BRIDGE-KYC-DIGITALCOOP.md). Berkas dikirim server-ke-server, tidak lewat browser. */
+export interface KycDigitalcoop {
+  kycStatus: string;
+  nama: string;
+  nik: string;
+  ktp: { mime: string; base64: string };
+  selfie: { mime: string; base64: string };
+}
+
 export class BridgeError extends Error {
   constructor(
     public readonly status: number,
@@ -69,6 +78,8 @@ export const createBridge = (env: NodeJS.ProcessEnv = process.env, fetchImpl: Fe
       (await call<{ cocok: boolean }>("POST", "/api/bridge/academy/verifikasi-password", { digitalcoopUserId, password })).cocok,
     status: async (digitalcoopUserId: string) =>
       (await call<{ profil: ProfilDigitalcoop }>("GET", `/api/bridge/academy/status/${encodeURIComponent(digitalcoopUserId)}`)).profil,
+    ambilKyc: async (digitalcoopUserId: string) =>
+      (await call<{ kyc: KycDigitalcoop }>("GET", `/api/bridge/academy/kyc/${encodeURIComponent(digitalcoopUserId)}`)).kyc,
     // Dompet simpanan sukarela (spesifikasi: docs/SPEC-BRIDGE-DOMPET-DIGITALCOOP.md)
     saldo: (digitalcoopUserId: string) =>
       call<{ saldo: number; pinSet: boolean }>("GET", `/api/bridge/academy/saldo/${encodeURIComponent(digitalcoopUserId)}`),

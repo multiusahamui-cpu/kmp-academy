@@ -10,6 +10,7 @@ import helpdeskRoutes from "./helpdeskRoutes";
 import classRoutes from "./classRoutes";
 import legalRoutes from "./legalRoutes";
 import payoutRoutes from "./payoutRoutes";
+import kycRoutes from "./kycRoutes";
 import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
 import paymentRoutes from "./paymentRoutes";
@@ -43,6 +44,7 @@ router.use("/payments", paymentRoutes); // Order pembayaran: VA, transfer manual
 router.use("/users", userRoutes); // Includes Learning, Wallet, Certs
 router.use("/mentor", mentorRoutes); // Kelas, sesi, dan penilaian Mentor
 router.use("/payouts", payoutRoutes); // Bagi hasil: sisi Creator/Mentor
+router.use("/kyc", kycRoutes); // Verifikasi identitas (KTP/selfie di R2 privat)
 router.use("/legal", legalRoutes); // Dokumen hukum dan persetujuan
 router.use("/classes", classRoutes); // Sisi siswa: gabung dan kelas yang diikuti
 router.use("/helpdesk", helpdeskRoutes); // Tiket bantuan

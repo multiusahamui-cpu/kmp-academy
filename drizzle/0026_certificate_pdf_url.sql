@@ -1,0 +1,1 @@
+ALTER TABLE "academy"."certificates" ADD COLUMN "pdf_url" text;

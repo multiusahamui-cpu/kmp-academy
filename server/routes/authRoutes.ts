@@ -1,6 +1,6 @@
 
 import { Router } from "express";
-import { register, login, logout, changePassword, getProfile, updateProfile, uploadAvatar, deleteAvatar, avatarUploadMiddleware, submitKYC, getKycStatus } from "../controllers/authController";
+import { register, login, logout, changePassword, getProfile, updateProfile, uploadAvatar, deleteAvatar, avatarUploadMiddleware } from "../controllers/authController";
 import { authenticateToken } from "../middleware/auth";
 import { emailChangeLimiter, loginLimiter, passwordLimiter, registerLimiter, uploadLimiter } from "../lib/security";
 import { getMyDeletion, requestDeletion, cancelDeletion } from "../controllers/accountDeletionController";
@@ -32,7 +32,5 @@ router.put("/profile", authenticateToken, updateProfile);
 router.post("/profile/avatar", authenticateToken, uploadLimiter, avatarUploadMiddleware, uploadAvatar);
 router.delete("/profile/avatar", authenticateToken, uploadLimiter, deleteAvatar);
 
-router.post("/kyc", authenticateToken, submitKYC);
-router.get("/kyc-status", authenticateToken, getKycStatus);
 
 export default router;
