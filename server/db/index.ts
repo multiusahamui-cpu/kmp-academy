@@ -13,8 +13,14 @@ if (!process.env.DATABASE_URL) {
 
 // SSL diatur lewat DATABASE_URL (mis. `?sslmode=require`), seperti garuda-superapp.
 // PostgreSQL lokal/VPS yang sama dengan digitalcoop.id tidak memakai SSL.
+// PENTING (zona waktu): pin setiap koneksi ke UTC, menyamai standar garuda-superapp.
+// Tanpa ini koneksi mewarisi timezone server (Asia/Jakarta), sehingga now()/defaultNow()
+// menulis WIB sedangkan Drizzle mengirim `new Date()` sebagai UTC — keduanya beda 7 jam
+// dan merusak semua perbandingan waktu (kedaluwarsa, cutoff, jendela harian).
+// `-c timezone=UTC` diset saat handshake koneksi (bebas race, aman untuk connection pooling).
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  options: "-c timezone=UTC",
 });
 
 // Inisialisasi Drizzle dengan Schema
