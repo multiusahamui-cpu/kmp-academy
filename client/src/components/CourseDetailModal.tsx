@@ -59,7 +59,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.finalPrice ?? course.price)}
                     </h3>
                     {(course.finalPrice ?? course.price) < course.price && (
-                       <p className="text-xs text-gray-400"><s>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}</s> {t('shop.discountPct', { percent: course.discountPercent })}{course.discountEndsAt ? t('shop.until', { date: new Date(course.discountEndsAt).toLocaleDateString('id-ID') }) : ''}</p>
+                       <p className="text-xs text-gray-400"><s>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}</s> {t('shop.discountPct', { percent: course.discountPercent ?? 0 })}{course.discountEndsAt ? t('shop.until', { date: new Date(course.discountEndsAt).toLocaleDateString('id-ID') }) : ''}</p>
                     )}
                  </div>
                  <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded text-yellow-700 dark:text-yellow-500 font-bold text-sm">

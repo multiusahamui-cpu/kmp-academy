@@ -39,12 +39,12 @@ describe("createBridge", () => {
     const calls: { url: string; headers: Record<string, string> }[] = [];
     const ok = createBridge(env, async (url, init) => {
       calls.push({ url, headers: init.headers });
-      return { ok: true, status: 200, json: async () => ({ profil: profil() }) };
+      return { ok: true, status: 200, headers: { get: () => "application/json" }, json: async () => ({ profil: profil() }) };
     });
     expect((await ok.tukarTiket("t".repeat(43))).nama).toBe("Budi");
     expect(calls[0].url).toBe("http://127.0.0.1:5000/api/bridge/academy/tukar");
     expect(calls[0].headers["X-Academy-Bridge-Key"]).toBe("k".repeat(40));
-    const ditolak = createBridge(env, async () => ({ ok: false, status: 401, json: async () => ({ message: "Tiket kedaluwarsa" }) }));
+    const ditolak = createBridge(env, async () => ({ ok: false, status: 401, headers: { get: () => "application/json" }, json: async () => ({ message: "Tiket kedaluwarsa" }) }));
     await expect(ditolak.tukarTiket("x")).rejects.toMatchObject({ status: 401, message: "Tiket kedaluwarsa" });
     const putus = createBridge(env, async () => {
       throw new Error("ECONNREFUSED");

@@ -47,6 +47,7 @@ export const bridgeConfigured = (env: NodeJS.ProcessEnv = process.env): boolean 
 type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body?: string; signal?: AbortSignal }) => Promise<{
   ok: boolean;
   status: number;
+  headers: { get: (name: string) => string | null };
   json: () => Promise<unknown>;
 }>;
 

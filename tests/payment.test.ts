@@ -105,14 +105,14 @@ describe("bridge dompet", () => {
   const env = { DIGITALCOOP_BRIDGE_URL: "http://127.0.0.1:5000", DIGITALCOOP_BRIDGE_KEY: "k".repeat(32) } as unknown as NodeJS.ProcessEnv;
   it("debit mengirim kunci idempotensi dan PIN ke endpoint yang benar", async () => {
     let seen: any = null;
-    const b = createBridge(env, async (url, init) => { seen = { url, init }; return { ok: true, status: 200, json: async () => ({ status: "SUCCESS", txId: "t1", saldoBaru: 5 }) }; });
+    const b = createBridge(env, async (url, init) => { seen = { url, init }; return { ok: true, status: 200, headers: { get: () => "application/json" },  json: async () => ({ status: "SUCCESS", txId: "t1", saldoBaru: 5 }) }; });
     const r = await b.debit({ digitalcoopUserId: "u1", amount: 1000, pin: "123456", idempotencyKey: "ord-1", description: "x" });
     expect(r.txId).toBe("t1");
     expect(seen.url).toBe("http://127.0.0.1:5000/api/bridge/academy/debit");
     expect(JSON.parse(seen.init.body)).toMatchObject({ idempotencyKey: "ord-1", pin: "123456" });
   });
   it("galat PIN diteruskan dengan status dan pesan", async () => {
-    const b = createBridge(env, async () => ({ ok: false, status: 400, json: async () => ({ message: "PIN salah. Sisa percobaan: 3", code: "PIN_REQUIRED" }) }));
+    const b = createBridge(env, async () => ({ ok: false, status: 400, headers: { get: () => "application/json" },  json: async () => ({ message: "PIN salah. Sisa percobaan: 3", code: "PIN_REQUIRED" }) }));
     await expect(b.debit({ digitalcoopUserId: "u1", amount: 1000, pin: "000000", idempotencyKey: "o", description: "x" })).rejects.toMatchObject({ status: 400, code: "PIN_REQUIRED" });
   });
 });

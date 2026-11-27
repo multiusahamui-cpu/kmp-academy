@@ -129,7 +129,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
                 <span className="text-sm text-gray-500">{t('shop.total')}</span>
                 <span className="text-2xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{free ? t('shop.free') : rupiah(price)}</span>
               </div>
-              {price < base && <p className="text-right text-xs text-gray-400"><s>{rupiah(base)}</s> {promoApplied ? t('shop.promoCodeLine', { code: promoApplied.code, percent: promoApplied.percent }) : t('shop.discountLine', { percent: course.discountPercent })}</p>}
+              {price < base && <p className="text-right text-xs text-gray-400"><s>{rupiah(base)}</s> {promoApplied ? t('shop.promoCodeLine', { code: promoApplied.code, percent: promoApplied.percent }) : t('shop.discountLine', { percent: course.discountPercent ?? 0 })}</p>}
             </div>
 
             <div>
