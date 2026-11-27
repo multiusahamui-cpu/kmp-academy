@@ -6,6 +6,7 @@ import { Plus, Trash2, RefreshCw, Eye, EyeOff, Landmark, History, ArrowDownLeft,
 import { userApi } from '../../services/api';
 import TopUpModal from '../../components/TopUpModal';
 import MyOrdersCard from '../../components/MyOrdersCard';
+import { useT } from '../../i18n';
 
 interface WalletSettingsProps {
   role: UserRole;
@@ -39,6 +40,7 @@ interface WalletData {
 }
 
 const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
+  const t = useT();
   const [walletData, setWalletData] = useState<WalletData>({ balance: 0, isMember: false, mode: 'VA_INFO', paymentsEnabled: false, history: [], banks: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(false);
@@ -83,35 +85,35 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
            accountNumber: newBankNumber,
            holderName: newHolderName
         });
-        toast.success("Rekening berhasil ditambahkan.");
+        toast.success(t('wallet.addOk'));
         setIsAddingBank(false);
         setNewBankNumber('');
         setNewHolderName('');
         fetchWalletData(); // Refresh list
      } catch {
-        toast.error("Gagal menambah rekening.");
+        toast.error(t('wallet.addFail'));
      } finally {
         setIsProcessing(false);
      }
   };
 
   const handleWithdraw = async () => {
-     const amountStr = prompt("Masukkan jumlah penarikan:");
+     const amountStr = prompt(t('wallet.askAmount'));
      if(!amountStr) return;
      const amount = parseInt(amountStr);
      
      if (amount > walletData.balance) {
-        toast.error("Saldo tidak mencukupi.");
+        toast.error(t('wallet.noFunds'));
         return;
      }
 
      setIsProcessing(true);
      try {
         await userApi.withdrawWallet({ amount, bankId: walletData.banks[0]?.id || 'default' });
-        toast.success("Permintaan penarikan dibuat. Menunggu persetujuan Admin.");
+        toast.success(t('wallet.wdOk'));
         fetchWalletData();
      } catch {
-        toast.error("Gagal melakukan withdraw.");
+        toast.error(t('wallet.wdFail'));
      } finally {
         setIsProcessing(false);
      }
@@ -123,9 +125,9 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dompet & Pembayaran (Live Database)</h2>
+           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('wallet.title')}</h2>
            <p className="text-gray-500 dark:text-slate-400">
-             {role === UserRole.STUDENT ? 'Kelola saldo, metode pembayaran, dan riwayat transaksi.' : 'Kelola pencairan dana (revenue) Anda.'}
+             {role === UserRole.STUDENT ? t('wallet.subStudent') : t('wallet.subOther')}
            </p>
         </div>
       </div>
@@ -140,7 +142,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                
                <div className="relative z-10">
                   <p className="text-digitalcoop-100 text-xs font-bold uppercase tracking-wider mb-2">
-                     {walletData.mode === 'SIMPANAN_SUKARELA' ? 'Simpanan Sukarela' : 'Saldo Efektif'}
+                     {walletData.mode === 'SIMPANAN_SUKARELA' ? t('wallet.savings') : t('wallet.effective')}
                   </p>
                   <div className="flex items-center justify-between mb-4">
                      <h3 className="text-3xl font-bold tracking-tight font-mono">
@@ -162,9 +164,9 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
 
                   <p className="mb-4 text-xs text-digitalcoop-100 leading-relaxed">
                      {walletData.mode === 'SIMPANAN_SUKARELA'
-                        ? 'Dompet Academy Anda adalah Simpanan Sukarela di digitalcoop.id dan disinkronkan dari saldo asli Anda di sana.'
-                        : 'Pembayaran kursus dilakukan langsung lewat Virtual Account setelah payment gateway aktif.'}
-                     {!walletData.paymentsEnabled && ' Penarikan belum tersedia.'}
+                        ? t('wallet.modeSavings')
+                        : t('wallet.modeVa')}
+                     {!walletData.paymentsEnabled && t('wallet.noWd')}
                   </p>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -186,7 +188,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                         </button>
                      )}
                      <button className="py-2.5 bg-digitalcoop-800/50 text-white border border-white/20 rounded-xl text-sm font-medium flex items-center justify-center hover:bg-digitalcoop-800 transition">
-                        <History size={16} className="mr-2" /> History
+                        <History size={16} className="mr-2" /> {t('wallet.history')}
                      </button>
                   </div>
                </div>
@@ -198,13 +200,13 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-5 shadow-sm">
                <div className="flex justify-between items-center mb-4">
                   <h3 className="font-bold text-gray-900 dark:text-white text-sm flex items-center">
-                     <Landmark size={16} className="mr-2 text-digitalcoop-600" /> Rekening Bank
+                     <Landmark size={16} className="mr-2 text-digitalcoop-600" /> {t('wallet.banks')}
                   </h3>
                   <button 
                      onClick={() => setIsAddingBank(!isAddingBank)}
                      className="text-xs bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 px-2 py-1 rounded text-gray-600 dark:text-slate-300 transition"
                   >
-                     {isAddingBank ? 'Batal' : '+ Tambah'}
+                     {isAddingBank ? t('wallet.cancel') : t('wallet.add')}
                   </button>
                </div>
 
@@ -223,7 +225,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                         </select>
                         <input 
                            type="text" 
-                           placeholder="Atas Nama (Sesuai KTP)" 
+                           placeholder={t('wallet.holderPh')} 
                            className="w-full p-2 text-xs border rounded dark:bg-slate-900 dark:border-slate-600 dark:text-white"
                            value={newHolderName}
                            onChange={(e) => setNewHolderName(e.target.value)}
@@ -231,14 +233,14 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                         />
                         <input 
                            type="number" 
-                           placeholder="Nomor Rekening" 
+                           placeholder={t('wallet.numberPh')} 
                            className="w-full p-2 text-xs border rounded dark:bg-slate-900 dark:border-slate-600 dark:text-white"
                            value={newBankNumber}
                            onChange={(e) => setNewBankNumber(e.target.value)}
                            required
                         />
                         <button type="submit" disabled={isProcessing} className="w-full py-1.5 bg-digitalcoop-600 text-white text-xs font-bold rounded hover:bg-digitalcoop-700">
-                           {isProcessing ? 'Menyimpan...' : 'Simpan Rekening'}
+                           {isProcessing ? t('wallet.saving') : t('wallet.saveBank')}
                         </button>
                      </div>
                   </form>
@@ -246,7 +248,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
 
                <div className="space-y-3">
                   {walletData.banks.length === 0 ? (
-                     <p className="text-xs text-gray-400 text-center py-2">Belum ada rekening terdaftar di database.</p>
+                     <p className="text-xs text-gray-400 text-center py-2">{t('wallet.noBanks')}</p>
                   ) : (
                      walletData.banks.map((bank) => (
                         <div key={bank.id} className="p-3 rounded-lg border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30 flex justify-between items-center group">
@@ -269,27 +271,27 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden h-full flex flex-col">
                <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950">
                   <h3 className="font-bold text-gray-900 dark:text-white flex items-center">
-                     <History size={18} className="mr-2 text-digitalcoop-600" /> Riwayat Transaksi (Realtime)
+                     <History size={18} className="mr-2 text-digitalcoop-600" /> {t('wallet.trxTitle')}
                   </h3>
                   <div className="relative">
                      <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-                     <input type="text" placeholder="Cari transaksi..." className="pl-7 pr-3 py-1 text-xs border rounded-full bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:outline-none focus:border-digitalcoop-500" />
+                     <input type="text" placeholder={t('wallet.search')} className="pl-7 pr-3 py-1 text-xs border rounded-full bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:outline-none focus:border-digitalcoop-500" />
                   </div>
                </div>
                
                <div className="overflow-y-auto flex-1 p-0 h-[500px]">
                   {walletData.history.length === 0 ? (
                      <div className="p-8 text-center text-gray-500 dark:text-slate-400 text-sm">
-                        Belum ada riwayat transaksi.
+                        {t('wallet.noTrx')}
                      </div>
                   ) : (
                      <table className="w-full text-sm text-left">
                         <thead className="bg-white dark:bg-slate-900 text-gray-500 border-b dark:border-slate-800 sticky top-0">
                            <tr>
-                              <th className="px-6 py-3 font-medium text-xs uppercase">Tanggal</th>
-                              <th className="px-6 py-3 font-medium text-xs uppercase">Keterangan</th>
-                              <th className="px-6 py-3 font-medium text-xs uppercase text-right">Jumlah</th>
-                              <th className="px-6 py-3 font-medium text-xs uppercase text-center">Status</th>
+                              <th className="px-6 py-3 font-medium text-xs uppercase">{t('wallet.colDate')}</th>
+                              <th className="px-6 py-3 font-medium text-xs uppercase">{t('wallet.colDesc')}</th>
+                              <th className="px-6 py-3 font-medium text-xs uppercase text-right">{t('wallet.colAmt')}</th>
+                              <th className="px-6 py-3 font-medium text-xs uppercase text-center">{t('wallet.colStatus')}</th>
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
