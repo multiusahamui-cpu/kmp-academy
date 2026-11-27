@@ -13,7 +13,6 @@ export default function NodeTopUp() {
   const [ordering, setOrdering] = useState(false);
   const [pin, setPin] = useState("");
   const [orders, setOrders] = useState<NodeTopupOrder[]>([]);
-  const referralLink = summary?.referral ? `${window.location.origin}/?ref=${summary.referral.code}` : "";
 
   const reload = async () => {
     const [s, o] = await Promise.all([nodeProgramApi.me(), nodeProgramApi.listTopups()]);
@@ -81,7 +80,7 @@ export default function NodeTopUp() {
         <div className="rounded-xl bg-digitalcoop-50/60 p-4 dark:bg-slate-800/60">
           <p className="text-xs font-bold text-gray-700 dark:text-slate-200 mb-2">Tiga jenis bonus</p>
           <div className="grid gap-2 sm:grid-cols-3">
-            <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Sponsor</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Dari anggota yang mendaftar lewat link referral Anda.</p></div>
+            <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Sponsor</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Mengikuti jaringan/upline keanggotaan Anda di digitalcoop.id.</p></div>
             <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Level</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Berjenjang mengikuti kedalaman jaringan sampai batas level.</p></div>
             <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Pairing</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Dari poin yang terpasang, dibatasi kapasitas harian node Anda.</p></div>
           </div>
@@ -100,7 +99,6 @@ export default function NodeTopUp() {
       <div className="card-surface p-5"><p className="text-xs text-gray-500 dark:text-slate-400">Kapasitas harian</p><p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{summary?.capacityPoints ?? 0} poin</p></div>
     </div>
 
-    {summary?.referral && <div className="card-surface p-5"><p className="font-bold text-digitalcoop-800 dark:text-digitalcoop-200">Link Referral Saya</p><p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Bagikan link ini; sponsor tercatat otomatis saat pendaftar baru membuat akun.</p><div className="mt-3 flex gap-2"><input readOnly value={referralLink} className="min-w-0 flex-1 rounded-lg border bg-white p-2 text-xs dark:border-slate-700 dark:bg-slate-800"/><button onClick={() => { void navigator.clipboard.writeText(referralLink); toast.success("Link disalin."); }} className="btn-primary text-sm">Salin</button></div></div>}
 
     {/* Form beli */}
     <div className="card-surface p-6">
