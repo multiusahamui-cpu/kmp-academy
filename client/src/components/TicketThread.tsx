@@ -26,7 +26,7 @@ const TicketThread: React.FC<{ id: string; onBack: () => void; onChanged: () => 
 
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-digitalcoop-600">&larr; Kembali</button>
       <StateBox loading={loading} error={error} onRetry={reload}>
         {data && (
           <>
@@ -41,7 +41,7 @@ const TicketThread: React.FC<{ id: string; onBack: () => void; onChanged: () => 
             </div>
             <ul className="space-y-3">
               {data.messages.map((m) => (
-                <li key={m.id} className={`p-3 rounded-lg text-sm ${m.isStaff ? 'bg-kodman-50 dark:bg-kodman-900/20' : 'bg-gray-50 dark:bg-slate-800'}`}>
+                <li key={m.id} className={`p-3 rounded-lg text-sm ${m.isStaff ? 'bg-digitalcoop-50 dark:bg-digitalcoop-900/20' : 'bg-gray-50 dark:bg-slate-800'}`}>
                   <p className="text-xs text-gray-500 mb-1">{m.author}{m.isStaff ? ' (staf)' : ''}, {dateTimeId(m.createdAt)}</p>
                   <p className="whitespace-pre-wrap text-gray-800 dark:text-slate-200">{m.body}</p>
                 </li>
@@ -57,7 +57,7 @@ const TicketThread: React.FC<{ id: string; onBack: () => void; onChanged: () => 
               >
                 <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4} maxLength={4000} placeholder="Tulis balasan" className="w-full p-3 text-sm border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
                 {err && <p role="alert" className="text-sm text-red-600">{err}</p>}
-                <button type="submit" disabled={busy || text.trim().length < 5} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Kirim</button>
+                <button type="submit" disabled={busy || text.trim().length < 5} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Kirim</button>
               </form>
             )}
           </>

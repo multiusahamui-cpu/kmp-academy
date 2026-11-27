@@ -97,9 +97,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
   };
 
   const row = (key: MethodKey, icon: React.ReactNode, title: string, hint: string) => (
-    <label key={key} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${method === key ? 'border-kodman-500 bg-kodman-50 dark:bg-kodman-900/20' : 'border-gray-200 hover:border-kodman-300 dark:border-slate-700'}`}>
+    <label key={key} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${method === key ? 'border-digitalcoop-500 bg-digitalcoop-50 dark:bg-digitalcoop-900/20' : 'border-gray-200 hover:border-digitalcoop-300 dark:border-slate-700'}`}>
       <input type="radio" name="method" className="mt-1" checked={method === key} onChange={() => setMethod(key)} />
-      <span className="mt-0.5 text-kodman-600">{icon}</span>
+      <span className="mt-0.5 text-digitalcoop-600">{icon}</span>
       <span className="flex-1"><span className="block text-sm font-bold text-gray-900 dark:text-white">{title}</span><span className="block text-xs text-gray-500 dark:text-slate-400">{hint}</span></span>
     </label>
   );
@@ -116,7 +116,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
             <CheckCircle size={48} className="mx-auto text-green-500" />
             <p className="font-bold text-gray-900 dark:text-white">Berhasil mengikuti kursus</p>
             {doneCard.card && <p className="text-sm text-gray-600 dark:text-slate-300">Kartu Student Anda terbit: <b>{doneCard.card}</b></p>}
-            <button onClick={onClose} className="w-full rounded-xl bg-kodman-600 py-3 font-bold text-white hover:bg-kodman-700">Tutup</button>
+            <button onClick={onClose} className="w-full rounded-xl bg-digitalcoop-600 py-3 font-bold text-white hover:bg-digitalcoop-700">Tutup</button>
           </div>
         ) : order ? (
           <OrderPanel orderId={order.id} initial={order} onPaid={() => finish(null)} />
@@ -125,7 +125,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
             <div className="rounded-xl bg-gray-50 p-4 dark:bg-slate-800/40">
               <div className="flex items-end justify-between">
                 <span className="text-sm text-gray-500">Total</span>
-                <span className="text-2xl font-bold text-kodman-700 dark:text-kodman-400">{free ? 'Gratis' : rupiah(price)}</span>
+                <span className="text-2xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{free ? 'Gratis' : rupiah(price)}</span>
               </div>
               {price < base && <p className="text-right text-xs text-gray-400"><s>{rupiah(base)}</s> {promoApplied ? `Kode ${promoApplied.code}: ${promoApplied.percent}%` : `Diskon ${course.discountPercent}%`}</p>}
             </div>
@@ -153,7 +153,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
                 {method === 'VA' && (
                   <div className="grid grid-cols-4 gap-2">
                     {BANKS.map((b) => (
-                      <button key={b.id} onClick={() => setBank(b.id)} className={`rounded-lg border py-2 text-xs font-bold ${bank === b.id ? 'border-kodman-500 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/20' : 'border-gray-200 text-gray-600 dark:border-slate-700 dark:text-slate-300'}`}>{b.label}</button>
+                      <button key={b.id} onClick={() => setBank(b.id)} className={`rounded-lg border py-2 text-xs font-bold ${bank === b.id ? 'border-digitalcoop-500 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20' : 'border-gray-200 text-gray-600 dark:border-slate-700 dark:text-slate-300'}`}>{b.label}</button>
                     ))}
                   </div>
                 )}
@@ -169,7 +169,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
 
             {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">{error}</p>}
             <button onClick={() => void pay()} disabled={busy || !methods || (!free && method === 'DC_WALLET' && pin.length < 4)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-kodman-600 py-3 font-bold text-white shadow-lg hover:bg-kodman-700 disabled:opacity-60">
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-digitalcoop-600 py-3 font-bold text-white shadow-lg hover:bg-digitalcoop-700 disabled:opacity-60">
               {busy && <Loader2 size={16} className="animate-spin" />}
               {free ? 'Daftar Gratis' : method === 'WALLET' ? `Bayar ${rupiah(price)}` : method === 'DC_WALLET' ? `Bayar ${rupiah(price)} dari dompet digitalcoop.id` : 'Buat Pesanan'}
             </button>

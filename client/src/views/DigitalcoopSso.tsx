@@ -89,7 +89,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
       <div className="mx-auto max-w-md p-8 text-center">
         <p className="mb-4 text-red-600">{error}</p>
         <div className="flex justify-center gap-3">
-          <a href={DIGITALCOOP_ACADEMY} className="rounded-lg bg-kodman-600 px-4 py-2 text-sm font-bold text-white">
+          <a href={DIGITALCOOP_ACADEMY} className="rounded-lg bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white">
             Kembali ke digitalcoop.id
           </a>
           <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2 text-sm">
@@ -113,7 +113,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
     <form onSubmit={kirim} className="mx-auto max-w-xl space-y-5 p-6">
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <ShieldCheck className="text-kodman-600" /> Selamat datang di KMP-ADNG Academy
+          <ShieldCheck className="text-digitalcoop-600" /> Selamat datang di KMP-ADNG Academy
         </h1>
         <p className="text-sm text-gray-500">Akun Academy Anda akan dibuat dan ditautkan ke akun digitalcoop.id.</p>
       </div>
@@ -185,7 +185,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
         <button
           type="submit"
           disabled={!setuju || busy || !password}
-          className="flex flex-1 items-center justify-center rounded-lg bg-kodman-600 py-3 font-bold text-white disabled:bg-kodman-400"
+          className="flex flex-1 items-center justify-center rounded-lg bg-digitalcoop-600 py-3 font-bold text-white disabled:bg-digitalcoop-400"
           data-testid="btn-onboarding"
         >
           {busy && <Loader2 size={18} className="mr-2 animate-spin" />} Setuju & buat akun Academy

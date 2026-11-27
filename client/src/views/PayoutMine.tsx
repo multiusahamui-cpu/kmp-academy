@@ -56,7 +56,7 @@ const PayoutMine: React.FC = () => {
                 <input required value={bank.bankName} onChange={(e) => setBank({ ...bank, bankName: e.target.value })} placeholder="Nama bank" className={input} />
                 <input required value={bank.accountNumber} onChange={(e) => setBank({ ...bank, accountNumber: e.target.value })} placeholder="Nomor rekening" inputMode="numeric" className={input} />
                 <input required value={bank.holderName} onChange={(e) => setBank({ ...bank, holderName: e.target.value })} placeholder="Nama pemilik rekening" className={input} />
-                <button disabled={busy} type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Simpan rekening</button>
+                <button disabled={busy} type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Simpan rekening</button>
               </form>
             </Card>
 
@@ -70,7 +70,7 @@ const PayoutMine: React.FC = () => {
                           <p className="font-bold">{h.period} · {rupiah(h.amount)}</p>
                           <p className="text-xs text-gray-500">{h.status === 'PAID' ? `Ditransfer ${dateTimeId(h.paidAt)} · Ref: ${h.transferRef}` : STATUS[h.batchStatus] ?? h.batchStatus}</p>
                         </div>
-                        <span className="shrink-0 flex gap-3">{h.hasProof && <button onClick={() => void payoutsApi.myProof(h.batchId).catch(() => setMsg('Gagal mengunduh bukti.'))} className="text-kodman-600 font-bold">Unduh bukti bayar</button>}<button onClick={() => void open(h.batchId)} className="text-kodman-600 font-bold">{detail?.id === h.batchId ? 'Tutup' : 'Rincian'}</button></span>
+                        <span className="shrink-0 flex gap-3">{h.hasProof && <button onClick={() => void payoutsApi.myProof(h.batchId).catch(() => setMsg('Gagal mengunduh bukti.'))} className="text-digitalcoop-600 font-bold">Unduh bukti bayar</button>}<button onClick={() => void open(h.batchId)} className="text-digitalcoop-600 font-bold">{detail?.id === h.batchId ? 'Tutup' : 'Rincian'}</button></span>
                       </div>
                       {detail?.id === h.batchId && (
                         <table className="w-full text-xs text-left mt-2">

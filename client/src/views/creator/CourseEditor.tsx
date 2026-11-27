@@ -83,7 +83,7 @@ const CourseEditor: React.FC<Props> = ({ courseId, onBack, onCreated }) => {
         <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-800">
           {tabs.map(([id, label]) => (
             <button key={id} disabled={!courseId && id !== 'DETAILS'} onClick={() => setTab(id)}
-              className={`flex-1 whitespace-nowrap px-4 py-3 text-sm font-bold disabled:opacity-40 ${tab === id ? 'border-b-2 border-kodman-600 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/20 dark:text-kodman-300' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>{label}</button>
+              className={`flex-1 whitespace-nowrap px-4 py-3 text-sm font-bold disabled:opacity-40 ${tab === id ? 'border-b-2 border-digitalcoop-600 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20 dark:text-digitalcoop-300' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>{label}</button>
           ))}
         </div>
 
@@ -112,7 +112,7 @@ const CourseEditor: React.FC<Props> = ({ courseId, onBack, onCreated }) => {
                 {categories.length === 0 ? <p className="text-xs text-gray-500">Belum ada kategori yang dibuat Admin.</p> : (
                   <div className="flex flex-wrap gap-2">
                     {categories.map((c) => (
-                      <button key={c.id} disabled={!editable} onClick={() => toggleCat(c.id)} className={`rounded-full border px-3 py-1 text-xs font-medium ${cats.includes(c.id) ? 'border-kodman-500 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/20' : 'border-gray-300 text-gray-600 dark:border-slate-600 dark:text-slate-300'}`}>{c.name}</button>
+                      <button key={c.id} disabled={!editable} onClick={() => toggleCat(c.id)} className={`rounded-full border px-3 py-1 text-xs font-medium ${cats.includes(c.id) ? 'border-digitalcoop-500 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20' : 'border-gray-300 text-gray-600 dark:border-slate-600 dark:text-slate-300'}`}>{c.name}</button>
                     ))}
                   </div>
                 )}

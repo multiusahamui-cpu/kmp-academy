@@ -27,11 +27,11 @@ const StrategicReport: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-            <PieChart className="mr-3 text-kodman-600" /> Laporan Strategis
+            <PieChart className="mr-3 text-digitalcoop-600" /> Laporan Strategis
           </h2>
           <p className="text-gray-500 dark:text-slate-400">Performa penjualan dan pertumbuhan 6 bulan terakhir (WIB), dihitung langsung dari data.</p>
         </div>
-        <button onClick={download} disabled={downloading} className="flex items-center px-4 py-2 bg-kodman-600 text-white rounded-lg hover:bg-kodman-700 font-bold text-sm shadow-sm disabled:opacity-50">
+        <button onClick={download} disabled={downloading} className="flex items-center px-4 py-2 bg-digitalcoop-600 text-white rounded-lg hover:bg-digitalcoop-700 font-bold text-sm shadow-sm disabled:opacity-50">
           <Download size={16} className="mr-2" /> {downloading ? 'Mengunduh...' : 'Unduh CSV Penjualan'}
         </button>
       </div>
@@ -85,7 +85,7 @@ const StrategicReport: React.FC = () => {
                           <td className="py-2 font-bold">{i + 1}</td>
                           <td className="font-medium text-gray-900 dark:text-white">{c.name} <span className="text-xs text-gray-400">{c.courses} kursus</span></td>
                           <td className="text-right font-mono">{num(c.students)}</td>
-                          <td className="text-right font-mono font-bold text-kodman-600 dark:text-kodman-400">{rupiah(c.revenue)}</td>
+                          <td className="text-right font-mono font-bold text-digitalcoop-600 dark:text-digitalcoop-400">{rupiah(c.revenue)}</td>
                         </tr>
                       ))}
                     </tbody>

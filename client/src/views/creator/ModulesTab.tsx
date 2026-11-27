@@ -73,11 +73,11 @@ const ModulesTab: React.FC<Props> = ({ courseId, editable, modules, onChanged })
         {modules.map((m, idx) => (
           <div key={m.id} className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-slate-700">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600 dark:bg-slate-800 dark:text-slate-300">{idx + 1}</span>
-            <span className="text-kodman-600">{m.type === 'VIDEO' ? <PlayCircle size={18} /> : <FileText size={18} />}</span>
+            <span className="text-digitalcoop-600">{m.type === 'VIDEO' ? <PlayCircle size={18} /> : <FileText size={18} />}</span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-gray-900 dark:text-white">{m.title} {m.isFreePreview && <span className="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">Pratinjau gratis</span>}</p>
               <p className="text-xs text-gray-500">{KIND_LABEL[m.type]} • {m.hasContent ? 'Isi tersedia' : <span className="text-red-600">Belum ada isi</span>}</p>
-              {progress?.id === m.id && <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-gray-200"><div className="h-full bg-kodman-600 transition-all" style={{ width: `${progress.pct}%` }} /></div>}
+              {progress?.id === m.id && <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-gray-200"><div className="h-full bg-digitalcoop-600 transition-all" style={{ width: `${progress.pct}%` }} /></div>}
             </div>
             {editable && (
               <div className="flex shrink-0 items-center gap-1">
@@ -114,7 +114,7 @@ const ModulesTab: React.FC<Props> = ({ courseId, editable, modules, onChanged })
               <textarea className={inputClass} rows={6} maxLength={20000} value={text} onChange={(e) => setText(e.target.value)} />
             </label>
           ) : (
-            <input ref={fileRef} type="file" accept={ACCEPT[type]} onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-kodman-600 file:px-3 file:py-2 file:text-sm file:font-bold file:text-white" />
+            <input ref={fileRef} type="file" accept={ACCEPT[type]} onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-digitalcoop-600 file:px-3 file:py-2 file:text-sm file:font-bold file:text-white" />
           )}
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300"><input type="checkbox" checked={free} onChange={(e) => setFree(e.target.checked)} /> Jadikan pratinjau gratis (bisa dibuka calon peserta)</label>
           {error && <p className="text-sm text-red-600">{error}</p>}

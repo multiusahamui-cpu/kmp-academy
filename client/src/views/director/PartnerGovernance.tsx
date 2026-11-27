@@ -34,7 +34,7 @@ const PartnerDetail: React.FC<{ partner: PartnerRow; onBack: () => void; onChang
 
   return (
     <div className="space-y-6">
-      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-digitalcoop-600">&larr; Kembali</button>
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{partner.name}</h2>
         <p className="text-sm text-gray-500">{partner.email}, status akun saat dibuka: {STATUS_LABEL[partner.status] ?? partner.status}</p>
@@ -73,7 +73,7 @@ const PartnerDetail: React.FC<{ partner: PartnerRow; onBack: () => void; onChang
                     liftId === s.id ? (
                       <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); void act(() => partnersApi.lift(s.id, note), () => { setLiftId(null); setNote(''); }); }}>
                         <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Catatan pencabutan (min. 10 karakter)" maxLength={1000} className={input} />
-                        <button type="submit" disabled={busy || note.trim().length < 10} className="px-3 py-1 bg-kodman-600 text-white rounded text-sm disabled:opacity-50">Cabut</button>
+                        <button type="submit" disabled={busy || note.trim().length < 10} className="px-3 py-1 bg-digitalcoop-600 text-white rounded text-sm disabled:opacity-50">Cabut</button>
                       </form>
                     ) : (
                       <button onClick={() => setLiftId(s.id)} className="mt-1 text-xs underline">Cabut pembekuan</button>
@@ -98,7 +98,7 @@ const PartnerGovernance: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Gavel className="mr-3 text-kodman-600" /> Tata Kelola Mitra</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Gavel className="mr-3 text-digitalcoop-600" /> Tata Kelola Mitra</h2>
         <p className="text-gray-500 dark:text-slate-400">Peringatan dan pembekuan akun mitra B2B. Hanya Direktur yang dapat menjatuhkan atau mencabut sanksi.</p>
       </div>
       <Card>

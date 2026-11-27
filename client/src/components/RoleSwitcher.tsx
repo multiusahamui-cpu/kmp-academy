@@ -17,7 +17,7 @@ export const RoleSwitcher: React.FC<RoleSwitcherProps> = ({ currentRole, onChang
             onClick={() => onChange(UserRole[roleKey])}
             className={`text-xs px-2 py-1 rounded border ${
               currentRole === UserRole[roleKey]
-                ? 'bg-kodman-600 text-white border-kodman-600'
+                ? 'bg-digitalcoop-600 text-white border-digitalcoop-600'
                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
             }`}
           >

@@ -281,10 +281,10 @@ export const Layout: React.FC<LayoutProps> = ({
               className="flex items-center gap-2 cursor-pointer group"
               onClick={() => onNavigate("landing")}
             >
-              <div className="bg-kodman-900 dark:bg-kodman-500 text-white p-2 rounded-lg group-hover:scale-105 transition">
+              <div className="bg-digitalcoop-900 dark:bg-digitalcoop-500 text-white p-2 rounded-lg group-hover:scale-105 transition">
                 <GraduationCap size={24} />
               </div>
-              <span className="font-sans font-extrabold text-xl text-kodman-900 dark:text-white tracking-tight">
+              <span className="font-sans font-extrabold text-xl text-digitalcoop-900 dark:text-white tracking-tight">
                 {publicConfig.siteName}
               </span>
             </div>
@@ -294,21 +294,21 @@ export const Layout: React.FC<LayoutProps> = ({
               <a
                 href="#home"
                 onClick={(e) => handleScroll(e, "home")}
-                className="hover:text-kodman-600 dark:hover:text-kodman-400 transition cursor-pointer"
+                className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
                 Beranda
               </a>
               <a
                 href="#courses"
                 onClick={(e) => handleScroll(e, "courses")}
-                className="hover:text-kodman-600 dark:hover:text-kodman-400 transition cursor-pointer"
+                className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
                 Kursus
               </a>
               <a
                 href="#about"
                 onClick={(e) => handleScroll(e, "about")}
-                className="hover:text-kodman-600 dark:hover:text-kodman-400 transition cursor-pointer"
+                className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
                 Tentang Kami
               </a>
@@ -334,7 +334,7 @@ export const Layout: React.FC<LayoutProps> = ({
               {/* Login Button */}
               <button
                 onClick={onOpenAuth}
-                className="px-5 py-2.5 bg-kodman-600 hover:bg-kodman-700 text-white font-bold rounded-full text-sm shadow-lg hover:shadow-kodman-500/30 transition transform hover:-translate-y-0.5 flex items-center"
+                className="px-5 py-2.5 bg-digitalcoop-600 hover:bg-digitalcoop-700 text-white font-bold rounded-full text-sm shadow-lg hover:shadow-digitalcoop-500/30 transition transform hover:-translate-y-0.5 flex items-center"
               >
                 <LogIn size={16} className="mr-2" /> Masuk / Daftar
               </button>
@@ -394,13 +394,13 @@ export const Layout: React.FC<LayoutProps> = ({
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-kodman-900 dark:bg-slate-900 text-white transform transition-transform duration-200 ease-in-out border-r border-transparent dark:border-slate-800
+        fixed inset-y-0 left-0 z-40 w-64 bg-digitalcoop-900 dark:bg-slate-900 text-white transform transition-transform duration-200 ease-in-out border-r border-transparent dark:border-slate-800
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0 lg:static lg:inset-auto flex flex-col
       `}
       >
-        <div className="h-16 flex items-center px-6 bg-kodman-950 dark:bg-slate-950/50 shrink-0">
-          <GraduationCap className="mr-2 text-kodman-400" />
+        <div className="h-16 flex items-center px-6 bg-digitalcoop-950 dark:bg-slate-950/50 shrink-0">
+          <GraduationCap className="mr-2 text-digitalcoop-400" />
           <span className="font-sans font-bold text-lg tracking-tight">
             KMP - ADNG LMS
           </span>
@@ -408,14 +408,14 @@ export const Layout: React.FC<LayoutProps> = ({
 
         <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
           <div className="flex items-center gap-3 p-3 bg-white/10 dark:bg-slate-800 rounded-xl mb-6 backdrop-blur-sm border border-white/5">
-            <div className="w-10 h-10 rounded-full bg-kodman-500 flex items-center justify-center font-bold text-white shadow-lg shadow-kodman-500/20">
+            <div className="w-10 h-10 rounded-full bg-digitalcoop-500 flex items-center justify-center font-bold text-white shadow-lg shadow-digitalcoop-500/20">
               {currentRole[0]}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold font-sans truncate">
                 User {currentRole}
               </p>
-              <p className="text-xs text-kodman-200 truncate capitalize">
+              <p className="text-xs text-digitalcoop-200 truncate capitalize">
                 {currentRole.replace("_", " ").toLowerCase()}
               </p>
             </div>
@@ -428,11 +428,11 @@ export const Layout: React.FC<LayoutProps> = ({
                 return (
                   <div key={`divider-${index}`} className="py-2 mt-2 mb-1">
                     {item.sectionTitle && (
-                      <p className="px-3 text-[10px] font-bold text-kodman-300 uppercase tracking-wider opacity-80 mb-1">
+                      <p className="px-3 text-[10px] font-bold text-digitalcoop-300 uppercase tracking-wider opacity-80 mb-1">
                         {item.sectionTitle}
                       </p>
                     )}
-                    <div className="border-t border-kodman-700 dark:border-slate-700 mx-3 opacity-50"></div>
+                    <div className="border-t border-digitalcoop-700 dark:border-slate-700 mx-3 opacity-50"></div>
                   </div>
                 );
               }
@@ -447,8 +447,8 @@ export const Layout: React.FC<LayoutProps> = ({
                   }}
                   className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${
                     activeView === item.id
-                      ? "bg-kodman-600 dark:bg-kodman-600 text-white shadow-md shadow-kodman-900/20"
-                      : "text-kodman-100 hover:bg-white/10 hover:text-white"
+                      ? "bg-digitalcoop-600 dark:bg-digitalcoop-600 text-white shadow-md shadow-digitalcoop-900/20"
+                      : "text-digitalcoop-100 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {item.icon && (
@@ -464,7 +464,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </nav>
         </div>
 
-        <div className="p-4 bg-kodman-950 dark:bg-slate-950 shrink-0">
+        <div className="p-4 bg-digitalcoop-950 dark:bg-slate-950 shrink-0">
           <button
             onClick={() => onRoleChange(UserRole.PUBLIC)}
             className="w-full flex items-center justify-center px-4 py-2 text-sm text-red-300 hover:text-red-100 hover:bg-red-900/30 rounded-lg transition font-medium"
@@ -530,8 +530,8 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-slate-950 scroll-smooth">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-digitalcoop-50/40 dark:bg-slate-950 scroll-smooth">
+          <div key={currentView} className="max-w-7xl mx-auto animate-in">{children}</div>
         </main>
       </div>
       {/* Mobile Sidebar Overlay */}
@@ -548,40 +548,40 @@ export const Layout: React.FC<LayoutProps> = ({
 const Footer = () => {
   const publicConfig = usePublicConfig();
   return (
-  <footer className="bg-kodman-900 dark:bg-slate-900 text-white pt-16 pb-8 border-t border-kodman-800 dark:border-slate-800">
+  <footer className="bg-digitalcoop-900 dark:bg-slate-900 text-white pt-16 pb-8 border-t border-digitalcoop-800 dark:border-slate-800">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
       <div>
         <div className="flex items-center gap-2 mb-6">
-          <GraduationCap size={32} className="text-kodman-400" />
+          <GraduationCap size={32} className="text-digitalcoop-400" />
           <span className="font-sans font-bold text-2xl tracking-tight">
             {publicConfig.siteName}
           </span>
         </div>
-        <p className="text-kodman-100 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">
+        <p className="text-digitalcoop-100 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">
           Platform pembelajaran digital terdepan untuk pengembangan Koperasi dan
           UMKM di Indonesia dengan kurikulum berbasis teknologi modern.
         </p>
       </div>
 
       <div>
-        <h3 className="font-sans font-bold text-lg mb-6 text-kodman-50">
+        <h3 className="font-sans font-bold text-lg mb-6 text-digitalcoop-50">
           Hubungi Kami
         </h3>
-        <ul className="space-y-4 text-sm text-kodman-100 dark:text-slate-400">
+        <ul className="space-y-4 text-sm text-digitalcoop-100 dark:text-slate-400">
           <li>
-            <span className="block text-kodman-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+            <span className="block text-digitalcoop-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
               Project Lead
             </span>
             {CONTACT_INFO.lead}
           </li>
           <li>
-            <span className="block text-kodman-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+            <span className="block text-digitalcoop-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
               WhatsApp
             </span>
             <span className="font-mono">{publicConfig.supportWhatsapp}</span>
           </li>
           <li>
-            <span className="block text-kodman-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
+            <span className="block text-digitalcoop-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
               Email Support
             </span>
             {publicConfig.supportEmail}
@@ -590,13 +590,13 @@ const Footer = () => {
       </div>
 
       <div>
-        <h3 className="font-sans font-bold text-lg mb-6 text-kodman-50">
+        <h3 className="font-sans font-bold text-lg mb-6 text-digitalcoop-50">
           Lokasi
         </h3>
-        <p className="text-sm text-kodman-100 dark:text-slate-400 leading-relaxed">
+        <p className="text-sm text-digitalcoop-100 dark:text-slate-400 leading-relaxed">
           {CONTACT_INFO.address}
         </p>
-        <div className="mt-8 pt-8 border-t border-kodman-800 dark:border-slate-800 text-xs text-kodman-300 dark:text-slate-600 font-mono">
+        <div className="mt-8 pt-8 border-t border-digitalcoop-800 dark:border-slate-800 text-xs text-digitalcoop-300 dark:text-slate-600 font-mono">
           &copy; {new Date().getFullYear()} KMP - ADNG Digital Cooperative.
         </div>
       </div>

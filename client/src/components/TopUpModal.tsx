@@ -67,26 +67,26 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ onClose, onPaid, existingOrderI
               <p className="mb-2 text-sm text-gray-500">Nominal</p>
               <div className="mb-3 grid grid-cols-3 gap-2">
                 {PRESETS.map((a) => (
-                  <button key={a} onClick={() => setAmount(a)} className={`rounded border px-1 py-2 text-sm font-medium transition ${amount === a ? 'border-kodman-500 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/30 dark:text-kodman-400' : 'border-gray-200 text-gray-600 hover:border-kodman-300 dark:border-slate-700 dark:text-slate-400'}`}>{a / 1000}k</button>
+                  <button key={a} onClick={() => setAmount(a)} className={`rounded border px-1 py-2 text-sm font-medium transition ${amount === a ? 'border-digitalcoop-500 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/30 dark:text-digitalcoop-400' : 'border-gray-200 text-gray-600 hover:border-digitalcoop-300 dark:border-slate-700 dark:text-slate-400'}`}>{a / 1000}k</button>
                 ))}
               </div>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-500">Rp</span>
                 <input type="number" min={10000} step={1000} value={amount} onChange={(e) => setAmount(Math.floor(Number(e.target.value)))}
-                  className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-lg font-bold outline-none focus:ring-2 focus:ring-kodman-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-lg font-bold outline-none focus:ring-2 focus:ring-digitalcoop-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </div>
               <p className="mt-1 text-xs text-gray-400">Minimal {rupiah(10000)}, maksimal {rupiah(20000000)}.</p>
             </div>
 
             <div className="space-y-2">
               {methods?.va.enabled && (
-                <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 ${method === 'VA' ? 'border-kodman-500 bg-kodman-50 dark:bg-kodman-900/20' : 'border-gray-200 dark:border-slate-700'}`}>
+                <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 ${method === 'VA' ? 'border-digitalcoop-500 bg-digitalcoop-50 dark:bg-digitalcoop-900/20' : 'border-gray-200 dark:border-slate-700'}`}>
                   <input type="radio" checked={method === 'VA'} onChange={() => setMethod('VA')} />
                   <span className="text-sm font-bold text-gray-900 dark:text-white">Virtual Account <span className="font-normal text-gray-500">(otomatis)</span></span>
                 </label>
               )}
               {methods?.manual.enabled && (
-                <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 ${method === 'MANUAL' ? 'border-kodman-500 bg-kodman-50 dark:bg-kodman-900/20' : 'border-gray-200 dark:border-slate-700'}`}>
+                <label className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 ${method === 'MANUAL' ? 'border-digitalcoop-500 bg-digitalcoop-50 dark:bg-digitalcoop-900/20' : 'border-gray-200 dark:border-slate-700'}`}>
                   <input type="radio" checked={method === 'MANUAL'} onChange={() => setMethod('MANUAL')} />
                   <span className="text-sm font-bold text-gray-900 dark:text-white">Transfer Manual <span className="font-normal text-gray-500">(diverifikasi Admin)</span></span>
                 </label>
@@ -94,14 +94,14 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ onClose, onPaid, existingOrderI
               {method === 'VA' && methods?.va.enabled && (
                 <div className="grid grid-cols-4 gap-2">
                   {BANKS.map((b) => (
-                    <button key={b.id} onClick={() => setBank(b.id)} className={`rounded-lg border py-2 text-xs font-bold ${bank === b.id ? 'border-kodman-500 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/20' : 'border-gray-200 text-gray-600 dark:border-slate-700 dark:text-slate-300'}`}>{b.label}</button>
+                    <button key={b.id} onClick={() => setBank(b.id)} className={`rounded-lg border py-2 text-xs font-bold ${bank === b.id ? 'border-digitalcoop-500 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20' : 'border-gray-200 text-gray-600 dark:border-slate-700 dark:text-slate-300'}`}>{b.label}</button>
                   ))}
                 </div>
               )}
             </div>
 
             {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">{error}</p>}
-            <button onClick={() => void create()} disabled={busy || !methods} className="flex w-full items-center justify-center gap-2 rounded-lg bg-kodman-600 py-3 font-bold text-white shadow-lg hover:bg-kodman-700 disabled:opacity-60">
+            <button onClick={() => void create()} disabled={busy || !methods} className="flex w-full items-center justify-center gap-2 rounded-lg bg-digitalcoop-600 py-3 font-bold text-white shadow-lg hover:bg-digitalcoop-700 disabled:opacity-60">
               {busy && <Loader2 size={16} className="animate-spin" />} Lanjut Pembayaran
             </button>
           </div>

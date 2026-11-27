@@ -39,10 +39,10 @@ const Support: React.FC = () => {
     <div className="space-y-6 max-w-3xl">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><LifeBuoy className="mr-3 text-kodman-600" /> Bantuan</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><LifeBuoy className="mr-3 text-digitalcoop-600" /> Bantuan</h2>
           <p className="text-gray-500 dark:text-slate-400">Kirim pertanyaan atau kendala ke tim admin. Balasan masuk ke notifikasi Anda.</p>
         </div>
-        <button onClick={() => setForm(!form)} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold">Tiket baru</button>
+        <button onClick={() => setForm(!form)} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold">Tiket baru</button>
       </div>
 
       {form && (
@@ -60,7 +60,7 @@ const Support: React.FC = () => {
               <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} maxLength={4000} className={input} />
             </label>
             {err && <p role="alert" className="text-sm text-red-600">{err}</p>}
-            <button type="submit" disabled={busy} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Mengirim...' : 'Kirim'}</button>
+            <button type="submit" disabled={busy} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Mengirim...' : 'Kirim'}</button>
           </form>
         </Card>
       )}

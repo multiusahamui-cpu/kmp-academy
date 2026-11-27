@@ -145,7 +145,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-gray-900 text-white">
         <p>{loadError}</p>
-        <button onClick={onBack} className="rounded bg-kodman-600 px-4 py-2 text-sm font-bold">Kembali</button>
+        <button onClick={onBack} className="rounded bg-digitalcoop-600 px-4 py-2 text-sm font-bold">Kembali</button>
       </div>
     );
   }
@@ -193,7 +193,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
               {content?.type === 'PDF' && content.url && (
                 <div>
                   <iframe key={active.id} src={content.url} title={active.title} className="w-full h-[70vh] bg-white" />
-                  <a href={content.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 bg-gray-800 py-2 text-xs text-kodman-400 hover:underline"><ExternalLink size={12} /> Buka di tab baru</a>
+                  <a href={content.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 bg-gray-800 py-2 text-xs text-digitalcoop-400 hover:underline"><ExternalLink size={12} /> Buka di tab baru</a>
                 </div>
               )}
               {content?.type === 'TEXT' && (
@@ -227,7 +227,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
 
             <div className="flex gap-6 border-b border-gray-700 mb-6">
               {([['DESCRIPTION', 'Deskripsi'], ['REVIEWS', 'Ulasan & Rating']] as const).map(([id, label]) => (
-                <button key={id} onClick={() => setActiveTab(id)} className={`pb-3 border-b-2 font-bold text-sm transition ${activeTab === id ? 'border-kodman-500 text-kodman-400' : 'border-transparent text-gray-400 hover:border-gray-600'}`}>{label}</button>
+                <button key={id} onClick={() => setActiveTab(id)} className={`pb-3 border-b-2 font-bold text-sm transition ${activeTab === id ? 'border-digitalcoop-500 text-digitalcoop-400' : 'border-transparent text-gray-400 hover:border-gray-600'}`}>{label}</button>
               ))}
             </div>
 
@@ -250,9 +250,9 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                         ))}
                         <span className="ml-2 text-sm text-gray-400">{newRating === 5 ? 'Sangat Puas' : newRating === 4 ? 'Puas' : 'Cukup'}</span>
                       </div>
-                      <textarea className="w-full bg-gray-900 border border-gray-700 rounded p-3 text-sm text-white focus:ring-1 focus:ring-kodman-500 outline-none mb-3" rows={3}
+                      <textarea className="w-full bg-gray-900 border border-gray-700 rounded p-3 text-sm text-white focus:ring-1 focus:ring-digitalcoop-500 outline-none mb-3" rows={3}
                         placeholder="Bagaimana pengalaman belajar Anda? Ceritakan di sini..." value={newComment} onChange={(e) => setNewComment(e.target.value)} required />
-                      <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-kodman-600 text-white rounded font-bold text-sm hover:bg-kodman-700 flex items-center disabled:opacity-50">
+                      <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-digitalcoop-600 text-white rounded font-bold text-sm hover:bg-digitalcoop-700 flex items-center disabled:opacity-50">
                         {isSubmitting ? <Loader2 size={14} className="mr-2 animate-spin" /> : <Send size={14} className="mr-2" />} Kirim Ulasan
                       </button>
                     </form>
@@ -277,8 +277,8 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                         </div>
                         <p className="text-sm text-gray-300 leading-relaxed ml-11">{rev.comment}</p>
                         {rev.reply && (
-                          <div className="ml-11 mt-3 bg-gray-800/50 p-3 rounded border-l-2 border-kodman-500">
-                            <p className="text-xs font-bold text-kodman-400 mb-1">Respon Instruktur</p>
+                          <div className="ml-11 mt-3 bg-gray-800/50 p-3 rounded border-l-2 border-digitalcoop-500">
+                            <p className="text-xs font-bold text-digitalcoop-400 mb-1">Respon Instruktur</p>
                             <p className="text-xs text-gray-400">{rev.reply.comment}</p>
                           </div>
                         )}
@@ -300,7 +300,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
             {modules.map((mod, idx) => (
               <div key={mod.id} onClick={() => setActiveId(mod.id)} className={`p-4 border-b border-gray-700/50 cursor-pointer hover:bg-gray-700/50 transition flex gap-3 ${activeIdx === idx ? 'bg-gray-700/80' : ''}`}>
                 <div className="mt-1">
-                  {mod.isCompleted ? <CheckCircle size={16} className="text-green-500" /> : <div className={`w-4 h-4 rounded-full border-2 ${activeIdx === idx ? 'border-kodman-400' : 'border-gray-500'}`} />}
+                  {mod.isCompleted ? <CheckCircle size={16} className="text-green-500" /> : <div className={`w-4 h-4 rounded-full border-2 ${activeIdx === idx ? 'border-digitalcoop-400' : 'border-gray-500'}`} />}
                 </div>
                 <div>
                   <h4 className={`text-sm font-medium mb-1 ${activeIdx === idx ? 'text-white' : 'text-gray-400'}`}>{idx + 1}. {mod.title}</h4>
@@ -330,7 +330,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                   )}
                 </div>
               )}
-              {certificate && <button onClick={() => void openCertificate()} className="w-full rounded border border-kodman-500 py-2 text-sm font-bold text-kodman-300 hover:bg-kodman-900/30">Lihat Sertifikat</button>}
+              {certificate && <button onClick={() => void openCertificate()} className="w-full rounded border border-digitalcoop-500 py-2 text-sm font-bold text-digitalcoop-300 hover:bg-digitalcoop-900/30">Lihat Sertifikat</button>}
             </div>
           )}
         </div>

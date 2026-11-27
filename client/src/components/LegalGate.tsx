@@ -57,7 +57,7 @@ const LegalGate: React.FC<{ role: string; onLogout: () => void }> = ({ role, onL
           {err && <p className="text-sm text-red-600">{err}</p>}
           <div className="flex justify-between gap-2">
             <button type="button" onClick={onLogout} className="px-4 py-2 text-sm rounded-lg border dark:border-slate-700 dark:text-slate-200">Keluar</button>
-            <button type="button" disabled={!agree || busy} onClick={accept} className="px-4 py-2 text-sm font-bold rounded-lg bg-kodman-600 text-white disabled:opacity-50">
+            <button type="button" disabled={!agree || busy} onClick={accept} className="px-4 py-2 text-sm font-bold rounded-lg bg-digitalcoop-600 text-white disabled:opacity-50">
               {busy ? 'Menyimpan...' : 'Setuju dan lanjutkan'}
             </button>
           </div>

@@ -41,6 +41,7 @@ import DigitalcoopSso from './views/DigitalcoopSso';
 import LearningRoom from './components/LearningRoom';
 import { authApi, userApi } from './services/api'; // Import API Service
 import { usePublicConfig } from './services/publicConfig';
+import { toast } from './services/toast';
 
 // Switcher role (alat pengembangan) dinonaktifkan sementara, tidak dibuang.
 // Aktifkan lagi di lokal dengan VITE_SHOW_ROLE_SWITCHER=true di .env lalu `pnpm dev:client`.
@@ -230,7 +231,7 @@ const App: React.FC = () => {
     } catch (error) {
        console.error("Failed to sync wishlist", error);
        // Revert on error could be implemented here
-       alert("Gagal menyimpan wishlist ke server.");
+       toast.error("Gagal menyimpan wishlist ke server.");
        loadWishlistData(); // Revert to server state
     }
   };
@@ -462,7 +463,7 @@ const App: React.FC = () => {
         </div>
       )}
       {showAnnouncement && (
-        <div role="status" className="bg-kodman-700 text-white text-sm text-center px-4 py-2">
+        <div role="status" className="bg-digitalcoop-700 text-white text-sm text-center px-4 py-2">
           {publicConfig.announcementText}
         </div>
       )}

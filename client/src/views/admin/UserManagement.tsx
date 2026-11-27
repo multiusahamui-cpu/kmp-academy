@@ -106,7 +106,7 @@ const UserManagement: React.FC = () => {
         </div>
         <div className="flex gap-2">
           {activeTab === 'INTERNAL' && (
-             <button className="px-4 py-2 bg-kodman-600 text-white rounded hover:bg-kodman-700 text-sm font-medium flex items-center">
+             <button className="px-4 py-2 bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 text-sm font-medium flex items-center">
                 <Plus size={16} className="mr-2" /> Tambah Staff (Via Settings)
              </button>
           )}
@@ -117,7 +117,7 @@ const UserManagement: React.FC = () => {
       <div className="grid grid-cols-5 gap-2 mb-6 p-1 bg-gray-100 dark:bg-slate-800 rounded-lg">
          <button 
             onClick={() => switchTab('INTERNAL')}
-            className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'INTERNAL' ? 'bg-white dark:bg-slate-700 shadow-sm text-kodman-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'INTERNAL' ? 'bg-white dark:bg-slate-700 shadow-sm text-digitalcoop-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
          >
             <Shield size={16} className="mr-2 hidden md:block" /> Internal <span className="ml-1 hidden md:inline text-[10px] bg-gray-200 dark:bg-slate-600 px-1.5 rounded-full text-gray-600 dark:text-slate-300">A</span>
          </button>
@@ -164,7 +164,7 @@ const UserManagement: React.FC = () => {
                placeholder="Cari nama, email, No HP, atau nomor kartu..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-kodman-500"
+               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-digitalcoop-500"
              />
            </div>
         </div>
@@ -231,7 +231,7 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => issueCard(user)}
                         disabled={busyId === user.id}
-                        className="px-3 py-1 text-xs bg-kodman-600 text-white rounded hover:bg-kodman-700 disabled:opacity-50"
+                        className="px-3 py-1 text-xs bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 disabled:opacity-50"
                       >
                         {busyId === user.id ? 'Memproses...' : 'Terbitkan Kartu'}
                       </button>

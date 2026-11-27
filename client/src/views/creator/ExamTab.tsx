@@ -42,7 +42,7 @@ const ExamTab: React.FC<Props> = ({ courseId, editable, onChanged }) => {
 
   const startEdit = (q: ExamQuestionDto) => { setEditQid(q.id); setQuestion(q.question); setOptions([...q.options]); setCorrect(q.correctIndex); };
 
-  if (!exam) return <div className="flex justify-center py-8">{error ? <p className="text-sm text-red-600">{error}</p> : <Loader2 className="animate-spin text-kodman-600" />}</div>;
+  if (!exam) return <div className="flex justify-center py-8">{error ? <p className="text-sm text-red-600">{error}</p> : <Loader2 className="animate-spin text-digitalcoop-600" />}</div>;
 
   return (
     <div className="space-y-6">

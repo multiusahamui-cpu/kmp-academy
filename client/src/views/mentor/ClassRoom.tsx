@@ -28,7 +28,7 @@ const ClassDetailView: React.FC<{ id: string; onBack: () => void; onChanged: () 
 
   return (
     <div className="space-y-6">
-      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-digitalcoop-600">&larr; Kembali</button>
       <StateBox loading={loading} error={error} onRetry={reload}>
         {data && (
           <>
@@ -56,7 +56,7 @@ const ClassDetailView: React.FC<{ id: string; onBack: () => void; onChanged: () 
             <Card title={`Anggota (${num(data.members.length)})`}>
               {!data.class.courseId && <form className="flex gap-2 mb-4" onSubmit={(e) => { e.preventDefault(); void act(() => classesApi.addMember(id, email), 'Siswa ditambahkan.').then(() => setEmail('')); }}>
                 <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email siswa terdaftar" className={input} />
-                <button type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold shrink-0">Tambah</button>
+                <button type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold shrink-0">Tambah</button>
               </form>}
               {data.members.length === 0 ? (
                 <Empty>Belum ada anggota. Tambahkan lewat email atau bagikan kode gabung.</Empty>
@@ -72,7 +72,7 @@ const ClassDetailView: React.FC<{ id: string; onBack: () => void; onChanged: () 
                             <form className="flex gap-1 items-center" onSubmit={(e) => { e.preventDefault(); void act(() => classesApi.grade(id, m.userId, Number(grading.grade), grading.note), 'Nilai disimpan.').then(() => setGrading(null)); }}>
                               <input type="number" min={0} max={100} value={grading.grade} onChange={(e) => setGrading({ ...grading, grade: e.target.value })} className="w-20 px-2 py-1 border rounded dark:bg-slate-800 dark:text-white" />
                               <input value={grading.note} onChange={(e) => setGrading({ ...grading, note: e.target.value })} placeholder="Catatan" maxLength={500} className="px-2 py-1 border rounded dark:bg-slate-800 dark:text-white" />
-                              <button type="submit" className="px-2 py-1 bg-kodman-600 text-white rounded text-xs">Simpan</button>
+                              <button type="submit" className="px-2 py-1 bg-digitalcoop-600 text-white rounded text-xs">Simpan</button>
                             </form>
                           ) : m.grade === null ? '-' : <span className="font-mono font-bold">{m.grade}{m.gradeNote ? <span className="font-sans font-normal text-xs text-gray-500">, {m.gradeNote}</span> : null}</span>}
                         </td>
@@ -92,7 +92,7 @@ const ClassDetailView: React.FC<{ id: string; onBack: () => void; onChanged: () 
                 <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Judul sesi" className={input} />
                 <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className={input} />
                 <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://... (opsional)" className={input} />
-                <button type="submit" disabled={!title || !startsAt} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Jadwalkan</button>
+                <button type="submit" disabled={!title || !startsAt} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Jadwalkan</button>
               </form>
               {data.sessions.length === 0 ? (
                 <Empty>Belum ada sesi.</Empty>
@@ -143,10 +143,10 @@ const ClassRoom: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Users className="mr-3 text-kodman-600" /> Kelas Saya</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Users className="mr-3 text-digitalcoop-600" /> Kelas Saya</h2>
           <p className="text-gray-500 dark:text-slate-400">Kelola anggota, jadwal sesi, dan nilai siswa.</p>
         </div>
-        <button onClick={() => setForm(!form)} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold">Kelas baru</button>
+        <button onClick={() => setForm(!form)} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold">Kelas baru</button>
       </div>
       {form && (
         <Card>
@@ -154,7 +154,7 @@ const ClassRoom: React.FC = () => {
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama kelas" maxLength={120} className={input} />
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Deskripsi (opsional)" rows={3} maxLength={1000} className={input} />
             {err && <p role="alert" className="text-sm text-red-600">{err}</p>}
-            <button type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold">Buat kelas</button>
+            <button type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold">Buat kelas</button>
           </form>
         </Card>
       )}
@@ -165,7 +165,7 @@ const ClassRoom: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-4">
             {data?.map((c) => (
               <button key={c.id} onClick={() => setOpenId(c.id)} className="text-left">
-                <Card className="hover:border-kodman-300">
+                <Card className="hover:border-digitalcoop-300">
                   <h3 className="font-bold text-gray-900 dark:text-white">{c.name}{c.archived && <span className="text-xs text-red-600 ml-2">arsip</span>}</h3>
                   <p className="text-sm text-gray-500 dark:text-slate-400">{num(c.members)} anggota</p>
                   <p className="text-xs text-gray-500 mt-1">{c.nextSession ? `Sesi berikutnya: ${dateTimeId(c.nextSession)}` : 'Belum ada sesi mendatang'}</p>

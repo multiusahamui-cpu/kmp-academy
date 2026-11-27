@@ -30,7 +30,7 @@ const ProposalManager: React.FC = () => {
         {data && <p className="text-gray-500 dark:text-slate-400">Bagi hasil workshop berlaku: pemilik materi {data.split.owner}%, Mentor {data.split.mentor}%, Lembaga {data.split.platform}%. Diatur di Konfigurasi Sistem, grup Bagi Hasil.</p>}
       </div>
       <div className="flex gap-2">
-        {FILTERS.map((f) => <button key={f.id} onClick={() => setStatus(f.id)} className={`px-3 py-1.5 text-sm rounded-lg border ${status === f.id ? 'bg-kodman-600 text-white border-kodman-600' : 'dark:border-slate-700 dark:text-slate-200'}`}>{f.label}</button>)}
+        {FILTERS.map((f) => <button key={f.id} onClick={() => setStatus(f.id)} className={`px-3 py-1.5 text-sm rounded-lg border ${status === f.id ? 'bg-digitalcoop-600 text-white border-digitalcoop-600' : 'dark:border-slate-700 dark:text-slate-200'}`}>{f.label}</button>)}
       </div>
       {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
       <StateBox loading={loading} error={error} onRetry={reload}>
@@ -43,7 +43,7 @@ const ProposalManager: React.FC = () => {
               {p.decisionNote && <p className="text-xs">Catatan: {p.decisionNote}</p>}
               {p.status === 'PENDING' && (
                 <div className="flex gap-2 pt-2">
-                  <button disabled={busy} onClick={() => approve(p.id, p.title)} className="px-3 py-1.5 bg-kodman-600 text-white rounded-lg font-bold">Setujui</button>
+                  <button disabled={busy} onClick={() => approve(p.id, p.title)} className="px-3 py-1.5 bg-digitalcoop-600 text-white rounded-lg font-bold">Setujui</button>
                   <button disabled={busy} onClick={() => reject(p.id)} className="px-3 py-1.5 border rounded-lg dark:border-slate-700">Tolak</button>
                 </div>
               )}

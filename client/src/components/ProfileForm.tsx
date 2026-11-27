@@ -147,7 +147,7 @@ const ProfileForm: React.FC = () => {
         <p className={`text-sm ${result.ok ? 'text-green-600' : 'text-red-600'}`} role="status">{result.text}</p>
       )}
       <button type="submit" disabled={saving}
-        className="px-6 py-2 bg-kodman-600 text-white rounded font-medium hover:bg-kodman-700 disabled:opacity-50">
+        className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
         {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
       </button>
     </form>

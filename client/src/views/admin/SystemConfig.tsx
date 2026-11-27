@@ -42,7 +42,7 @@ const displayValue = (def: Pick<ConfigDefinition, 'type' | 'unit'> | undefined, 
 };
 
 const inputClass =
-  'w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none text-sm';
+  'w-full px-3 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none text-sm';
 
 const SystemConfig: React.FC = () => {
   const [groups, setGroups] = useState<ConfigGroup[]>([]);
@@ -108,7 +108,7 @@ const SystemConfig: React.FC = () => {
           role="switch"
           aria-checked={isOn}
           onClick={() => setDraft(isOn ? 'off' : 'on')}
-          className={`relative inline-flex h-7 w-14 items-center rounded-full transition ${isOn ? 'bg-kodman-600' : 'bg-gray-300 dark:bg-slate-700'}`}
+          className={`relative inline-flex h-7 w-14 items-center rounded-full transition ${isOn ? 'bg-digitalcoop-600' : 'bg-gray-300 dark:bg-slate-700'}`}
         >
           <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${isOn ? 'translate-x-8' : 'translate-x-1'}`} />
           <span className="sr-only">{item.label}</span>
@@ -180,7 +180,7 @@ const SystemConfig: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center font-sans">
-          <SlidersHorizontal className="mr-3 text-kodman-600" /> Konfigurasi Sistem
+          <SlidersHorizontal className="mr-3 text-digitalcoop-600" /> Konfigurasi Sistem
         </h2>
         <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
           Parameter umum aplikasi. Setiap perubahan langsung berlaku dan tercatat di riwayat.
@@ -225,7 +225,7 @@ const SystemConfig: React.FC = () => {
                       type="button"
                       disabled={!isDirty || isSaving}
                       onClick={() => void save(item, draft)}
-                      className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-bold text-white bg-kodman-600 hover:bg-kodman-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition"
+                      className="inline-flex items-center px-3 py-2 rounded-lg text-sm font-bold text-white bg-digitalcoop-600 hover:bg-digitalcoop-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition"
                     >
                       {isSaving ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Save size={14} className="mr-1" />}
                       Simpan

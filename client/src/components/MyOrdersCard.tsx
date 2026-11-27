@@ -29,7 +29,7 @@ const MyOrdersCard: React.FC<MyOrdersCardProps> = ({ refreshKey = 0, onOpen }) =
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="mb-4 flex items-center text-sm font-bold text-gray-900 dark:text-white"><Receipt size={16} className="mr-2 text-kodman-600" /> Pesanan Pembayaran</h3>
+      <h3 className="mb-4 flex items-center text-sm font-bold text-gray-900 dark:text-white"><Receipt size={16} className="mr-2 text-digitalcoop-600" /> Pesanan Pembayaran</h3>
       {loading ? <p className="py-2 text-center text-xs text-gray-400">Memuat...</p> : orders.length === 0 ? (
         <p className="py-2 text-center text-xs text-gray-400">Belum ada pesanan.</p>
       ) : (

@@ -84,7 +84,7 @@ const RoleApplications: React.FC = () => {
                     {item.kycStatus === 'VERIFIED' ? 'KYC Academy' : item.dcKycStatus === 'completed' ? 'KYC digitalcoop.id' : 'KYC belum lengkap'}
                   </span>
                 </p>
-                <p className="text-xs font-bold uppercase text-kodman-600">Melamar: {ROLE_LABEL[item.requestedRole] ?? item.requestedRole}</p>
+                <p className="text-xs font-bold uppercase text-digitalcoop-600">Melamar: {ROLE_LABEL[item.requestedRole] ?? item.requestedRole}</p>
                 <p className="text-gray-700 dark:text-slate-300"><strong>Profil:</strong> {item.profile}</p>
                 <p className="text-gray-700 dark:text-slate-300"><strong>Pengalaman:</strong> {item.experience}</p>
                 <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString('id-ID')}</p>

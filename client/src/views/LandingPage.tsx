@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { courseApi } from "../services/api";
+import { CardSkeleton } from "../components/Skeleton";
 import {
   Users,
   Award,
@@ -68,18 +69,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
       {/* 1. Hero Section (ID: home) */}
       <div
         id="home"
-        className="bg-kodman-900 dark:bg-slate-950 text-white relative overflow-hidden"
+        className="bg-digitalcoop-900 dark:bg-slate-950 text-white relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1951&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-kodman-900 dark:from-slate-950 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-digitalcoop-950 dark:from-slate-950 via-digitalcoop-900/70 to-transparent"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gold-400/20 blur-3xl"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
           <div className="max-w-3xl">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-kodman-500/20 border border-kodman-400/30 text-kodman-200 text-xs font-bold uppercase tracking-wider mb-6">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-digitalcoop-500/20 border border-digitalcoop-400/30 text-digitalcoop-200 text-xs font-bold uppercase tracking-wider mb-6">
               The Future of Digital Coop
             </span>
             <h1 className="font-sans text-4xl md:text-6xl font-extrabold mb-6 leading-tight tracking-tight">
               Tingkatkan Kompetensi{" "}
-              <span className="text-kodman-400">Digital</span> Koperasi & UMKM
+              <span className="text-digitalcoop-400">Digital</span> Koperasi & UMKM
               Anda
             </h1>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed font-light">
@@ -94,7 +96,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={onRegister}
-                className="bg-kodman-500 hover:bg-kodman-400 text-white font-sans font-bold py-3.5 px-8 rounded-full transition shadow-xl shadow-kodman-500/20 text-lg"
+                className="btn-gold font-sans text-lg py-3.5 px-8"
               >
                 Mulai Belajar Sekarang
               </button>
@@ -117,11 +119,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
       </div>
 
       {/* Stats Section */}
-      <div className="bg-kodman-50 dark:bg-slate-900 border-b border-kodman-100 dark:border-slate-800">
+      <div className="bg-digitalcoop-50 dark:bg-slate-900 border-b border-digitalcoop-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-gray-200 dark:divide-slate-800/50">
             <div>
-              <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
+              <div className="font-sans text-4xl font-extrabold text-digitalcoop-gradient mb-1">
                 {fmtNumber(stats?.instructors)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
@@ -129,7 +131,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               </div>
             </div>
             <div>
-              <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
+              <div className="font-sans text-4xl font-extrabold text-digitalcoop-gradient mb-1">
                 {fmtNumber(stats?.courses)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
@@ -137,7 +139,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               </div>
             </div>
             <div>
-              <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
+              <div className="font-sans text-4xl font-extrabold text-digitalcoop-gradient mb-1">
                 {fmtNumber(stats?.students)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
@@ -145,7 +147,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               </div>
             </div>
             <div>
-              <div className="font-sans text-4xl font-extrabold text-kodman-600 dark:text-kodman-400 mb-1">
+              <div className="font-sans text-4xl font-extrabold text-digitalcoop-gradient mb-1">
                 {stats?.satisfactionPercent != null ? `${stats.satisfactionPercent}%` : fmtNumber(stats?.certificates)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
@@ -170,13 +172,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
             </div>
             <button
               onClick={onRegister}
-              className="text-kodman-600 dark:text-kodman-400 font-bold hover:underline"
+              className="text-digitalcoop-600 dark:text-digitalcoop-400 font-bold hover:underline"
             >
               Lihat Semua &rarr;
             </button>
           </div>
 
-          {summaryState === "loading" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">Memuat kursus...</p>}
+          {summaryState === "loading" && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+          )}
           {summaryState === "error" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">Katalog kursus belum dapat dimuat. Coba muat ulang halaman.</p>}
           {summaryState === "ok" && topCourses.length === 0 && (
             <p className="text-center text-gray-500 dark:text-slate-400 py-12">Belum ada kursus yang diterbitkan. Segera hadir.</p>
@@ -188,7 +196,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-gray-100 dark:border-slate-800 group flex flex-col relative"
               >
                 {/* Ranking Badge */}
-                <div className={`absolute top-0 left-0 font-bold text-xs px-3 py-1 rounded-br-lg z-20 shadow-sm ${course.studentsEnrolled > 0 ? "bg-yellow-400 text-yellow-900" : "bg-kodman-100 text-kodman-800"}`}>
+                <div className={`absolute top-0 left-0 font-bold text-xs px-3 py-1 rounded-br-lg z-20 shadow-sm ${course.studentsEnrolled > 0 ? "bg-yellow-400 text-yellow-900" : "bg-digitalcoop-100 text-digitalcoop-800"}`}>
                   {course.studentsEnrolled > 0 ? `#${index + 1} Best Seller` : "Baru"}
                 </div>
 
@@ -218,20 +226,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                     ))}
                   </div>
 
-                  <h3 className="font-sans font-bold text-base mb-2 text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-kodman-600 dark:group-hover:text-kodman-400 transition flex-1">
+                  <h3 className="font-sans font-bold text-base mb-2 text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-digitalcoop-600 dark:group-hover:text-digitalcoop-400 transition flex-1">
                     {course.title}
                   </h3>
 
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
                     <div className="flex items-center text-xs text-gray-600 dark:text-slate-400 font-medium">
-                      <Users size={14} className="mr-1.5 text-kodman-500" />
+                      <Users size={14} className="mr-1.5 text-digitalcoop-500" />
                       {fmtNumber(course.studentsEnrolled)} Siswa
                     </div>
                     <div className="text-right">
                       {course.discountPercent > 0 && (
                         <span className="block text-[11px] text-gray-400 line-through leading-none">{rupiah(course.price)}</span>
                       )}
-                      <span className="font-sans font-bold text-kodman-600 dark:text-kodman-400 text-base">{rupiah(course.finalPrice)}</span>
+                      <span className="font-sans font-bold text-digitalcoop-600 dark:text-digitalcoop-400 text-base">{rupiah(course.finalPrice)}</span>
                     </div>
                   </div>
                 </div>
@@ -246,9 +254,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
-              <div className="inline-block p-2 bg-kodman-50 dark:bg-slate-800 rounded-lg mb-4">
+              <div className="inline-block p-2 bg-digitalcoop-50 dark:bg-slate-800 rounded-lg mb-4">
                 <Award
-                  className="text-kodman-600 dark:text-kodman-400"
+                  className="text-digitalcoop-600 dark:text-digitalcoop-400"
                   size={32}
                 />
               </div>
@@ -306,7 +314,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               </div>
             </div>
             <div className="order-1 md:order-2 relative">
-              <div className="absolute inset-0 bg-kodman-600 rounded-2xl rotate-6 transform opacity-20"></div>
+              <div className="absolute inset-0 bg-digitalcoop-600 rounded-2xl rotate-6 transform opacity-20"></div>
               <img
                 src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
                 alt="Tentang Kami"

@@ -85,7 +85,7 @@ const EmailChangeForm: React.FC = () => {
               value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <button type="submit" disabled={busy}
-            className="px-6 py-2 bg-kodman-600 text-white rounded font-medium hover:bg-kodman-700 disabled:opacity-50">
+            className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
             {busy ? 'Mengirim...' : 'Kirim Kode Verifikasi'}
           </button>
         </form>
@@ -100,7 +100,7 @@ const EmailChangeForm: React.FC = () => {
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={busy || code.length !== 6}
-              className="px-6 py-2 bg-kodman-600 text-white rounded font-medium hover:bg-kodman-700 disabled:opacity-50">
+              className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
               {busy ? 'Memeriksa...' : 'Verifikasi'}
             </button>
             <button type="button" onClick={() => { setStep('form'); setCode(''); setResult(null); }}

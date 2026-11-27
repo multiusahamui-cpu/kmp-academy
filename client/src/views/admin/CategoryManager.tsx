@@ -90,20 +90,20 @@ const CategoryManager: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Kategori</h2>
           <p className="text-gray-500 dark:text-slate-400">Atur taksonomi kursus untuk memudahkan pencarian.</p>
         </div>
-        <button onClick={openNew} className="flex items-center px-4 py-2 bg-kodman-600 text-white rounded-lg hover:bg-kodman-700 font-bold text-sm shadow-sm">
+        <button onClick={openNew} className="flex items-center px-4 py-2 bg-digitalcoop-600 text-white rounded-lg hover:bg-digitalcoop-700 font-bold text-sm shadow-sm">
           <Plus size={18} className="mr-2" /> Tambah Kategori
         </button>
       </div>
 
       {notice && (
-        <div role="status" className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-kodman-200 dark:border-kodman-800 bg-kodman-50 dark:bg-kodman-900/20 px-4 py-2 text-sm text-kodman-800 dark:text-kodman-200">
+        <div role="status" className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-digitalcoop-200 dark:border-digitalcoop-800 bg-digitalcoop-50 dark:bg-digitalcoop-900/20 px-4 py-2 text-sm text-digitalcoop-800 dark:text-digitalcoop-200">
           <span>{notice}</span>
           <button onClick={() => setNotice('')} aria-label="Tutup"><X size={14} /></button>
         </div>
       )}
 
       {form && (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-kodman-200 dark:border-kodman-800 mb-6">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-digitalcoop-200 dark:border-digitalcoop-800 mb-6">
           <h3 className="font-bold text-gray-800 dark:text-white mb-4">{form.id ? 'Ubah Kategori' : 'Input Kategori Baru'}</h3>
           <form onSubmit={submit} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -115,7 +115,7 @@ const CategoryManager: React.FC = () => {
                   maxLength={100}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value, slug: form.slugTouched ? form.slug : slugify(e.target.value) })}
-                  className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-2 focus:ring-kodman-500"
+                  className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-2 focus:ring-digitalcoop-500"
                   placeholder="Contoh: Digital Marketing"
                 />
               </div>
@@ -127,7 +127,7 @@ const CategoryManager: React.FC = () => {
                   maxLength={100}
                   value={form.slug}
                   onChange={(e) => setForm({ ...form, slug: e.target.value, slugTouched: true })}
-                  className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded font-mono text-sm focus:ring-2 focus:ring-kodman-500"
+                  className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded font-mono text-sm focus:ring-2 focus:ring-digitalcoop-500"
                   placeholder="digital-marketing"
                 />
               </div>
@@ -139,14 +139,14 @@ const CategoryManager: React.FC = () => {
                 maxLength={CATEGORY_DESCRIPTION_MAX}
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded text-sm focus:ring-2 focus:ring-kodman-500"
+                className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded text-sm focus:ring-2 focus:ring-digitalcoop-500"
                 placeholder="Penjelasan singkat isi kategori ini."
               />
               <p className="text-xs text-gray-400 mt-1">Tampil sebagai keterangan saat kursor di atas kategori di katalog; tidak ikut pencarian. {form.description.length}/{CATEGORY_DESCRIPTION_MAX}</p>
             </div>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <div className="flex gap-3">
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-kodman-600 text-white rounded-lg hover:bg-kodman-700 font-bold text-sm disabled:opacity-50">
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg hover:bg-digitalcoop-700 font-bold text-sm disabled:opacity-50">
                 {saving ? 'Menyimpan...' : 'Simpan'}
               </button>
               <button type="button" onClick={() => setForm(null)} className="px-4 py-2 text-sm text-gray-600 dark:text-slate-300 hover:underline">Batal</button>
@@ -164,7 +164,7 @@ const CategoryManager: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari kategori..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-kodman-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-digitalcoop-500"
             />
           </div>
         </div>
@@ -206,7 +206,7 @@ const CategoryManager: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => openEdit(cat)} className="text-kodman-600 dark:text-kodman-400 hover:text-kodman-900 mx-2" aria-label={`Ubah ${cat.name}`}><Edit size={16} /></button>
+                    <button onClick={() => openEdit(cat)} className="text-digitalcoop-600 dark:text-digitalcoop-400 hover:text-digitalcoop-900 mx-2" aria-label={`Ubah ${cat.name}`}><Edit size={16} /></button>
                     <button onClick={() => remove(cat)} className="text-red-600 hover:text-red-900" aria-label={`Hapus ${cat.name}`}><Trash2 size={16} /></button>
                   </td>
                 </tr>

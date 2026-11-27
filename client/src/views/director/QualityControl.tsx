@@ -10,7 +10,7 @@ const QualityControl: React.FC = () => {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-          <CheckCircle className="mr-3 text-kodman-600" /> Penjaminan Mutu
+          <CheckCircle className="mr-3 text-digitalcoop-600" /> Penjaminan Mutu
         </h2>
         <p className="text-gray-500 dark:text-slate-400">Kursus dan ulasan yang perlu perhatian, berdasarkan rating siswa.</p>
       </div>

@@ -75,7 +75,7 @@ const LegalManager: React.FC<{ canPublish: boolean }> = ({ canPublish }) => {
                 {rows.map((r) => (
                   <li key={r.id} className="py-2 flex items-center justify-between text-sm dark:text-slate-200">
                     <span>Versi {r.version} · {r.status === 'PUBLISHED' ? `terbit ${dateTimeId(r.publishedAt)} · ${num(r.accepted)} persetujuan` : 'DRAF'}</span>
-                    <button onClick={() => show(r.id)} className="text-kodman-600 font-bold">{r.status === 'DRAFT' ? 'Edit' : 'Lihat'}</button>
+                    <button onClick={() => show(r.id)} className="text-digitalcoop-600 font-bold">{r.status === 'DRAFT' ? 'Edit' : 'Lihat'}</button>
                   </li>
                 ))}
               </ul>
@@ -92,7 +92,7 @@ const LegalManager: React.FC<{ canPublish: boolean }> = ({ canPublish }) => {
             {open.status === 'DRAFT' && (
               <div className="flex gap-2 justify-end">
                 <button disabled={busy} onClick={save} className="px-4 py-2 text-sm rounded-lg border dark:border-slate-700 dark:text-slate-200">Simpan draf</button>
-                {canPublish && <button disabled={busy} onClick={publish} className="px-4 py-2 text-sm font-bold rounded-lg bg-kodman-600 text-white">Terbitkan</button>}
+                {canPublish && <button disabled={busy} onClick={publish} className="px-4 py-2 text-sm font-bold rounded-lg bg-digitalcoop-600 text-white">Terbitkan</button>}
               </div>
             )}
           </div>

@@ -7,7 +7,7 @@ const RunHistory: React.FC<{ id: string; label: string; onBack: () => void }> = 
   const { data, loading, error, reload } = useAsync(() => jobsApi.runs(id), [id]);
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-digitalcoop-600">&larr; Kembali</button>
       <Card title={`Riwayat: ${label}`}>
         <p className="text-xs text-gray-500 mb-3">Hanya eksekusi yang memproses sesuatu, gagal, atau dipicu manual yang dicatat. Riwayat disimpan 30 hari.</p>
         <StateBox loading={loading} error={error} onRetry={reload}>
@@ -60,7 +60,7 @@ const CronManager: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Activity className="mr-3 text-kodman-600" /> Job Berkala</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><Activity className="mr-3 text-digitalcoop-600" /> Job Berkala</h2>
         <p className="text-gray-500 dark:text-slate-400">Tugas otomatis di server. Status terakhir dihitung sejak server dihidupkan; riwayat disimpan di database.</p>
       </div>
       {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
@@ -81,7 +81,7 @@ const CronManager: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setHistory({ id: j.id, label: j.label })} className="px-3 py-1 border rounded text-sm">Riwayat</button>
-                  <button disabled={busyId === j.id || j.running} onClick={() => void trigger(j.id)} className="px-3 py-1 bg-kodman-600 text-white rounded text-sm font-bold disabled:opacity-50">{busyId === j.id ? 'Menjalankan...' : 'Jalankan sekarang'}</button>
+                  <button disabled={busyId === j.id || j.running} onClick={() => void trigger(j.id)} className="px-3 py-1 bg-digitalcoop-600 text-white rounded text-sm font-bold disabled:opacity-50">{busyId === j.id ? 'Menjalankan...' : 'Jalankan sekarang'}</button>
                 </div>
               </div>
             </Card>

@@ -30,10 +30,10 @@ const CourseCreator: React.FC<CourseCreatorProps> = ({ isCreateMode = false }) =
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Kursus Saya</h2>
-        <button onClick={() => { setEditingId(null); setMode('EDIT'); }} className="flex items-center rounded bg-kodman-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-kodman-700"><Plus size={18} className="mr-2" /> Buat Baru</button>
+        <button onClick={() => { setEditingId(null); setMode('EDIT'); }} className="flex items-center rounded bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-digitalcoop-700"><Plus size={18} className="mr-2" /> Buat Baru</button>
       </div>
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-      {!courses ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-kodman-600" /></div> : courses.length === 0 ? (
+      {!courses ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-digitalcoop-600" /></div> : courses.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 py-16 text-center text-sm text-gray-500 dark:border-slate-700">Anda belum membuat kursus. Klik &quot;Buat Baru&quot; untuk mulai.</div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -47,10 +47,10 @@ const CourseCreator: React.FC<CourseCreatorProps> = ({ isCreateMode = false }) =
                     <h3 className="font-bold text-gray-900 dark:text-white">{c.title}</h3>
                     <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-bold ${st.cls}`}>{st.label}</span>
                   </div>
-                  <p className="text-sm font-bold text-kodman-700 dark:text-kodman-400">{c.price === 0 ? 'Gratis' : rupiah(c.price)}</p>
+                  <p className="text-sm font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{c.price === 0 ? 'Gratis' : rupiah(c.price)}</p>
                   <p className="flex items-center gap-3 text-xs text-gray-500"><span>{c.moduleCount} modul</span><span>{c.questionCount} soal</span><span className="flex items-center gap-1"><Users size={12} /> {c.studentsEnrolled}</span></p>
                   {c.status === 'REJECTED' && c.reviewNote && <p className="rounded bg-red-50 p-2 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300">Ditolak: {c.reviewNote}</p>}
-                  <button onClick={() => { setEditingId(c.id); setMode('EDIT'); }} className="mt-auto rounded-lg border border-kodman-600 py-2 text-sm font-bold text-kodman-700 hover:bg-kodman-50 dark:text-kodman-300 dark:hover:bg-kodman-900/20">Kelola</button>
+                  <button onClick={() => { setEditingId(c.id); setMode('EDIT'); }} className="mt-auto rounded-lg border border-digitalcoop-600 py-2 text-sm font-bold text-digitalcoop-700 hover:bg-digitalcoop-50 dark:text-digitalcoop-300 dark:hover:bg-digitalcoop-900/20">Kelola</button>
                 </div>
               </div>
             );

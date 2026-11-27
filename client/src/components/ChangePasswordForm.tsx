@@ -62,7 +62,7 @@ const ChangePasswordForm: React.FC = () => {
         <p className={`text-sm ${result.ok ? 'text-green-600' : 'text-red-600'}`}>{result.text}</p>
       )}
       <button type="submit" disabled={isSaving}
-        className="px-4 py-2 bg-kodman-600 text-white rounded font-bold text-sm hover:bg-kodman-700 disabled:opacity-50">
+        className="px-4 py-2 bg-digitalcoop-600 text-white rounded font-bold text-sm hover:bg-digitalcoop-700 disabled:opacity-50">
         {isSaving ? 'Menyimpan...' : 'Simpan Password Baru'}
       </button>
     </form>

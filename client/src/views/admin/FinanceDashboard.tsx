@@ -165,7 +165,7 @@ const VouchersTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600 dark:text-slate-300">Kode sekali pakai untuk sponsor atau mitra B2B. Daftar kode hanya ditampilkan sekali setelah dibuat.</p>
-        <button onClick={() => setOpen(!open)} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold flex items-center"><Ticket size={16} className="mr-2" /> Buat batch</button>
+        <button onClick={() => setOpen(!open)} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold flex items-center"><Ticket size={16} className="mr-2" /> Buat batch</button>
       </div>
 
       {open && (
@@ -192,7 +192,7 @@ const VouchersTab: React.FC = () => {
             <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className={input} />
           </label>
           {formError && <p role="alert" className="text-sm text-red-600 md:col-span-2">{formError}</p>}
-          <button type="submit" disabled={busy} className="md:col-span-2 px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Membuat...' : 'Buat kode'}</button>
+          <button type="submit" disabled={busy} className="md:col-span-2 px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Membuat...' : 'Buat kode'}</button>
         </form>
       )}
 
@@ -268,7 +268,7 @@ const FinanceDashboard: React.FC = () => {
       <Card>
         <div className="flex border-b border-gray-200 dark:border-slate-800 mb-4">
           {tabs.map(([k, label]) => (
-            <button key={k} onClick={() => setTab(k)} className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${tab === k ? 'border-kodman-600 text-kodman-600 dark:text-kodman-400' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>{label}</button>
+            <button key={k} onClick={() => setTab(k)} className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${tab === k ? 'border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>{label}</button>
           ))}
         </div>
         {tab === 'SALES' && <SalesTab />}

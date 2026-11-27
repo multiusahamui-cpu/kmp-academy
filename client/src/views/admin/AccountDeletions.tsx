@@ -78,7 +78,7 @@ const SettleForm: React.FC<{ item: Item; onDone: (msg: string) => void }> = ({ i
         onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       <p className="text-xs text-gray-500">Bukti JPG, PNG, WebP, atau PDF, maksimal 5 MB. Bukti bersifat privat.</p>
       {err && <p className="text-sm text-red-600">{err}</p>}
-      <button type="submit" disabled={busy} className="px-4 py-2 bg-kodman-600 text-white rounded text-sm font-medium disabled:opacity-50">
+      <button type="submit" disabled={busy} className="px-4 py-2 bg-digitalcoop-600 text-white rounded text-sm font-medium disabled:opacity-50">
         {busy ? 'Menyimpan...' : 'Simpan penyelesaian saldo'}
       </button>
     </form>
@@ -139,7 +139,7 @@ const AccountDeletions: React.FC = () => {
         <div className="flex gap-2 text-sm">
           {(['PENDING', 'ALL'] as const).map((t) => (
             <button key={t} type="button" onClick={() => setTab(t)}
-              className={`px-3 py-1 rounded ${tab === t ? 'bg-kodman-600 text-white' : 'border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300'}`}>
+              className={`px-3 py-1 rounded ${tab === t ? 'bg-digitalcoop-600 text-white' : 'border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300'}`}>
               {t === 'PENDING' ? 'Menunggu' : 'Semua'}
             </button>
           ))}
@@ -172,7 +172,7 @@ const AccountDeletions: React.FC = () => {
                 <p className="text-gray-600 dark:text-slate-300">
                   Saldo diselesaikan {rupiah(it.settlement.amount)} pada {it.settlement.transferDate}, ref {it.settlement.bankRef}
                   {it.settlement.settledByName ? `, oleh ${it.settlement.settledByName}` : ''}.{' '}
-                  <a className="text-kodman-600 hover:underline" href={adminApi.proofUrl(it.settlement.id)} target="_blank" rel="noreferrer">Lihat bukti</a>
+                  <a className="text-digitalcoop-600 hover:underline" href={adminApi.proofUrl(it.settlement.id)} target="_blank" rel="noreferrer">Lihat bukti</a>
                 </p>
               )}
               {it.status !== 'PENDING' && (

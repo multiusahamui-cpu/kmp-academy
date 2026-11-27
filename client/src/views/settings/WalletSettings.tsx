@@ -1,4 +1,5 @@
 
+import { toast } from "../../services/toast";
 import React, { useState, useEffect } from 'react';
 import { UserRole } from '../../types';
 import { Plus, Trash2, RefreshCw, Eye, EyeOff, Landmark, History, ArrowDownLeft, ArrowUpRight, Search, Loader2 } from 'lucide-react';
@@ -82,13 +83,13 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
            accountNumber: newBankNumber,
            holderName: newHolderName
         });
-        alert("Rekening berhasil ditambahkan ke Database!");
+        toast.success("Rekening berhasil ditambahkan.");
         setIsAddingBank(false);
         setNewBankNumber('');
         setNewHolderName('');
         fetchWalletData(); // Refresh list
      } catch {
-        alert("Gagal menambah rekening.");
+        toast.error("Gagal menambah rekening.");
      } finally {
         setIsProcessing(false);
      }
@@ -100,17 +101,17 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
      const amount = parseInt(amountStr);
      
      if (amount > walletData.balance) {
-        alert("Saldo tidak mencukupi.");
+        toast.error("Saldo tidak mencukupi.");
         return;
      }
 
      setIsProcessing(true);
      try {
         await userApi.withdrawWallet({ amount, bankId: walletData.banks[0]?.id || 'default' });
-        alert("Permintaan penarikan berhasil dibuat. Menunggu persetujuan Admin.");
+        toast.success("Permintaan penarikan dibuat. Menunggu persetujuan Admin.");
         fetchWalletData();
      } catch {
-        alert("Gagal melakukan withdraw.");
+        toast.error("Gagal melakukan withdraw.");
      } finally {
         setIsProcessing(false);
      }
@@ -134,11 +135,11 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
          <div className="md:col-span-1 space-y-6">
             
             {/* Balance Card */}
-            <div className="bg-gradient-to-br from-kodman-900 to-kodman-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-digitalcoop-900 to-digitalcoop-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">
                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition duration-700"></div>
                
                <div className="relative z-10">
-                  <p className="text-kodman-100 text-xs font-bold uppercase tracking-wider mb-2">
+                  <p className="text-digitalcoop-100 text-xs font-bold uppercase tracking-wider mb-2">
                      {walletData.mode === 'SIMPANAN_SUKARELA' ? 'Simpanan Sukarela' : 'Saldo Efektif'}
                   </p>
                   <div className="flex items-center justify-between mb-4">
@@ -153,13 +154,13 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                      </h3>
                      <button 
                         onClick={() => setShowBalance(!showBalance)}
-                        className="text-kodman-200 hover:text-white transition p-2 rounded-full hover:bg-white/10"
+                        className="text-digitalcoop-200 hover:text-white transition p-2 rounded-full hover:bg-white/10"
                      >
                         {showBalance ? <EyeOff size={20} /> : <Eye size={20} />}
                      </button>
                   </div>
 
-                  <p className="mb-4 text-xs text-kodman-100 leading-relaxed">
+                  <p className="mb-4 text-xs text-digitalcoop-100 leading-relaxed">
                      {walletData.mode === 'SIMPANAN_SUKARELA'
                         ? 'Dompet Academy Anda adalah Simpanan Sukarela di digitalcoop.id dan disinkronkan dari saldo asli Anda di sana.'
                         : 'Pembayaran kursus dilakukan langsung lewat Virtual Account setelah payment gateway aktif.'}
@@ -171,7 +172,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                         <button 
                            onClick={() => setIsTopUpOpen(true)}
                            disabled={isProcessing}
-                           className="py-2.5 bg-white text-kodman-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
+                           className="py-2.5 bg-white text-digitalcoop-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
                         >
                            <Plus size={16} className="mr-2" /> Top Up
                         </button>
@@ -179,12 +180,12 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                         <button 
                            onClick={handleWithdraw}
                            disabled={isProcessing || !walletData.paymentsEnabled}
-                           className="py-2.5 bg-white text-kodman-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
+                           className="py-2.5 bg-white text-digitalcoop-900 rounded-xl text-sm font-bold flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
                         >
                            <RefreshCw size={16} className="mr-2" /> Withdraw
                         </button>
                      )}
-                     <button className="py-2.5 bg-kodman-800/50 text-white border border-white/20 rounded-xl text-sm font-medium flex items-center justify-center hover:bg-kodman-800 transition">
+                     <button className="py-2.5 bg-digitalcoop-800/50 text-white border border-white/20 rounded-xl text-sm font-medium flex items-center justify-center hover:bg-digitalcoop-800 transition">
                         <History size={16} className="mr-2" /> History
                      </button>
                   </div>
@@ -197,7 +198,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-5 shadow-sm">
                <div className="flex justify-between items-center mb-4">
                   <h3 className="font-bold text-gray-900 dark:text-white text-sm flex items-center">
-                     <Landmark size={16} className="mr-2 text-kodman-600" /> Rekening Bank
+                     <Landmark size={16} className="mr-2 text-digitalcoop-600" /> Rekening Bank
                   </h3>
                   <button 
                      onClick={() => setIsAddingBank(!isAddingBank)}
@@ -236,7 +237,7 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
                            onChange={(e) => setNewBankNumber(e.target.value)}
                            required
                         />
-                        <button type="submit" disabled={isProcessing} className="w-full py-1.5 bg-kodman-600 text-white text-xs font-bold rounded hover:bg-kodman-700">
+                        <button type="submit" disabled={isProcessing} className="w-full py-1.5 bg-digitalcoop-600 text-white text-xs font-bold rounded hover:bg-digitalcoop-700">
                            {isProcessing ? 'Menyimpan...' : 'Simpan Rekening'}
                         </button>
                      </div>
@@ -268,11 +269,11 @@ const WalletSettings: React.FC<WalletSettingsProps> = ({ role }) => {
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden h-full flex flex-col">
                <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-950">
                   <h3 className="font-bold text-gray-900 dark:text-white flex items-center">
-                     <History size={18} className="mr-2 text-kodman-600" /> Riwayat Transaksi (Realtime)
+                     <History size={18} className="mr-2 text-digitalcoop-600" /> Riwayat Transaksi (Realtime)
                   </h3>
                   <div className="relative">
                      <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
-                     <input type="text" placeholder="Cari transaksi..." className="pl-7 pr-3 py-1 text-xs border rounded-full bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:outline-none focus:border-kodman-500" />
+                     <input type="text" placeholder="Cari transaksi..." className="pl-7 pr-3 py-1 text-xs border rounded-full bg-white dark:bg-slate-900 dark:border-slate-700 dark:text-white focus:outline-none focus:border-digitalcoop-500" />
                   </div>
                </div>
                

@@ -44,7 +44,7 @@ const TalentProfileEditor: React.FC = () => {
         <span className={`text-sm font-bold ${live ? 'text-green-600' : 'text-gray-500'}`}>{live ? 'Status: TAMPIL DI PUBLIK' : 'Status: PRIVAT'}</span>
       </div>
       <p className="text-sm text-gray-600 dark:text-slate-400">Tampilkan profil, kursus yang Anda selesaikan, dan sertifikat Anda agar dapat dilihat HR dan calon pemberi kerja. Portofolio dan kompetensi diambil otomatis dari data belajar Anda.</p>
-      {live && data.profile && <p className="text-sm dark:text-slate-200">Alamat profil: <a className="text-kodman-600 font-bold" href={`/talent/${data.profile.slug}`} target="_blank" rel="noopener noreferrer">/talent/{data.profile.slug}</a></p>}
+      {live && data.profile && <p className="text-sm dark:text-slate-200">Alamat profil: <a className="text-digitalcoop-600 font-bold" href={`/talent/${data.profile.slug}`} target="_blank" rel="noopener noreferrer">/talent/{data.profile.slug}</a></p>}
       {!data.kycOk && (
         <div className="bg-gray-100 dark:bg-slate-800 p-4 rounded-lg border border-gray-300 dark:border-slate-700 text-sm flex gap-2 dark:text-slate-200"><Lock size={18} className="shrink-0" /> Anda dapat menyimpan draf, tetapi memublikasikan profil butuh verifikasi identitas (KYC) di tab KYC.</div>
       )}
@@ -62,7 +62,7 @@ const TalentProfileEditor: React.FC = () => {
       {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
       <div className="flex flex-wrap gap-3">
         <button disabled={busy} onClick={() => void save(false)} className="px-5 py-2 border rounded font-bold dark:border-slate-700 dark:text-slate-200 disabled:opacity-50">Simpan draf</button>
-        <button disabled={busy || !data.kycOk || !consent} onClick={() => void save(true)} className="px-5 py-2 bg-kodman-600 text-white rounded font-bold disabled:opacity-50 inline-flex items-center gap-1"><Eye size={16} /> {live ? 'Perbarui dan tampilkan' : 'Publikasikan'}</button>
+        <button disabled={busy || !data.kycOk || !consent} onClick={() => void save(true)} className="px-5 py-2 bg-digitalcoop-600 text-white rounded font-bold disabled:opacity-50 inline-flex items-center gap-1"><Eye size={16} /> {live ? 'Perbarui dan tampilkan' : 'Publikasikan'}</button>
         {live && <button disabled={busy} onClick={() => void hide()} className="px-5 py-2 border rounded font-bold text-red-600 dark:border-slate-700 inline-flex items-center gap-1 disabled:opacity-50"><EyeOff size={16} /> Sembunyikan</button>}
       </div>
     </div>

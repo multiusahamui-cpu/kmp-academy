@@ -72,11 +72,12 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* 1. Header with Identity Card */}
       <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-3 gap-6 items-center">
         {/* Welcome Text Section */}
-        <div className="order-2 md:order-1 md:col-span-2 lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 h-full flex flex-col justify-center min-h-[180px]">
-          <h1 className="font-sans text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="order-2 md:order-1 md:col-span-2 lg:col-span-2 bg-digitalcoop-gradient text-white p-6 rounded-2xl shadow-digitalcoop h-full flex flex-col justify-center min-h-[180px] relative overflow-hidden">
+          <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-gold-400/25 blur-3xl pointer-events-none"></div>
+          <h1 className="font-sans text-3xl font-bold text-white mb-2 relative">
             {getGreeting()}{displayName ? `, ${displayName}` : ""}!
           </h1>
-          <p className="text-gray-500 dark:text-slate-400 text-lg leading-relaxed">
+          <p className="text-white/90 text-lg leading-relaxed relative">
             {role === UserRole.STUDENT &&
               (profile?.cardNumber
                 ? "Kartu Student Anda aktif! Terus belajar untuk meningkatkan skill."
@@ -94,7 +95,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             {(role === UserRole.ADMIN_SYSTEM || role === UserRole.SUPERADMIN) &&
               "Sistem berjalan normal. Kartu akses Admin aktif."}
           </p>
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center text-sm text-gray-400 font-mono">
+          <div className="mt-4 pt-4 border-t border-white/20 flex items-center text-sm text-white/80 relative">
             <Clock size={14} className="mr-2" />
             {new Date().toLocaleDateString("id-ID", {
               weekday: "long",
@@ -154,7 +155,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
   return (
     <div className="space-y-6">
       {/* Hero Progress */}
-      <div className="bg-gradient-to-r from-kodman-800 to-kodman-600 rounded-xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group">
+      <div className="bg-gradient-to-r from-digitalcoop-800 to-digitalcoop-600 rounded-xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group">
         {/* Background Decoration */}
         <div className="absolute -right-10 -bottom-10 opacity-10 transform rotate-12 group-hover:scale-110 transition duration-700">
           <BookOpen size={200} />
@@ -167,33 +168,33 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                 Terakhir Diakses
               </span>
               <h2 className="text-2xl font-bold mb-2">{lastCourse.title}</h2>
-              <p className="text-kodman-100 text-sm mb-4">{lastCourse.instructor}</p>
+              <p className="text-digitalcoop-100 text-sm mb-4">{lastCourse.instructor}</p>
               <div className="w-full bg-black/20 rounded-full h-2 mb-2">
                 <div
                   className="bg-green-400 h-2 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"
                   style={{ width: `${lastCourse.progress}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-kodman-200">{lastCourse.progress}% Selesai</p>
+              <p className="text-xs text-digitalcoop-200">{lastCourse.progress}% Selesai</p>
             </>
           ) : (
             <>
               <h2 className="text-2xl font-bold mb-2">Mulai perjalanan belajar Anda</h2>
-              <p className="text-kodman-100 text-sm">Anda belum mengikuti kursus. Jelajahi katalog untuk memilih kursus pertama.</p>
+              <p className="text-digitalcoop-100 text-sm">Anda belum mengikuti kursus. Jelajahi katalog untuk memilih kursus pertama.</p>
             </>
           )}
         </div>
         {lastCourse ? (
           <button
             onClick={() => onOpenLearning(lastCourse.id)}
-            className="px-6 py-3 bg-white text-kodman-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
+            className="px-6 py-3 bg-white text-digitalcoop-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
           >
             <Play size={18} className="mr-2 fill-current" /> Lanjut Belajar
           </button>
         ) : (
           <button
             onClick={() => onNavigate("catalog")}
-            className="px-6 py-3 bg-white text-kodman-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
+            className="px-6 py-3 bg-white text-digitalcoop-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
           >
             Lihat Katalog
           </button>
@@ -210,7 +211,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
             </h3>
             <button
               onClick={() => onNavigate("catalog")}
-              className="text-sm text-kodman-600 hover:underline"
+              className="text-sm text-digitalcoop-600 hover:underline"
             >
               Lihat Katalog
             </button>
@@ -224,7 +225,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                 </p>
                 <button
                   onClick={() => onNavigate("catalog")}
-                  className="mt-2 text-xs font-bold text-kodman-600"
+                  className="mt-2 text-xs font-bold text-digitalcoop-600"
                 >
                   Jelajahi Kursus
                 </button>
@@ -247,7 +248,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                     <p className="text-xs text-gray-500 mt-1">
                       Ditambahkan: {item.addedAt}
                     </p>
-                    <p className="text-sm font-bold text-kodman-600 mt-1">
+                    <p className="text-sm font-bold text-digitalcoop-600 mt-1">
                       {new Intl.NumberFormat("id-ID", {
                         style: "currency",
                         currency: "IDR",
@@ -257,7 +258,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                   </div>
                   <button
                     onClick={() => onNavigate("catalog")}
-                    className="self-center px-3 py-1.5 border border-kodman-600 text-kodman-600 dark:text-kodman-400 dark:border-kodman-400 rounded text-xs font-bold hover:bg-kodman-50 dark:hover:bg-kodman-900/20"
+                    className="self-center px-3 py-1.5 border border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400 dark:border-digitalcoop-400 rounded text-xs font-bold hover:bg-digitalcoop-50 dark:hover:bg-digitalcoop-900/20"
                   >
                     Lihat
                   </button>
@@ -308,7 +309,7 @@ const StudentSchedule: React.FC<{ onNavigate: (view: string) => void }> = ({ onN
             ))}
           </div>
         )}
-        <button onClick={() => onNavigate("classes")} className="mt-3 text-xs text-kodman-600 underline">Semua kelas</button>
+        <button onClick={() => onNavigate("classes")} className="mt-3 text-xs text-digitalcoop-600 underline">Semua kelas</button>
       </StateBox>
     </Card>
   );
@@ -325,7 +326,7 @@ const MentorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({ onN
           <StatCard title="Total Siswa" value={num(active.reduce((n, c) => n + c.members, 0))} icon={<Users className="text-blue-500" />} change="Di semua kelas aktif" />
           <StatCard title="Kelas Berjadwal" value={num(active.filter((c) => c.nextSession).length)} icon={<Calendar className="text-purple-500" />} change="Punya sesi mendatang" />
         </div>
-        <Card title="Sesi Berikutnya per Kelas" right={<button onClick={() => onNavigate("my-classes")} className="text-xs text-kodman-600 underline">Kelola kelas</button>}>
+        <Card title="Sesi Berikutnya per Kelas" right={<button onClick={() => onNavigate("my-classes")} className="text-xs text-digitalcoop-600 underline">Kelola kelas</button>}>
           {active.length === 0 ? (
             <Empty>Belum ada kelas. Buat kelas di menu Rombongan Belajar.</Empty>
           ) : (
@@ -381,7 +382,7 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
             <StatCard
               title={`Bagian Anda (${data.sharePercent}%)`}
               value={rupiah(data.earningsTotal)}
-              icon={<Wallet className="text-kodman-500" />}
+              icon={<Wallet className="text-digitalcoop-500" />}
               change={`${rupiah(data.earningsThisMonth)} bulan ini`}
             />
             <StatCard
@@ -424,7 +425,7 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
               right={
                 <button
                   onClick={() => onNavigate("my-courses")}
-                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold"
+                  className="px-3 py-1 bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-400 border border-digitalcoop-200 dark:border-digitalcoop-700 rounded text-xs font-bold"
                 >
                   Atur harga dan diskon
                 </button>
@@ -446,7 +447,7 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
               right={
                 <button
                   onClick={() => onNavigate("wallet")}
-                  className="px-3 py-1 bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-400 border border-kodman-200 dark:border-kodman-700 rounded text-xs font-bold flex items-center"
+                  className="px-3 py-1 bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-400 border border-digitalcoop-200 dark:border-digitalcoop-700 rounded text-xs font-bold flex items-center"
                 >
                   <Wallet size={12} className="mr-1" /> Dompet Saya
                 </button>
@@ -521,7 +522,7 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, icon, change }: StatCardProps) => (
-  <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 transition-all hover:border-kodman-200 dark:hover:border-slate-600">
+  <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 transition-all hover:border-digitalcoop-200 dark:hover:border-slate-600">
     <div className="flex justify-between items-start">
       <div>
         <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">

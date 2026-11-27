@@ -28,13 +28,13 @@ const StudentClasses: React.FC = () => {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><GraduationCap className="mr-3 text-kodman-600" /> Kelas</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><GraduationCap className="mr-3 text-digitalcoop-600" /> Kelas</h2>
         <p className="text-gray-500 dark:text-slate-400">Kelas dari Mentor: jadwal sesi dan nilai Anda.</p>
       </div>
       <Card title="Gabung dengan kode">
         <form onSubmit={join} className="flex gap-2">
           <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Kode dari Mentor" className="flex-1 px-3 py-2 text-sm border rounded-lg font-mono uppercase dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
-          <button type="submit" disabled={busy || !code.trim()} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Gabung</button>
+          <button type="submit" disabled={busy || !code.trim()} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Gabung</button>
         </form>
         {msg && <p role="status" className="text-sm mt-2 text-gray-700 dark:text-slate-300">{msg}</p>}
       </Card>

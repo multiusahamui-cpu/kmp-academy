@@ -41,7 +41,7 @@ const BroadcastPanel: React.FC = () => {
         </select>
         <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Judul" className={input} />
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={2000} placeholder="Isi pengumuman" className={input} />
-        <button type="submit" disabled={busy || title.trim().length < 3 || body.trim().length < 5} className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Mengirim...' : 'Kirim siaran'}</button>
+        <button type="submit" disabled={busy || title.trim().length < 3 || body.trim().length < 5} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">{busy ? 'Mengirim...' : 'Kirim siaran'}</button>
         {msg && <p role="status" className="text-sm">{msg}</p>}
       </form>
       <h4 className="font-bold text-sm mb-2">Riwayat</h4>

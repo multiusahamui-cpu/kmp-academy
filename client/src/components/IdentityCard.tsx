@@ -66,9 +66,9 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
       case UserRole.STUDENT:
         // Group S: Student
         return {
-          bg: "bg-gradient-to-br from-kodman-500 via-kodman-600 to-kodman-800",
+          bg: "bg-gradient-to-br from-digitalcoop-500 via-digitalcoop-600 to-digitalcoop-800",
           text: "text-white",
-          border: "border-kodman-400",
+          border: "border-digitalcoop-400",
           prefix: "S",
           tierName: "STUDENT MEMBER",
           isPremium: false,

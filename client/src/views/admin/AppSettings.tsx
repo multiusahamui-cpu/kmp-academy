@@ -56,7 +56,7 @@ const AppSettings: React.FC = () => {
             {STAFF_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
           </select>
           <input required value={note} onChange={(e) => setNote(e.target.value)} placeholder="Dasar (mis. nomor SK)" className={input} />
-          <button disabled={busy} type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Angkat</button>
+          <button disabled={busy} type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Angkat</button>
         </form>
       </Card>
 

@@ -39,7 +39,7 @@ const KycManager: React.FC = () => {
         <p className="text-gray-500 dark:text-slate-400">Foto KTP dan selfie tersimpan privat. Setiap pembukaan dicatat atas nama Anda.</p>
       </div>
       <div className="flex gap-2">
-        {TABS.map((t) => <button key={t.id} onClick={() => { close(); setTab(t.id); }} className={`px-4 py-1.5 rounded-lg text-sm font-bold ${tab === t.id ? 'bg-kodman-600 text-white' : 'border dark:border-slate-700 dark:text-slate-200'}`}>{t.label}</button>)}
+        {TABS.map((t) => <button key={t.id} onClick={() => { close(); setTab(t.id); }} className={`px-4 py-1.5 rounded-lg text-sm font-bold ${tab === t.id ? 'bg-digitalcoop-600 text-white' : 'border dark:border-slate-700 dark:text-slate-200'}`}>{t.label}</button>)}
       </div>
       {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
       <StateBox loading={list.loading} error={list.error} onRetry={list.reload}>
@@ -54,7 +54,7 @@ const KycManager: React.FC = () => {
                       <p className="text-xs text-gray-500">{r.fullName} · NIK {r.nikMasked} · {dateTimeId(r.submittedAt)}</p>
                       {r.rejectNote && <p className="text-xs text-red-600">Ditolak: {r.rejectNote}</p>}
                     </div>
-                    <button onClick={() => void openRow(r)} className="text-kodman-600 font-bold shrink-0">Buka foto</button>
+                    <button onClick={() => void openRow(r)} className="text-digitalcoop-600 font-bold shrink-0">Buka foto</button>
                   </div>
                   {view?.id === r.id && (
                     <div className="mt-3 space-y-3">
@@ -67,7 +67,7 @@ const KycManager: React.FC = () => {
                         {view.nik && <span className="font-mono text-sm">{view.nik}</span>}
                         {r.status === 'PENDING' && (
                           <>
-                            <button disabled={busy} onClick={() => confirm('Setujui KYC ini? Cocokkan wajah, foto KTP, dan NIK.') && void act(() => kycApi.approve(r.id), 'KYC disetujui.')} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-kodman-600 text-white">Setujui</button>
+                            <button disabled={busy} onClick={() => confirm('Setujui KYC ini? Cocokkan wajah, foto KTP, dan NIK.') && void act(() => kycApi.approve(r.id), 'KYC disetujui.')} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-digitalcoop-600 text-white">Setujui</button>
                             <button disabled={busy} onClick={() => { const n = prompt('Alasan penolakan (10-500 karakter, akan dibaca pengguna):'); if (n) void act(() => kycApi.reject(r.id, n), 'KYC ditolak.'); }} className="text-xs font-bold px-3 py-1.5 rounded-lg border dark:border-slate-700 text-red-600">Tolak</button>
                           </>
                         )}

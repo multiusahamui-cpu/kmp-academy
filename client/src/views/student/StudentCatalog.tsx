@@ -1,4 +1,5 @@
 
+import { CardSkeleton } from "../../components/Skeleton";
 import React, { useCallback, useEffect, useState } from 'react';
 import { Play, Heart, Filter, X, Award, Key, CheckCircle, Info } from 'lucide-react';
 import { CourseType, Course, WishlistItem } from '../../types';
@@ -218,7 +219,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                   <div className="space-y-1">
                      <button
                         onClick={() => setSelectedCategory(null)}
-                        className={`w-full text-left px-3 py-2 rounded text-sm transition ${!selectedCategory ? 'bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                        className={`w-full text-left px-3 py-2 rounded text-sm transition ${!selectedCategory ? 'bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                      >
                         Semua Kategori
                      </button>
@@ -227,7 +228,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                            key={cat.id}
                            title={cat.description ?? undefined}
                            onClick={() => setSelectedCategory(cat.id)}
-                           className={`w-full text-left px-3 py-2 rounded text-sm flex justify-between items-center transition ${selectedCategory === cat.id ? 'bg-kodman-50 dark:bg-kodman-900/30 text-kodman-700 dark:text-kodman-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                           className={`w-full text-left px-3 py-2 rounded text-sm flex justify-between items-center transition ${selectedCategory === cat.id ? 'bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
                            {cat.name}
                            <span className="text-xs bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-gray-500">{cat.count}</span>
@@ -247,14 +248,16 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
             )}
 
             {isLoading ? (
-               <div className="text-center py-12 text-gray-500 dark:text-slate-400">Memuat kursus...</div>
+               <div className={`grid grid-cols-1 ${enrolledOnly ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'} gap-6`}>
+                  {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+               </div>
             ) : filteredCourses.length === 0 ? (
                <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-lg border border-dashed border-gray-300 dark:border-slate-700">
                   <p className="text-gray-500 dark:text-slate-400">
                      {enrolledOnly ? 'Anda belum mengikuti kursus apa pun.' : 'Tidak ada kursus ditemukan.'}
                   </p>
                   {selectedCategory && (
-                     <button onClick={() => setSelectedCategory(null)} className="mt-2 text-kodman-600 font-medium hover:underline">Lihat Semua Kursus</button>
+                     <button onClick={() => setSelectedCategory(null)} className="mt-2 text-digitalcoop-600 font-medium hover:underline">Lihat Semua Kursus</button>
                   )}
                </div>
             ) : (
@@ -288,7 +291,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                        {course.price === 0 && !enrolledIds.has(course.id) && (
                                           <button 
                                           onClick={(e) => handleEnroll(e, course)}
-                                          className="p-2 bg-kodman-600 rounded-full text-white hover:bg-kodman-700 hover:scale-110 transition" title="Ikuti Kursus Gratis"
+                                          className="p-2 bg-digitalcoop-600 rounded-full text-white hover:bg-digitalcoop-700 hover:scale-110 transition" title="Ikuti Kursus Gratis"
                                           >
                                              <Play size={20} />
                                           </button>
@@ -329,7 +332,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                  <div className="space-y-2">
                                     <div>
                                        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
-                                          <div className="bg-kodman-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
+                                          <div className="bg-digitalcoop-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
                                        </div>
                                        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400">
                                           <span>{progressById[course.id] ?? 0}% Selesai</span>
@@ -339,7 +342,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                     <div className="flex gap-2">
                                        <button 
                                           onClick={() => onOpenLearning(course.id)}
-                                          className="flex-1 py-2 bg-kodman-600 text-white rounded font-medium text-xs flex items-center justify-center hover:bg-kodman-700 transition shadow-sm"
+                                          className="flex-1 py-2 bg-digitalcoop-600 text-white rounded font-medium text-xs flex items-center justify-center hover:bg-digitalcoop-700 transition shadow-sm"
                                        >
                                           <Play size={14} className="mr-2" /> Materi
                                        </button>
@@ -363,7 +366,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                     </span>
                                     <button 
                                        onClick={(e) => openDetailModal(e, course)}
-                                       className="px-4 py-2 border border-kodman-600 text-kodman-600 dark:text-kodman-400 dark:border-kodman-400 rounded text-sm font-medium hover:bg-kodman-50 dark:hover:bg-kodman-900/30 transition flex items-center"
+                                       className="px-4 py-2 border border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400 dark:border-digitalcoop-400 rounded text-sm font-medium hover:bg-digitalcoop-50 dark:hover:bg-digitalcoop-900/30 transition flex items-center"
                                     >
                                        <Info size={14} className="mr-2" /> Detail Kursus
                                     </button>

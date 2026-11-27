@@ -53,7 +53,7 @@ const KycPanel: React.FC<{ kyc: MyKyc; onChanged: () => void }> = ({ kyc, onChan
         <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm dark:text-slate-200">
           <p className="font-bold mb-1">KYC Anda di digitalcoop.id sudah lengkap, sehingga tidak wajib mengulang.</p>
           <p className="mb-3">Bila ingin datanya (NIK, foto KTP, dan selfie) juga tersimpan di Academy, salin dengan tombol ini.</p>
-          <button disabled={busy} onClick={() => void run(() => kycApi.importDigitalcoop(), 'Gagal menyalin dari digitalcoop.id.')} className="px-4 py-2 bg-kodman-600 text-white rounded font-bold disabled:opacity-50">Ambil data KYC dari digitalcoop.id</button>
+          <button disabled={busy} onClick={() => void run(() => kycApi.importDigitalcoop(), 'Gagal menyalin dari digitalcoop.id.')} className="px-4 py-2 bg-digitalcoop-600 text-white rounded font-bold disabled:opacity-50">Ambil data KYC dari digitalcoop.id</button>
         </div>
       )}
       {kyc.status === 'REJECTED' && (
@@ -62,7 +62,7 @@ const KycPanel: React.FC<{ kyc: MyKyc; onChanged: () => void }> = ({ kyc, onChan
         </div>
       )}
       {kyc.linked && !kyc.exempt && (
-        <button disabled={busy} onClick={() => void run(() => kycApi.importDigitalcoop(), 'Gagal menyalin dari digitalcoop.id.')} className="text-sm font-bold text-kodman-600">Coba ambil data KYC dari digitalcoop.id</button>
+        <button disabled={busy} onClick={() => void run(() => kycApi.importDigitalcoop(), 'Gagal menyalin dari digitalcoop.id.')} className="text-sm font-bold text-digitalcoop-600">Coba ambil data KYC dari digitalcoop.id</button>
       )}
       <form onSubmit={submit} className="space-y-5">
         <div className="grid md:grid-cols-2 gap-6">
@@ -88,7 +88,7 @@ const KycPanel: React.FC<{ kyc: MyKyc; onChanged: () => void }> = ({ kyc, onChan
           <input required value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={150} className={input} />
         </div>
         <p className="text-xs text-gray-500">Foto disimpan di penyimpanan privat dan NIK dienkripsi. Hanya Admin Sistem yang dapat membukanya, dan setiap pembukaan dicatat.</p>
-        <button type="submit" disabled={busy} className="px-6 py-2 bg-kodman-600 text-white rounded font-bold hover:bg-kodman-700 shadow-md disabled:opacity-50">Kirim Data Verifikasi</button>
+        <button type="submit" disabled={busy} className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-bold hover:bg-digitalcoop-700 shadow-md disabled:opacity-50">Kirim Data Verifikasi</button>
       </form>
       {msg && <p role="alert" className="text-sm text-red-600">{msg}</p>}
     </div>

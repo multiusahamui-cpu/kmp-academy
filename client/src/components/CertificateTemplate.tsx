@@ -64,7 +64,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
             </button>
             <button
               onClick={handlePrint}
-              className="px-6 py-2 bg-kodman-600 hover:bg-kodman-700 rounded font-bold text-sm"
+              className="px-6 py-2 bg-digitalcoop-600 hover:bg-digitalcoop-700 rounded font-bold text-sm"
             >
               Download / Cetak PDF
             </button>
@@ -74,7 +74,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
         {/* Certificate Area */}
         <div
           id="certificate-area"
-          className="p-12 md:p-16 bg-white text-center relative border-[20px] border-kodman-900 min-h-[600px] flex flex-col justify-center"
+          className="p-12 md:p-16 bg-white text-center relative border-[20px] border-digitalcoop-900 min-h-[600px] flex flex-col justify-center"
         >
           {/* Watermark/Background decoration */}
           <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
@@ -84,7 +84,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
           {/* Content */}
           <div className="relative z-10">
             <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-2 text-kodman-900">
+              <div className="flex items-center gap-2 text-digitalcoop-900">
                 <GraduationCap size={48} />
                 <span className="font-sans font-extrabold text-3xl tracking-tighter">
                   KMP - ADNG ACADEMY
@@ -92,7 +92,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
               </div>
             </div>
 
-            <h1 className="font-serif text-5xl text-kodman-800 mb-8 uppercase tracking-widest">
+            <h1 className="font-serif text-5xl text-digitalcoop-800 mb-8 uppercase tracking-widest">
               {titleText}
             </h1>
 
@@ -105,7 +105,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
               {bodyText}
             </p>
 
-            <h3 className="text-2xl font-bold text-kodman-900 mb-12 uppercase">
+            <h3 className="text-2xl font-bold text-digitalcoop-900 mb-12 uppercase">
               {data.courseTitle}
             </h3>
 

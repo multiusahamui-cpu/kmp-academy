@@ -109,25 +109,25 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
         <div className="flex border-b border-gray-200 dark:border-slate-800 overflow-x-auto">
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "profile" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "profile" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("profile")}
           >
             Informasi Akun
           </button>
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "security" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "security" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("security")}
           >
             <Lock size={16} /> Keamanan
           </button>
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "notifications" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "notifications" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("notifications")}
           >
             Notifikasi
           </button>
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "kyc" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap flex items-center gap-2 ${activeTab === "kyc" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("kyc")}
           >
             <Shield size={16} /> Verifikasi (KYC)
@@ -140,13 +140,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
             <Linkedin size={16} /> Karir & Industry Hub
           </button>
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "roles" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "roles" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("roles")}
           >
             Upgrade Role
           </button>
           <button
-            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "certificates" ? "border-b-2 border-kodman-600 text-kodman-600 dark:text-kodman-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
+            className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "certificates" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("certificates")}
           >
             Sertifikat
@@ -219,14 +219,14 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
             <div>
               <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">
                 <Shield
-                  className="text-kodman-600 dark:text-kodman-400 mt-1"
+                  className="text-digitalcoop-600 dark:text-digitalcoop-400 mt-1"
                   size={20}
                 />
                 <div>
-                  <h3 className="font-bold text-kodman-800 dark:text-kodman-300">
+                  <h3 className="font-bold text-digitalcoop-800 dark:text-digitalcoop-300">
                     Status Role Saat Ini: {currentRole}
                   </h3>
-                  <p className="text-sm text-kodman-700 dark:text-kodman-400">
+                  <p className="text-sm text-digitalcoop-700 dark:text-digitalcoop-400">
                     {currentRole === "STUDENT" &&
                       "Anda saat ini terdaftar sebagai Peserta. Anda bisa meningkatkan karir dengan menjadi Mentor atau Creator."}
                     {currentRole === "MENTOR" &&
@@ -253,7 +253,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                     <textarea required minLength={30} maxLength={2000} rows={5} value={applyForm.experience} onChange={(e) => setApplyForm({ ...applyForm, experience: e.target.value })} className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded" />
                   </div>
                   <div className="flex gap-3">
-                    <button type="submit" disabled={applyBusy} className="px-5 py-2 bg-kodman-600 text-white rounded font-bold disabled:opacity-50">Kirim pengajuan</button>
+                    <button type="submit" disabled={applyBusy} className="px-5 py-2 bg-digitalcoop-600 text-white rounded font-bold disabled:opacity-50">Kirim pengajuan</button>
                     <button type="button" onClick={() => setApplyRole(null)} className="px-5 py-2 border rounded dark:border-slate-700 dark:text-slate-200">Batal</button>
                   </div>
                 </form>
@@ -390,7 +390,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                     key={cert.id}
                     className="border border-gray-200 dark:border-slate-800 rounded-lg p-4 bg-white dark:bg-slate-900 hover:shadow-lg transition flex gap-4"
                   >
-                    <div className="w-16 h-16 bg-kodman-900 rounded flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                    <div className="w-16 h-16 bg-digitalcoop-900 rounded flex items-center justify-center text-white shadow-sm flex-shrink-0">
                       <Award size={32} />
                     </div>
                     <div className="flex-1">
@@ -409,7 +409,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                         )}
                         <button
                           onClick={() => setViewCert(cert)}
-                          className="text-xs font-bold text-kodman-600 dark:text-kodman-400 hover:underline flex items-center"
+                          className="text-xs font-bold text-digitalcoop-600 dark:text-digitalcoop-400 hover:underline flex items-center"
                         >
                           <FileCheck size={12} className="mr-1" /> Lihat / Cetak
                         </button>
@@ -418,7 +418,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
                             href={cert.pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs font-bold text-kodman-600 dark:text-kodman-400 hover:underline"
+                            className="text-xs font-bold text-digitalcoop-600 dark:text-digitalcoop-400 hover:underline"
                           >
                             Unduh PDF
                           </a>

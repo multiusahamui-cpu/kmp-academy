@@ -59,7 +59,7 @@ const CourseReviews: React.FC = () => {
     const pending = selected.status === 'PENDING_REVIEW';
     return (
       <div className="mx-auto max-w-4xl space-y-6">
-        <button onClick={() => { setSelected(null); setError(''); }} className="text-sm font-medium text-kodman-700 hover:underline dark:text-kodman-300">&larr; Kembali ke daftar</button>
+        <button onClick={() => { setSelected(null); setError(''); }} className="text-sm font-medium text-digitalcoop-700 hover:underline dark:text-digitalcoop-300">&larr; Kembali ke daftar</button>
         <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selected.title}</h2>
           <p className="mt-1 text-sm text-gray-500">Creator: {selected.instructorName ?? '-'} · Harga dasar {selected.price === 0 ? 'Gratis' : rupiah(selected.price)} · Diajukan {fmt(selected.submittedAt)}</p>
@@ -69,12 +69,12 @@ const CourseReviews: React.FC = () => {
 
         <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <h3 className="mb-3 font-bold text-gray-900 dark:text-white">Modul ({selected.moduleCount}) · Soal ujian {selected.examEnabled ? selected.questionCount : 'tidak aktif'}</h3>
-          {!detail ? <Loader2 className="animate-spin text-kodman-600" /> : (
+          {!detail ? <Loader2 className="animate-spin text-digitalcoop-600" /> : (
             <ul className="divide-y divide-gray-100 dark:divide-slate-800">
               {detail.modules.map((m, i) => (
                 <li key={m.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                   <span className="text-gray-800 dark:text-slate-200">{i + 1}. {m.title} <span className="text-xs text-gray-400">({m.type}{m.isFreePreview ? ', preview gratis' : ''})</span></span>
-                  <button onClick={() => void view(m.id, m.title)} className="text-xs font-bold text-kodman-700 hover:underline dark:text-kodman-300">Lihat isi</button>
+                  <button onClick={() => void view(m.id, m.title)} className="text-xs font-bold text-digitalcoop-700 hover:underline dark:text-digitalcoop-300">Lihat isi</button>
                 </li>
               ))}
             </ul>
@@ -83,7 +83,7 @@ const CourseReviews: React.FC = () => {
             <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/50">
               <p className="mb-2 font-bold">{preview.title}</p>
               {preview.text !== undefined ? <p className="whitespace-pre-line">{preview.text}</p> : (
-                <a href={preview.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-kodman-700 hover:underline dark:text-kodman-300"><ExternalLink size={14} /> Buka berkas (tautan berlaku 1 jam)</a>
+                <a href={preview.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-digitalcoop-700 hover:underline dark:text-digitalcoop-300"><ExternalLink size={14} /> Buka berkas (tautan berlaku 1 jam)</a>
               )}
             </div>
           )}
@@ -119,10 +119,10 @@ const CourseReviews: React.FC = () => {
     <div>
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Review Kursus</h2>
       <div className="mb-4 flex gap-2">
-        {FILTERS.map(([id, label]) => <button key={id} onClick={() => setFilter(id)} className={`rounded-full border px-4 py-1.5 text-sm font-medium ${filter === id ? 'border-kodman-600 bg-kodman-50 text-kodman-700 dark:bg-kodman-900/20' : 'border-gray-300 text-gray-600 dark:border-slate-600 dark:text-slate-300'}`}>{label}</button>)}
+        {FILTERS.map(([id, label]) => <button key={id} onClick={() => setFilter(id)} className={`rounded-full border px-4 py-1.5 text-sm font-medium ${filter === id ? 'border-digitalcoop-600 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20' : 'border-gray-300 text-gray-600 dark:border-slate-600 dark:text-slate-300'}`}>{label}</button>)}
       </div>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
-      {!rows ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-kodman-600" /></div> : rows.length === 0 ? (
+      {!rows ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-digitalcoop-600" /></div> : rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-500 dark:border-slate-700">Tidak ada kursus pada daftar ini.</p>
       ) : (
         <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">

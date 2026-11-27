@@ -22,14 +22,14 @@ const Directory: React.FC = () => {
     <div className="space-y-6">
       <form onSubmit={(e) => { e.preventDefault(); setPage(1); void load(q, 1); }} className="flex gap-2">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, keahlian, atau kota" className={input} />
-        <button type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded font-bold inline-flex items-center gap-1"><Search size={16} /> Cari</button>
+        <button type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded font-bold inline-flex items-center gap-1"><Search size={16} /> Cari</button>
       </form>
       {items.length === 0 && !busy && <p className="text-center text-gray-500 py-10">Belum ada talenta yang cocok.</p>}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map((t) => (
           <a key={t.slug} href={`/talent/${t.slug}`} className="block border border-gray-200 dark:border-slate-800 rounded-lg p-4 bg-white dark:bg-slate-900 hover:shadow-md transition">
             <div className="flex gap-3 items-center mb-2">
-              {t.avatar ? <img src={t.avatar} alt="" className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 rounded-full bg-kodman-100 flex items-center justify-center font-bold text-kodman-700">{t.name.slice(0, 1)}</div>}
+              {t.avatar ? <img src={t.avatar} alt="" className="w-12 h-12 rounded-full object-cover" /> : <div className="w-12 h-12 rounded-full bg-digitalcoop-100 flex items-center justify-center font-bold text-digitalcoop-700">{t.name.slice(0, 1)}</div>}
               <div><p className="font-bold dark:text-white">{t.name}</p><p className="text-sm text-gray-600 dark:text-slate-400">{t.headline}</p></div>
             </div>
             {t.city && <p className="text-xs text-gray-500 flex items-center gap-1 mb-2"><MapPin size={12} /> {t.city}</p>}
@@ -62,14 +62,14 @@ const Profile: React.FC<{ slug: string }> = ({ slug }) => {
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         <div className="border border-gray-200 dark:border-slate-800 rounded-lg p-6 bg-white dark:bg-slate-900 flex gap-4">
-          {p.avatar ? <img src={p.avatar} alt="" className="w-20 h-20 rounded-full object-cover" /> : <div className="w-20 h-20 rounded-full bg-kodman-100 flex items-center justify-center text-2xl font-bold text-kodman-700">{p.name.slice(0, 1)}</div>}
+          {p.avatar ? <img src={p.avatar} alt="" className="w-20 h-20 rounded-full object-cover" /> : <div className="w-20 h-20 rounded-full bg-digitalcoop-100 flex items-center justify-center text-2xl font-bold text-digitalcoop-700">{p.name.slice(0, 1)}</div>}
           <div>
             <h2 className="text-2xl font-bold dark:text-white">{p.name}</h2>
             <p className="text-gray-700 dark:text-slate-300">{p.headline}</p>
             {p.city && <p className="text-sm text-gray-500 flex items-center gap-1"><MapPin size={14} /> {p.city}</p>}
             <div className="flex gap-3 mt-2 text-sm">
-              {p.linkedinUrl && <a href={p.linkedinUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-kodman-600 font-bold">LinkedIn</a>}
-              {p.portfolioUrl && <a href={p.portfolioUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-kodman-600 font-bold">Portofolio</a>}
+              {p.linkedinUrl && <a href={p.linkedinUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-digitalcoop-600 font-bold">LinkedIn</a>}
+              {p.portfolioUrl && <a href={p.portfolioUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-digitalcoop-600 font-bold">Portofolio</a>}
             </div>
           </div>
         </div>
@@ -85,7 +85,7 @@ const Profile: React.FC<{ slug: string }> = ({ slug }) => {
               {p.certificates.map((c) => (
                 <li key={c.serial} className="py-2 text-sm dark:text-slate-200">
                   <p className="font-bold">{c.courseTitle}</p>
-                  <p className="text-xs text-gray-500">{KIND[c.kind] ?? c.kind}{c.grade ? ` · Nilai ${c.grade}` : ''} · {formatLongDate(c.issuedAt)} · <a className="text-kodman-600 font-bold" href={`/verify?no=${c.serial}`}>Verifikasi {c.serial}</a></p>
+                  <p className="text-xs text-gray-500">{KIND[c.kind] ?? c.kind}{c.grade ? ` · Nilai ${c.grade}` : ''} · {formatLongDate(c.issuedAt)} · <a className="text-digitalcoop-600 font-bold" href={`/verify?no=${c.serial}`}>Verifikasi {c.serial}</a></p>
                 </li>
               ))}
             </ul>
@@ -104,7 +104,7 @@ const Profile: React.FC<{ slug: string }> = ({ slug }) => {
         <input required type="email" value={f.senderEmail} onChange={(e) => setF({ ...f, senderEmail: e.target.value })} placeholder="Email kantor" className={input} />
         <textarea required minLength={20} maxLength={1000} rows={4} value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} placeholder="Tulis kebutuhan atau posisi yang dibuka (min. 20 karakter)" className={input} />
         {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
-        <button disabled={busy} type="submit" className="w-full py-2 bg-kodman-600 text-white rounded font-bold disabled:opacity-50">Kirim pesan</button>
+        <button disabled={busy} type="submit" className="w-full py-2 bg-digitalcoop-600 text-white rounded font-bold disabled:opacity-50">Kirim pesan</button>
       </form>
     </div>
   );
@@ -117,8 +117,8 @@ const TalentHub: React.FC<{ onHome: () => void }> = ({ onHome }) => {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/talent" className="font-extrabold text-xl text-kodman-900 dark:text-white flex items-center gap-2"><GraduationCap /> Industry Hub KMP - ADNG</a>
-          <button onClick={onHome} className="text-sm font-bold text-kodman-600">Ke Academy</button>
+          <a href="/talent" className="font-extrabold text-xl text-digitalcoop-900 dark:text-white flex items-center gap-2"><GraduationCap /> Industry Hub KMP - ADNG</a>
+          <button onClick={onHome} className="text-sm font-bold text-digitalcoop-600">Ke Academy</button>
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">

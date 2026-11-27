@@ -62,7 +62,7 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
       </div>
       <div className="flex gap-2">
         {(['run', 'archive'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={`px-4 py-1.5 rounded-lg text-sm font-bold ${tab === t ? 'bg-kodman-600 text-white' : 'border dark:border-slate-700 dark:text-slate-200'}`}>{t === 'run' ? 'Berjalan' : 'Arsip pembayaran'}</button>
+          <button key={t} onClick={() => setTab(t)} className={`px-4 py-1.5 rounded-lg text-sm font-bold ${tab === t ? 'bg-digitalcoop-600 text-white' : 'border dark:border-slate-700 dark:text-slate-200'}`}>{t === 'run' ? 'Berjalan' : 'Arsip pembayaran'}</button>
         ))}
       </div>
       {msg && <p role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</p>}
@@ -87,7 +87,7 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
                   {o.batches.map((b) => (
                     <li key={b.id} className="py-2 flex justify-between items-center text-sm dark:text-slate-200">
                       <span><b>{b.period}</b> · {rupiah(b.ownerTotal + b.mentorTotal)} untuk penerima · {BATCH_LABEL[b.status]}</span>
-                      <button onClick={() => void show(b.id)} className="text-kodman-600 font-bold">Buka</button>
+                      <button onClick={() => void show(b.id)} className="text-digitalcoop-600 font-bold">Buka</button>
                     </li>
                   ))}
                 </ul>
@@ -104,7 +104,7 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
               <button onClick={() => void payoutsApi.downloadTransactions(open.batch.id, open.batch.cutoffAt.slice(0, 10)).catch(() => setMsg('Gagal mengunduh CSV.'))} className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg border dark:border-slate-700"><Download size={14} /> Unduh uang masuk per judul (CSV)</button>
               {isDirector && open.batch.status === 'POSTED' && (
                 <>
-                  <button disabled={busy} onClick={() => confirm('Setujui pencairan ini? Admin lalu mentransfer ke tiap penerima.') && void act(() => payoutsApi.approve(open.batch.id), 'Batch disetujui.')} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-kodman-600 text-white">Setujui</button>
+                  <button disabled={busy} onClick={() => confirm('Setujui pencairan ini? Admin lalu mentransfer ke tiap penerima.') && void act(() => payoutsApi.approve(open.batch.id), 'Batch disetujui.')} className="text-xs font-bold px-3 py-1.5 rounded-lg bg-digitalcoop-600 text-white">Setujui</button>
                   <button disabled={busy} onClick={() => { const n = prompt('Alasan pembatalan (minimal 10 karakter). Transaksinya masuk posting berikutnya.'); if (n) void act(() => payoutsApi.voidBatch(open.batch.id, n), 'Batch dibatalkan.'); }} className="text-xs font-bold px-3 py-1.5 rounded-lg border dark:border-slate-700 text-red-600">Batalkan</button>
                 </>
               )}
@@ -134,7 +134,7 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
                             <div className="flex flex-col gap-1 items-start">
                               <input value={refs[p.id] ?? ''} onChange={(e) => setRefs({ ...refs, [p.id]: e.target.value })} placeholder="No. referensi" className={`${input} w-40`} />
                               <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => setFiles({ ...files, [p.id]: e.target.files?.[0] })} className="text-xs max-w-[11rem]" aria-label="Bukti bayar" />
-                              <button disabled={busy || !p.bank || !files[p.id]} onClick={() => pay(p.id, p.userName, p.amount)} className="text-xs font-bold px-2 py-1 rounded-lg bg-kodman-600 text-white disabled:opacity-50">Sudah transfer</button>
+                              <button disabled={busy || !p.bank || !files[p.id]} onClick={() => pay(p.id, p.userName, p.amount)} className="text-xs font-bold px-2 py-1 rounded-lg bg-digitalcoop-600 text-white disabled:opacity-50">Sudah transfer</button>
                             </div>
                           )}
                         </td>
@@ -165,8 +165,8 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
                             <td className="text-xs">{p.bank ? `${p.bank.bankName} ${p.bank.account}` : '-'}</td>
                             <td className="text-xs">{dateTimeId(p.paidAt)}<br />Ref: {p.transferRef}<br />{p.proofEmailedAt ? `Email terkirim ${dateTimeId(p.proofEmailedAt)}` : <span className="text-amber-600">Email belum terkirim</span>}</td>
                             <td className="text-xs whitespace-nowrap">
-                              {p.hasProof && <button onClick={() => void payoutsApi.adminProof(p.id).catch(() => setMsg('Gagal mengunduh bukti.'))} className="text-kodman-600 font-bold mr-2">Bukti</button>}
-                              {isAdmin && p.hasProof && <button disabled={busy} onClick={() => void act(() => payoutsApi.resend(p.id), 'Email bukti dikirim ulang.')} className="text-kodman-600 font-bold">Kirim ulang email</button>}
+                              {p.hasProof && <button onClick={() => void payoutsApi.adminProof(p.id).catch(() => setMsg('Gagal mengunduh bukti.'))} className="text-digitalcoop-600 font-bold mr-2">Bukti</button>}
+                              {isAdmin && p.hasProof && <button disabled={busy} onClick={() => void act(() => payoutsApi.resend(p.id), 'Email bukti dikirim ulang.')} className="text-digitalcoop-600 font-bold">Kirim ulang email</button>}
                             </td>
                           </tr>
                         ))}
@@ -182,8 +182,8 @@ const PayoutManager: React.FC<{ role: 'ADMIN_SYSTEM' | 'DIRECTOR' }> = ({ role }
                       <li key={b.id} className="py-2 flex justify-between items-center text-sm dark:text-slate-200">
                         <span><b>{b.period}</b> · {rupiah(b.ownerTotal + b.mentorTotal)} · {BATCH_LABEL[b.status]}</span>
                         <span className="flex gap-3">
-                          <button onClick={() => void payoutsApi.downloadTransactions(b.id, b.cutoffAt.slice(0, 10)).catch(() => setMsg('Gagal mengunduh CSV.'))} className="text-kodman-600 font-bold">CSV</button>
-                          <button onClick={() => { setTab('run'); void show(b.id); }} className="text-kodman-600 font-bold">Laporan</button>
+                          <button onClick={() => void payoutsApi.downloadTransactions(b.id, b.cutoffAt.slice(0, 10)).catch(() => setMsg('Gagal mengunduh CSV.'))} className="text-digitalcoop-600 font-bold">CSV</button>
+                          <button onClick={() => { setTab('run'); void show(b.id); }} className="text-digitalcoop-600 font-bold">Laporan</button>
                         </span>
                       </li>
                     ))}

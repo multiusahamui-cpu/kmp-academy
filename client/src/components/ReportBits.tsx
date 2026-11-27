@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Inbox, AlertTriangle, RotateCw } from 'lucide-react';
+import { Skeleton } from './Skeleton';
 
 export const rupiah = (n: number): string =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -42,15 +44,29 @@ export function useAsync<T>(fn: () => Promise<T>, deps: React.DependencyList = [
   return { data, loading, error, reload };
 }
 
-export const StateBox: React.FC<{ loading: boolean; error: boolean; onRetry?: () => void; children: React.ReactNode }> = ({ loading, error, onRetry, children }) => {
-  if (loading) return <p className="py-12 text-center text-sm text-gray-500 dark:text-slate-400">Memuat...</p>;
+export const StateBox: React.FC<{ loading: boolean; error: boolean; onRetry?: () => void; rows?: number; children: React.ReactNode }> = ({ loading, error, onRetry, rows = 4, children }) => {
+  if (loading)
+    return (
+      <div className="py-4 space-y-3" aria-busy="true" aria-live="polite">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 flex-1" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        ))}
+      </div>
+    );
   if (error)
     return (
-      <div className="py-12 text-center text-sm text-red-600">
-        Gagal memuat data.{' '}
+      <div className="py-12 flex flex-col items-center gap-3 text-center">
+        <span className="grid place-items-center w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500">
+          <AlertTriangle size={22} />
+        </span>
+        <p className="text-sm text-gray-600 dark:text-slate-300">Gagal memuat data.</p>
         {onRetry && (
-          <button onClick={onRetry} className="underline font-bold">
-            Coba lagi
+          <button onClick={onRetry} className="btn-ghost text-sm">
+            <RotateCw size={15} /> Coba lagi
           </button>
         )}
       </div>
@@ -59,7 +75,7 @@ export const StateBox: React.FC<{ loading: boolean; error: boolean; onRetry?: ()
 };
 
 export const Card: React.FC<{ title?: string; right?: React.ReactNode; children: React.ReactNode; className?: string }> = ({ title, right, children, className = '' }) => (
-  <div className={`bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 ${className}`}>
+  <div className={`card-surface p-6 ${className}`}>
     {(title || right) && (
       <div className="flex justify-between items-center mb-4">
         {title && <h3 className="font-bold text-gray-900 dark:text-white">{title}</h3>}
@@ -71,13 +87,13 @@ export const Card: React.FC<{ title?: string; right?: React.ReactNode; children:
 );
 
 export const Tile: React.FC<{ title: string; value: React.ReactNode; hint?: string; icon?: React.ReactNode }> = ({ title, value, hint, icon }) => (
-  <div className="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800">
+  <div className="card-surface p-5 transition hover:shadow-md hover:-translate-y-0.5">
     <div className="flex justify-between items-start">
       <div className="min-w-0">
         <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">{title}</p>
         <h3 className="font-sans text-2xl font-bold text-gray-900 dark:text-white break-words">{value}</h3>
       </div>
-      {icon && <div className="p-2 bg-gray-50 dark:bg-slate-800 rounded-lg shrink-0">{icon}</div>}
+      {icon && <div className="p-2 bg-digitalcoop-50 dark:bg-slate-800 text-digitalcoop-600 dark:text-digitalcoop-400 rounded-lg shrink-0">{icon}</div>}
     </div>
     {hint && <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">{hint}</p>}
   </div>
@@ -90,7 +106,7 @@ export interface BarItem {
 }
 
 /** Diagram batang sederhana (tanpa pustaka). Tinggi dinormalisasi ke nilai terbesar; semua nol tetap tampil sebagai garis dasar. */
-export const Bars: React.FC<{ items: BarItem[]; height?: number; color?: string }> = ({ items, height = 160, color = 'bg-kodman-500' }) => {
+export const Bars: React.FC<{ items: BarItem[]; height?: number; color?: string }> = ({ items, height = 160, color = 'bg-digitalcoop-500' }) => {
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
     <div className="flex items-end gap-2" style={{ height }} role="img" aria-label="Diagram batang">
@@ -104,8 +120,13 @@ export const Bars: React.FC<{ items: BarItem[]; height?: number; color?: string 
   );
 };
 
-export const Empty: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="py-8 text-center text-sm text-gray-500 dark:text-slate-400">{children}</p>
+export const Empty: React.FC<{ children: React.ReactNode; icon?: React.ReactNode }> = ({ children, icon }) => (
+  <div className="py-10 flex flex-col items-center gap-2 text-center">
+    <span className="grid place-items-center w-12 h-12 rounded-full bg-digitalcoop-50 dark:bg-slate-800 text-digitalcoop-500">
+      {icon ?? <Inbox size={22} />}
+    </span>
+    <p className="text-sm text-gray-500 dark:text-slate-400 max-w-xs">{children}</p>
+  </div>
 );
 
 export const ComingSoon: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (

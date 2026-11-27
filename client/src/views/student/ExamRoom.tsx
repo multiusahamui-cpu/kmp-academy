@@ -110,7 +110,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
 
   const retry = async () => { setResult(null); setSession(null); await loadSummary(); setStep("INTRO"); };
 
-  if (!summary && !error) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-kodman-600" /></div>;
+  if (!summary && !error) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-digitalcoop-600" /></div>;
 
   // ---------------- INTRO ----------------
   if (step === "INTRO") {
@@ -120,7 +120,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
         <button onClick={onExit} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white"><ArrowLeft size={16} /> Kembali</button>
         <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-kodman-100 text-kodman-700"><Award size={32} /></div>
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-digitalcoop-100 text-digitalcoop-700"><Award size={32} /></div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ujian Akhir</h2>
             <p className="text-sm text-gray-500">{title}</p>
           </div>
@@ -140,7 +140,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
               {summary.passed ? (
                 <div className="space-y-3 text-center">
                   <p className="font-bold text-green-600">Anda sudah lulus{summary.bestScore !== null ? ` (skor terbaik ${summary.bestScore})` : ""}.</p>
-                  <button onClick={() => void openCertificate()} className="rounded-lg bg-kodman-600 px-6 py-2 text-sm font-bold text-white hover:bg-kodman-700">Lihat Sertifikat</button>
+                  <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-6 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Lihat Sertifikat</button>
                 </div>
               ) : summary.eligible ? (
                 <button disabled={busy} onClick={() => void start()} className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 py-3 font-bold text-white hover:bg-green-700 disabled:opacity-50">
@@ -173,8 +173,8 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
           <p className="mb-6 whitespace-pre-line text-lg font-medium text-gray-900 dark:text-white">{q.question}</p>
           <div className="space-y-3">
             {q.options.map((opt, i) => (
-              <button key={i} onClick={() => choose(i)} className={`flex w-full items-start gap-3 rounded-lg border-2 p-4 text-left text-sm transition ${answers[idx] === i ? "border-kodman-600 bg-kodman-50 dark:bg-kodman-900/20" : "border-gray-200 hover:border-gray-300 dark:border-slate-700"}`}>
-                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${answers[idx] === i ? "bg-kodman-600 text-white" : "bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300"}`}>{String.fromCharCode(65 + i)}</span>
+              <button key={i} onClick={() => choose(i)} className={`flex w-full items-start gap-3 rounded-lg border-2 p-4 text-left text-sm transition ${answers[idx] === i ? "border-digitalcoop-600 bg-digitalcoop-50 dark:bg-digitalcoop-900/20" : "border-gray-200 hover:border-gray-300 dark:border-slate-700"}`}>
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${answers[idx] === i ? "bg-digitalcoop-600 text-white" : "bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300"}`}>{String.fromCharCode(65 + i)}</span>
                 <span className="text-gray-800 dark:text-slate-200">{opt}</span>
               </button>
             ))}
@@ -184,14 +184,14 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
             {last ? (
               <button onClick={() => setConfirming(true)} className="rounded-lg bg-green-600 px-6 py-2 text-sm font-bold text-white hover:bg-green-700">Selesai & Kirim</button>
             ) : (
-              <button onClick={() => setIdx(idx + 1)} className="flex items-center gap-1 rounded-lg bg-kodman-600 px-4 py-2 text-sm font-bold text-white hover:bg-kodman-700">Berikutnya <ArrowRight size={14} /></button>
+              <button onClick={() => setIdx(idx + 1)} className="flex items-center gap-1 rounded-lg bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Berikutnya <ArrowRight size={14} /></button>
             )}
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {session.questions.map((_, i) => (
-            <button key={i} onClick={() => setIdx(i)} className={`h-8 w-8 rounded text-xs font-bold ${i === idx ? "bg-kodman-600 text-white" : answers[i] !== -1 ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300"}`}>{i + 1}</button>
+            <button key={i} onClick={() => setIdx(i)} className={`h-8 w-8 rounded text-xs font-bold ${i === idx ? "bg-digitalcoop-600 text-white" : answers[i] !== -1 ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300"}`}>{i + 1}</button>
           ))}
         </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
@@ -220,12 +220,12 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {result.passed ? <CheckCircle size={64} className="mx-auto mb-3 text-green-500" /> : <XCircle size={64} className="mx-auto mb-3 text-red-500" />}
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{result.passed ? "Selamat, Anda lulus!" : "Belum lulus"}</h2>
-          <p className="mt-4 text-5xl font-extrabold text-kodman-700 dark:text-kodman-300">{result.score}</p>
+          <p className="mt-4 text-5xl font-extrabold text-digitalcoop-700 dark:text-digitalcoop-300">{result.score}</p>
           <p className="mt-1 text-sm text-gray-500">{result.correct} dari {result.total} soal benar · nilai lulus {result.passingGrade}</p>
           {!result.passed && <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">{result.attemptsLeft > 0 ? `Sisa kesempatan: ${result.attemptsLeft}. Pelajari materi lagi lalu coba kembali.` : "Kesempatan ujian sudah habis."}</p>}
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {result.passed && result.certificate && <button onClick={() => void openCertificate()} className="rounded-lg bg-kodman-600 px-5 py-2 text-sm font-bold text-white hover:bg-kodman-700">Lihat Sertifikat</button>}
+            {result.passed && result.certificate && <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-5 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Lihat Sertifikat</button>}
             {!result.passed && result.attemptsLeft > 0 && <button onClick={() => void retry()} className="rounded-lg bg-green-600 px-5 py-2 text-sm font-bold text-white hover:bg-green-700">Coba Lagi</button>}
             <button onClick={onExit} className="rounded-lg border border-gray-300 px-5 py-2 text-sm dark:border-slate-600">Selesai</button>
           </div>

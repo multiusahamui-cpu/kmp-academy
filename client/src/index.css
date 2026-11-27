@@ -2,9 +2,205 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles for smooth transition */
-body {
-  transition:
-    background-color 0.3s,
-    color 0.3s;
+/* =====================================================================
+   KMP-ADNG Academy — Design System
+   Brand: hijau daun (digitalcoop) + kuning emas (gold).
+   ===================================================================== */
+
+@layer base {
+  :root {
+    --digitalcoop-500: #2e9d3c;
+    --digitalcoop-600: #228030;
+    --digitalcoop-700: #1d6628;
+    --gold-400: #fbbf24;
+    --gold-500: #f59e0b;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  /* Kanvas latar terang: perpaduan hijau daun ke kuning lembut. */
+  .bg-digitalcoop-canvas {
+    background-color: #f5f9ec;
+    background-image:
+      radial-gradient(1100px 600px at 100% -10%, rgba(245, 158, 11, 0.10), transparent 60%),
+      radial-gradient(1000px 650px at -10% 0%, rgba(46, 157, 60, 0.10), transparent 55%),
+      linear-gradient(135deg, #f1f8e9 0%, #f6faee 45%, #fdfbe9 100%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(1000px 600px at 100% -10%, rgba(245, 158, 11, 0.06), transparent 60%),
+      radial-gradient(900px 600px at -10% 0%, rgba(46, 157, 60, 0.10), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  /* Seleksi teks bernuansa digitalcoop. */
+  ::selection {
+    background: rgba(46, 157, 60, 0.22);
+    color: inherit;
+  }
+
+  /* Focus ring aksesibel & konsisten. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--digitalcoop-500);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Scrollbar halus. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(46, 157, 60, 0.35) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(46, 157, 60, 0.30);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(46, 157, 60, 0.55);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* Kartu permukaan standar dengan hover lembut. */
+  .card-surface {
+    @apply bg-white dark:bg-slate-900 rounded-2xl border border-gray-200/80 dark:border-slate-800 shadow-sm;
+  }
+  .card-interactive {
+    @apply card-surface transition duration-300 hover:shadow-xl hover:-translate-y-0.5 hover:border-digitalcoop-300 dark:hover:border-digitalcoop-700;
+  }
+
+  /* Tombol. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-full px-5 py-2.5 transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-digitalcoop-600 hover:bg-digitalcoop-700 text-white shadow-digitalcoop;
+  }
+  .btn-gold {
+    @apply btn bg-gold-400 hover:bg-gold-500 text-digitalcoop-950 shadow-gold;
+  }
+  .btn-ghost {
+    @apply btn bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700;
+  }
+
+  /* Chip / badge. */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .chip-digitalcoop {
+    @apply chip bg-digitalcoop-100 text-digitalcoop-800 dark:bg-digitalcoop-900/40 dark:text-digitalcoop-200;
+  }
+  .chip-gold {
+    @apply chip bg-gold-100 text-gold-800 dark:bg-gold-900/30 dark:text-gold-200;
+  }
+
+  /* Skeleton loading. */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-gray-200/80 dark:bg-slate-800;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    animation: shimmer 1.4s infinite;
+  }
+  .dark .skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+  }
+}
+
+@layer utilities {
+  /* Animasi masuk untuk konten & toast. */
+  .animate-in {
+    animation: fadeRise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-pop {
+    animation: pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .bg-digitalcoop-gradient {
+    background-image: linear-gradient(135deg, var(--digitalcoop-600), var(--digitalcoop-500) 55%, var(--gold-500));
+  }
+  .text-digitalcoop-gradient {
+    background-image: linear-gradient(120deg, var(--digitalcoop-600), var(--gold-500));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

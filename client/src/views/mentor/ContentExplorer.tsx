@@ -69,7 +69,7 @@ const ContentExplorer: React.FC = () => {
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Deskripsi, jadwal rencana, dan apa yang akan dipelajari" rows={3} className={input} />
               <input required type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Harga per peserta (Rp)" className={input} />
               <div className="flex items-center gap-3">
-                <button disabled={busy} type="submit" className="px-4 py-2 bg-kodman-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Ajukan</button>
+                <button disabled={busy} type="submit" className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg text-sm font-bold disabled:opacity-50">Ajukan</button>
                 {msg && <span role="status" className="text-sm text-gray-700 dark:text-slate-300">{msg}</span>}
               </div>
             </form>

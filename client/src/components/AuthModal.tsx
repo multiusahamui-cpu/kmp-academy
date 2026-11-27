@@ -82,7 +82,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-800 animate-fade-in-up">
         {/* Header */}
-        <div className="relative h-32 bg-kodman-900 flex items-center justify-center overflow-hidden">
+        <div className="relative h-32 bg-digitalcoop-900 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')] bg-cover opacity-20 mix-blend-overlay"></div>
           <div className="relative z-10 text-center">
             <GraduationCap size={40} className="text-white mx-auto mb-2" />
@@ -101,7 +101,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
         {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-slate-800">
           <button
-            className={`flex-1 py-4 text-sm font-bold transition ${mode === "LOGIN" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
+            className={`flex-1 py-4 text-sm font-bold transition ${mode === "LOGIN" ? "text-digitalcoop-600 border-b-2 border-digitalcoop-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
             onClick={() => {
               setActiveTab("LOGIN");
               setForgot(false);
@@ -112,7 +112,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           </button>
           {canRegister && (
             <button
-              className={`flex-1 py-4 text-sm font-bold transition ${mode === "REGISTER" ? "text-kodman-600 border-b-2 border-kodman-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
+              className={`flex-1 py-4 text-sm font-bold transition ${mode === "REGISTER" ? "text-digitalcoop-600 border-b-2 border-digitalcoop-600 bg-gray-50 dark:bg-slate-800" : "text-gray-500 hover:text-gray-800 dark:text-slate-400"}`}
               onClick={() => {
                 setActiveTab("REGISTER");
                 setForgot(false);
@@ -149,7 +149,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="text"
                     required
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
                     placeholder="Nama Anda"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -171,7 +171,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   type={mode === "LOGIN" ? "text" : "email"}
                   required
                   autoComplete={mode === "LOGIN" ? "username" : "email"}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
                   placeholder={mode === "LOGIN" ? "email@contoh.com atau 0812..." : "email@contoh.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -187,7 +187,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 <input
                   type="tel"
                   autoComplete="tel"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
                   placeholder="0812 3456 789"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -211,7 +211,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   autoComplete={
                     mode === "LOGIN" ? "current-password" : "new-password"
                   }
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-kodman-500 outline-none"
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -228,7 +228,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
             {mode === "LOGIN" && (
               <div className="text-right -mt-3">
-                <button type="button" onClick={() => { setForgot(true); setDoneMsg(""); setErrorMsg(""); }} className="text-xs font-bold text-kodman-600 hover:underline">
+                <button type="button" onClick={() => { setForgot(true); setDoneMsg(""); setErrorMsg(""); }} className="text-xs font-bold text-digitalcoop-600 hover:underline">
                   Lupa password?
                 </button>
               </div>
@@ -261,7 +261,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 text-white rounded-lg font-bold shadow-lg flex items-center justify-center transition transform active:scale-95 ${isLoading ? "bg-kodman-400 cursor-not-allowed" : "bg-kodman-600 hover:bg-kodman-700"}`}
+              className={`w-full py-3 text-white rounded-lg font-bold shadow-lg flex items-center justify-center transition transform active:scale-95 ${isLoading ? "bg-digitalcoop-400 cursor-not-allowed" : "bg-digitalcoop-600 hover:bg-digitalcoop-700"}`}
             >
               {isLoading ? (
                 <>
@@ -280,7 +280,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           {mode === "LOGIN" && (
             <a
               href="https://digitalcoop.id/member/academy?masuk=1"
-              className="mt-4 block w-full rounded-lg border border-kodman-600 py-3 text-center text-sm font-bold text-kodman-600 hover:bg-kodman-50 dark:hover:bg-slate-800"
+              className="mt-4 block w-full rounded-lg border border-digitalcoop-600 py-3 text-center text-sm font-bold text-digitalcoop-600 hover:bg-digitalcoop-50 dark:hover:bg-slate-800"
               data-testid="btn-masuk-digitalcoop"
             >
               Masuk dengan akun digitalcoop.id

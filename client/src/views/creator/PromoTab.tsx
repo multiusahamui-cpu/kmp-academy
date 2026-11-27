@@ -76,7 +76,7 @@ const PromoTab: React.FC<Props> = ({ courseId, isManager = false }) => {
       <div className="space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800/40">
         <div className="flex flex-wrap gap-2">
           {([['CODE', 'Kode promo'], ['BULK', 'Kode sekali pakai (massal)'], ['AUTO', 'Diskon otomatis']] as [Mode, string][]).map(([m, l]) => (
-            <button key={m} onClick={() => setMode(m)} className={`rounded-full px-3 py-1 text-sm font-medium ${mode === m ? 'bg-kodman-600 text-white' : 'bg-white text-gray-600 dark:bg-slate-800 dark:text-slate-300'}`}>{l}</button>
+            <button key={m} onClick={() => setMode(m)} className={`rounded-full px-3 py-1 text-sm font-medium ${mode === m ? 'bg-digitalcoop-600 text-white' : 'bg-white text-gray-600 dark:bg-slate-800 dark:text-slate-300'}`}>{l}</button>
           ))}
         </div>
         <div className="grid gap-3 md:grid-cols-3">
@@ -127,7 +127,7 @@ const PromoTab: React.FC<Props> = ({ courseId, isManager = false }) => {
 
       <div className="space-y-2">
         <h4 className="text-sm font-bold text-gray-900 dark:text-white">Daftar Diskon</h4>
-        {!items ? <Loader2 className="mx-auto animate-spin text-kodman-600" /> : items.length === 0 ? (
+        {!items ? <Loader2 className="mx-auto animate-spin text-digitalcoop-600" /> : items.length === 0 ? (
           <p className="rounded-lg border border-dashed border-gray-300 py-6 text-center text-sm text-gray-500 dark:border-slate-700">Belum ada diskon.</p>
         ) : items.map((d) => (
           <div key={d.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 p-3 text-sm dark:border-slate-700">

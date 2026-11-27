@@ -64,7 +64,7 @@ const PublishTab: React.FC<Props> = ({ course, editable, onChanged }) => {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
-        <h3 className="mb-4 flex items-center text-lg font-bold text-gray-900 dark:text-white"><ShieldCheck className="mr-2 text-kodman-600" /> Perjanjian Lisensi Eksklusif</h3>
+        <h3 className="mb-4 flex items-center text-lg font-bold text-gray-900 dark:text-white"><ShieldCheck className="mr-2 text-digitalcoop-600" /> Perjanjian Lisensi Eksklusif</h3>
         <div className="mb-4 h-56 overflow-y-auto rounded border border-gray-200 bg-white p-4 text-sm leading-relaxed text-gray-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
           <p className="mb-2 font-bold">PASAL 1: DEFINISI</p>
           <p className="mb-4">&quot;Konten&quot; merujuk pada seluruh materi video, teks, kuis, dan aset digital yang diunggah. &quot;Platform&quot; merujuk pada KMP - ADNG Academy.</p>
@@ -78,7 +78,7 @@ const PublishTab: React.FC<Props> = ({ course, editable, onChanged }) => {
           <p className="mb-4">KMP - ADNG Academy berhak penuh untuk menurunkan (Unpublish) konten dari etalase jika:<br />a. Rating rata-rata di bawah 3.0.<br />b. Materi terindikasi plagiat atau melanggar hukum.<br />c. Tidak ada aktivitas penjualan selama 6 bulan berturut-turut.</p>
           <p className="font-bold text-red-600">Dengan mencentang kotak di bawah, Anda mengikatkan diri secara hukum terhadap perjanjian ini.</p>
         </div>
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-kodman-200 bg-white p-4 dark:border-kodman-800 dark:bg-slate-900">
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-digitalcoop-200 bg-white p-4 dark:border-digitalcoop-800 dark:bg-slate-900">
           <input type="checkbox" disabled={!editable} checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-5 w-5" />
           <span>
             <span className="font-bold text-gray-900 dark:text-white">Saya menyetujui Syarat & Ketentuan Lisensi Eksklusif KMP - ADNG Academy.</span>

@@ -118,13 +118,13 @@ const PaymentVerification: React.FC = () => {
       <div className="flex flex-wrap gap-2">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => { setTab(t.id); setPage(1); setOpenId(null); }}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium ${tab === t.id ? 'bg-kodman-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300'}`}>{t.label}</button>
+            className={`rounded-full px-4 py-1.5 text-sm font-medium ${tab === t.id ? 'bg-digitalcoop-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300'}`}>{t.label}</button>
         ))}
       </div>
 
       {notice && <div className="flex justify-between rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300"><span>{notice}</span><button onClick={() => setNotice('')}>Tutup</button></div>}
 
-      {loading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-kodman-600" /></div> : items.length === 0 ? (
+      {loading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-digitalcoop-600" /></div> : items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center text-sm text-gray-500 dark:border-slate-700">Tidak ada pesanan pada status ini.</div>
       ) : (
         <div className="space-y-3">
@@ -139,14 +139,14 @@ const PaymentVerification: React.FC = () => {
                   {it.paidReference && <p className="text-xs text-gray-500">Referensi: {it.paidReference} ({it.paidDate})</p>}
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-kodman-700 dark:text-kodman-400">{rupiah(it.amount)}</p>
+                  <p className="text-lg font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{rupiah(it.amount)}</p>
                   <span className="rounded bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600 dark:bg-slate-800 dark:text-slate-300">{it.status}</span>
                 </div>
               </div>
               {it.method === 'MANUAL' && it.status === 'VERIFYING' && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {it.hasProof && <a href={paymentAdminApi.proofUrl(it.id)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-slate-200"><ExternalLink size={14} /> Lihat bukti</a>}
-                  <button onClick={() => setOpenId(openId === it.id ? null : it.id)} className="rounded-lg bg-kodman-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-kodman-700">{openId === it.id ? 'Tutup' : 'Proses'}</button>
+                  <button onClick={() => setOpenId(openId === it.id ? null : it.id)} className="rounded-lg bg-digitalcoop-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-digitalcoop-700">{openId === it.id ? 'Tutup' : 'Proses'}</button>
                 </div>
               )}
               {openId === it.id && <DecisionForm item={it} onDone={(m) => { setNotice(m); setOpenId(null); void load(); }} />}

@@ -52,7 +52,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between bg-gray-50 dark:bg-slate-950">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <ShoppingBag size={20} className="text-kodman-600" />
+              <ShoppingBag size={20} className="text-digitalcoop-600" />
               Keranjang & Wishlist
             </h2>
             <button onClick={onClose} className="text-gray-500 hover:text-red-500 transition">
@@ -64,13 +64,13 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="flex border-b border-gray-200 dark:border-slate-800">
             <button 
               onClick={() => setActiveTab('CART')}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'CART' ? 'border-kodman-600 text-kodman-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
+              className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'CART' ? 'border-digitalcoop-600 text-digitalcoop-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
             >
               Keranjang ({items.length})
             </button>
             <button 
               onClick={() => setActiveTab('WISHLIST')}
-              className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'WISHLIST' ? 'border-kodman-600 text-kodman-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
+              className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'WISHLIST' ? 'border-digitalcoop-600 text-digitalcoop-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
             >
               Wishlist ({wishlistItems.length})
             </button>
@@ -90,7 +90,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                       <div className="relative">
                         <img src={item.thumbnail} alt={item.title} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
                         {item.qty > 1 && (
-                          <div className="absolute -top-2 -right-2 bg-kodman-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
+                          <div className="absolute -top-2 -right-2 bg-digitalcoop-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
                             x{item.qty}
                           </div>
                         )}
@@ -101,7 +101,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                         <p className="text-xs text-gray-500 mt-1 mb-2">{item.type}</p>
                         
                         <div className="flex justify-between items-end">
-                          <span className="font-bold text-kodman-600 dark:text-kodman-400 text-sm">
+                          <span className="font-bold text-digitalcoop-600 dark:text-digitalcoop-400 text-sm">
                             {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.price * item.qty)}
                           </span>
                           
@@ -162,7 +162,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                              <h4 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1">{item.title}</h4>
                              <p className="text-xs text-gray-500 mt-1 mb-2">Disimpan: {item.addedAt}</p>
                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-kodman-600 dark:text-kodman-400 text-sm">
+                                <span className="font-bold text-digitalcoop-600 dark:text-digitalcoop-400 text-sm">
                                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.price)}
                                 </span>
                                 <div className="flex gap-2">
@@ -175,7 +175,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                                    </button>
                                    <button 
                                       onClick={() => onMoveToCart(item)}
-                                      className="p-1.5 bg-kodman-600 text-white rounded hover:bg-kodman-700 transition shadow-sm"
+                                      className="p-1.5 bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 transition shadow-sm"
                                       title="Pindahkan ke Keranjang"
                                    >
                                       <ShoppingCart size={16} />
@@ -209,7 +209,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
               
               <div className="border-t border-gray-200 dark:border-slate-800 pt-3 flex justify-between items-center mb-4">
                 <span className="text-gray-800 dark:text-white font-bold">Total Pembayaran</span>
-                <span className="text-xl font-bold text-kodman-700 dark:text-kodman-400">
+                <span className="text-xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">
                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalAmount)}
                 </span>
               </div>

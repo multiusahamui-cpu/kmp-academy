@@ -21,7 +21,7 @@ const Detail: React.FC<{ id: string; canMarkRead: boolean; onBack: () => void; o
   }, [id]);
   return (
     <div className="space-y-4">
-      <button onClick={onBack} className="text-sm text-gray-500 hover:text-kodman-600">&larr; Kembali</button>
+      <button onClick={onBack} className="text-sm text-gray-500 hover:text-digitalcoop-600">&larr; Kembali</button>
       <StateBox loading={loading} error={error} onRetry={reload}>
         {data && (
           <Card title={`Laporan ${KIND_LABEL[data.kind]}`}>
@@ -70,7 +70,7 @@ const ManagementReports: React.FC<{ canGenerate?: boolean; canMarkRead?: boolean
         <div className="mb-4 space-y-2">
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={1000} placeholder="Catatan untuk Direktur (opsional)" className="w-full p-2 text-sm border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white" />
           <div className="flex gap-2">
-            <button disabled={busy} onClick={() => void generate('WEEKLY')} className="px-3 py-1.5 bg-kodman-600 text-white rounded text-sm font-bold disabled:opacity-50">Buat laporan mingguan</button>
+            <button disabled={busy} onClick={() => void generate('WEEKLY')} className="px-3 py-1.5 bg-digitalcoop-600 text-white rounded text-sm font-bold disabled:opacity-50">Buat laporan mingguan</button>
             <button disabled={busy} onClick={() => void generate('MONTHLY')} className="px-3 py-1.5 border rounded text-sm font-bold disabled:opacity-50">Buat laporan bulanan</button>
           </div>
           <p className="text-xs text-gray-500">Mingguan: 7 hari terakhir. Bulanan: bulan kalender sebelumnya (WIB).</p>

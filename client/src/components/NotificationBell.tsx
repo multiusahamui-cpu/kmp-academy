@@ -112,7 +112,7 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
             <span className="font-semibold text-sm text-gray-900 dark:text-white">Notifikasi</span>
             <div className="flex items-center gap-3">
               {unread > 0 && (
-                <button onClick={readAll} className="text-xs text-kodman-600 dark:text-kodman-400 hover:underline">
+                <button onClick={readAll} className="text-xs text-digitalcoop-600 dark:text-digitalcoop-400 hover:underline">
                   Tandai semua dibaca
                 </button>
               )}
@@ -139,10 +139,10 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
               <button
                 key={n.id}
                 onClick={() => readOne(n)}
-                className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition ${n.readAt ? "" : "bg-kodman-50/60 dark:bg-slate-800/60"}`}
+                className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition ${n.readAt ? "" : "bg-digitalcoop-50/60 dark:bg-slate-800/60"}`}
               >
                 <div className="flex items-start gap-2">
-                  {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-kodman-600" aria-label="Belum dibaca" />}
+                  {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-digitalcoop-600" aria-label="Belum dibaca" />}
                   <div className="min-w-0">
                     <p className={`text-sm text-gray-900 dark:text-white ${n.readAt ? "" : "font-semibold"}`}>{n.title}</p>
                     <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5 break-words">{n.body}</p>

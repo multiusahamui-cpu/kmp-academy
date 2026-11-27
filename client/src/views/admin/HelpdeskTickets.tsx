@@ -17,13 +17,13 @@ const HelpdeskTickets: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><LifeBuoy className="mr-3 text-kodman-600" /> Helpdesk</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center"><LifeBuoy className="mr-3 text-digitalcoop-600" /> Helpdesk</h2>
         <p className="text-gray-500 dark:text-slate-400">Tiket bantuan dari pengguna.</p>
       </div>
       <Card>
         <div className="flex gap-2 mb-4 flex-wrap">
           {FILTERS.map(([k, label]) => (
-            <button key={k} onClick={() => { setStatus(k); setPage(1); }} className={`px-3 py-1 rounded-full text-sm border ${status === k ? 'bg-kodman-600 text-white border-kodman-600' : 'text-gray-600 dark:text-slate-300'}`}>{label}</button>
+            <button key={k} onClick={() => { setStatus(k); setPage(1); }} className={`px-3 py-1 rounded-full text-sm border ${status === k ? 'bg-digitalcoop-600 text-white border-digitalcoop-600' : 'text-gray-600 dark:text-slate-300'}`}>{label}</button>
           ))}
         </div>
         <StateBox loading={loading} error={error} onRetry={reload}>

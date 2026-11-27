@@ -47,7 +47,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "OBJECTIVE":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               1. Objektif Platform KMP - ADNG Academy
             </h3>
             <p className="text-gray-700 dark:text-slate-300 leading-relaxed">
@@ -56,8 +56,8 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
               melalui pendidikan vokasi yang terstruktur dan terukur.
             </p>
             <ul className="list-disc pl-5 space-y-3 text-gray-600 dark:text-slate-400">
-              <li className="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border-l-4 border-kodman-500 shadow-sm">
-                <strong className="text-kodman-700 dark:text-kodman-300 block mb-1 text-base">
+              <li className="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border-l-4 border-digitalcoop-500 shadow-sm">
+                <strong className="text-digitalcoop-700 dark:text-digitalcoop-300 block mb-1 text-base">
                   Transformasi Siswa (Good to Great)
                 </strong>
                 <span className="text-sm">
@@ -90,7 +90,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "ADVANTAGES":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               2. Keunggulan Platform
             </h3>
             <div className="grid gap-4">
@@ -127,7 +127,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "ARCHITECTURE":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               3. Arsitektur Sistem
             </h3>
             <p className="text-gray-700 dark:text-slate-300">
@@ -154,7 +154,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "WORKFLOW":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               4. Alur Kerja Sistem (Workflow)
             </h3>
             <ul className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
@@ -222,7 +222,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "ROLES":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               5. Panduan Role / Pemakai
             </h3>
 
@@ -327,7 +327,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "FAQ":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               6. Frequently Asked Questions
             </h3>
             <details className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg cursor-pointer">
@@ -362,7 +362,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "PRIVACY":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               7. Kebijakan Privasi
             </h3>
             <p className="text-sm text-gray-700 dark:text-slate-300">
@@ -380,7 +380,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "TERMS":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               8. Syarat & Ketentuan
             </h3>
             <ul className="list-decimal pl-5 space-y-2 text-sm text-gray-700 dark:text-slate-300">
@@ -403,24 +403,24 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "GLOSSARY":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               9. Glosarium Istilah
             </h3>
             <div className="grid grid-cols-1 gap-3">
               <div className="text-sm">
-                <strong className="text-kodman-600">LMS:</strong> Learning
+                <strong className="text-digitalcoop-600">LMS:</strong> Learning
                 Management System.
               </div>
               <div className="text-sm">
-                <strong className="text-kodman-600">KYC:</strong> Know Your
+                <strong className="text-digitalcoop-600">KYC:</strong> Know Your
                 Customer (Verifikasi Identitas KTP).
               </div>
               <div className="text-sm">
-                <strong className="text-kodman-600">Settlement:</strong> Proses
+                <strong className="text-digitalcoop-600">Settlement:</strong> Proses
                 pencairan dana dari sistem ke pengguna.
               </div>
               <div className="text-sm">
-                <strong className="text-kodman-600">Assembling:</strong> Proses
+                <strong className="text-digitalcoop-600">Assembling:</strong> Proses
                 Mentor menggunakan materi Creator lain untuk kelas Workshop.
               </div>
             </div>
@@ -429,7 +429,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "DISCLAIMER":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               A. Penafian (Disclaimer)
             </h3>
             <p className="text-sm text-gray-700 dark:text-slate-300 border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50 dark:bg-yellow-900/10">
@@ -448,7 +448,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "TECH":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-kodman-600 dark:text-kodman-400 mb-4">
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
               B. Technology Stack & Credits
             </h3>
 
@@ -506,7 +506,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
         <div className="w-full md:w-1/3 bg-gray-50 dark:bg-slate-950 border-r border-gray-200 dark:border-slate-800 flex flex-col">
           <div className="p-6 border-b border-gray-200 dark:border-slate-800">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-              <div className="bg-kodman-600 text-white p-1.5 rounded-lg mr-2">
+              <div className="bg-digitalcoop-600 text-white p-1.5 rounded-lg mr-2">
                 <Heart size={18} fill="currentColor" />
               </div>
               Pusat Informasi
@@ -523,13 +523,13 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition ${
                   activeTab === item.id
-                    ? "bg-white dark:bg-slate-800 text-kodman-600 dark:text-kodman-400 shadow-sm border border-gray-200 dark:border-slate-700"
+                    ? "bg-white dark:bg-slate-800 text-digitalcoop-600 dark:text-digitalcoop-400 shadow-sm border border-gray-200 dark:border-slate-700"
                     : "text-gray-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-900"
                 }`}
               >
                 <item.icon
                   size={16}
-                  className={`mr-3 ${activeTab === item.id ? "text-kodman-500" : "text-gray-400"}`}
+                  className={`mr-3 ${activeTab === item.id ? "text-digitalcoop-500" : "text-gray-400"}`}
                 />
                 {item.label}
               </button>

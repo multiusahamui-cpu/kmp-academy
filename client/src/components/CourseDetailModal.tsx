@@ -43,7 +43,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
-                 <span className={`self-start px-2 py-1 rounded text-[10px] font-bold uppercase mb-2 ${course.type === CourseType.CERTIFICATION ? 'bg-amber-500 text-white' : 'bg-kodman-600 text-white'}`}>
+                 <span className={`self-start px-2 py-1 rounded text-[10px] font-bold uppercase mb-2 ${course.type === CourseType.CERTIFICATION ? 'bg-amber-500 text-white' : 'bg-digitalcoop-600 text-white'}`}>
                     {course.type}
                  </span>
               </div>
@@ -53,7 +53,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
               <div className="flex items-center justify-between mb-6">
                  <div>
                     <p className="text-sm text-gray-500 dark:text-slate-400">Harga Kursus</p>
-                    <h3 className="text-2xl font-bold text-kodman-600 dark:text-kodman-400">
+                    <h3 className="text-2xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400">
                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.finalPrice ?? course.price)}
                     </h3>
                     {(course.finalPrice ?? course.price) < course.price && (
@@ -71,7 +71,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                        onAddToCart(course);
                        onClose();
                     }}
-                    className="w-full py-3 bg-kodman-600 hover:bg-kodman-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center transition"
+                    className="w-full py-3 bg-digitalcoop-600 hover:bg-digitalcoop-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center transition"
                  >
                     <ShoppingBag size={18} className="mr-2" /> {(course.finalPrice ?? course.price) === 0 ? 'Daftar Gratis' : 'Beli Kursus'}
                  </button>
@@ -117,7 +117,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     {course.modules && course.modules.length > 0 ? (
                        course.modules.map((mod, idx) => (
                           <div key={mod.id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition">
-                             <div className="mt-0.5 text-kodman-500">
+                             <div className="mt-0.5 text-digitalcoop-500">
                                 {mod.isFreePreview ? <PlayCircle size={18} fill="currentColor" className="text-white" /> : <div className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-slate-600 flex items-center justify-center text-[10px] font-bold text-gray-400">{idx + 1}</div>}
                              </div>
                              <div className="flex-1">
