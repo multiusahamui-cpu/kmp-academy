@@ -15,6 +15,7 @@ import {
 import { userApi } from "../services/api";
 import IdentityCard from "../components/IdentityCard";
 import { useProfile } from "../services/profile";
+import { useI18n, useT } from "../i18n";
 import { reportsApi } from "../services/reports";
 import { classesApi } from "../services/classes";
 import ManagementReports from "../components/ManagementReports";
@@ -33,16 +34,17 @@ const Dashboard: React.FC<DashboardProps> = ({
   onOpenLearning = () => {},
   wishlistItems = [],
 }) => {
+  const { t, lang } = useI18n();
   const { profile } = useProfile();
   const displayName = profile?.name ?? "";
   const cardIssuedAt = profile?.cardIssuedAt ? new Date(profile.cardIssuedAt) : null;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Selamat Pagi";
-    if (hour < 15) return "Selamat Siang";
-    if (hour < 18) return "Selamat Sore";
-    return "Selamat Malam";
+    if (hour < 12) return t("dashboard.greetMorning");
+    if (hour < 15) return t("dashboard.greetNoon");
+    if (hour < 18) return t("dashboard.greetAfternoon");
+    return t("dashboard.greetNight");
   };
 
   const renderDashboardContent = () => {
@@ -63,7 +65,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       case UserRole.SUPERADMIN:
         return <AdminDashboard />;
       default:
-        return <p>Dashboard not found.</p>;
+        return <p>{t("dashboard.notFound")}</p>;
     }
   };
 
@@ -80,24 +82,24 @@ const Dashboard: React.FC<DashboardProps> = ({
           <p className="text-white/90 text-lg leading-relaxed relative">
             {role === UserRole.STUDENT &&
               (profile?.cardNumber
-                ? "Kartu Student Anda aktif! Terus belajar untuk meningkatkan skill."
-                : "Ikuti kursus pertama Anda untuk mendapatkan Kartu Student.")}
+                ? t("dashboard.welStudentActive")
+                : t("dashboard.welStudentInactive"))}
             {role === UserRole.MENTOR &&
               (profile?.cardNumber
-                ? "Identitas Profesional Mentor Anda telah aktif. Selamat mengajar!"
-                : "Kartu Mentor Anda menunggu diterbitkan oleh Admin.")}
+                ? t("dashboard.welMentorActive")
+                : t("dashboard.welMentorInactive"))}
             {role === UserRole.CREATOR &&
               (profile?.cardNumber
-                ? "Kartu Creator Anda siap. Terus berkarya!"
-                : "Kartu Creator Anda menunggu diterbitkan oleh Admin.")}
+                ? t("dashboard.welCreatorActive")
+                : t("dashboard.welCreatorInactive"))}
             {role === UserRole.DIRECTOR &&
-              "Selamat datang di Panel Eksekutif, Pak Direktur."}
+              t("dashboard.welDirector")}
             {(role === UserRole.ADMIN_SYSTEM || role === UserRole.SUPERADMIN) &&
-              "Sistem berjalan normal. Kartu akses Admin aktif."}
+              t("dashboard.welAdmin")}
           </p>
           <div className="mt-4 pt-4 border-t border-white/20 flex items-center text-sm text-white/80 relative">
             <Clock size={14} className="mr-2" />
-            {new Date().toLocaleDateString("id-ID", {
+            {new Date().toLocaleDateString(lang === "id" ? "id-ID" : "en-US", {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -136,6 +138,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
   wishlistItems,
   onNavigate,
 }) => {
+  const t = useT();
   // Kursus yang terakhir dibuka: dari data pendaftaran nyata.
   const [lastCourse, setLastCourse] = useState<{ id: string; title: string; instructor: string; progress: number } | null>(null);
   useEffect(() => {
@@ -165,7 +168,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
           {lastCourse ? (
             <>
               <span className="inline-block px-2 py-1 bg-white/20 rounded text-xs font-bold mb-2 backdrop-blur-sm">
-                Terakhir Diakses
+                {t("dashboard.lastAccessed")}
               </span>
               <h2 className="text-2xl font-bold mb-2">{lastCourse.title}</h2>
               <p className="text-digitalcoop-100 text-sm mb-4">{lastCourse.instructor}</p>
@@ -175,12 +178,12 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                   style={{ width: `${lastCourse.progress}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-digitalcoop-200">{lastCourse.progress}% Selesai</p>
+              <p className="text-xs text-digitalcoop-200">{t("dashboard.percentDone", { n: lastCourse.progress })}</p>
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-bold mb-2">Mulai perjalanan belajar Anda</h2>
-              <p className="text-digitalcoop-100 text-sm">Anda belum mengikuti kursus. Jelajahi katalog untuk memilih kursus pertama.</p>
+              <h2 className="text-2xl font-bold mb-2">{t("dashboard.startTitle")}</h2>
+              <p className="text-digitalcoop-100 text-sm">{t("dashboard.startDesc")}</p>
             </>
           )}
         </div>
@@ -189,14 +192,14 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
             onClick={() => onOpenLearning(lastCourse.id)}
             className="px-6 py-3 bg-white text-digitalcoop-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
           >
-            <Play size={18} className="mr-2 fill-current" /> Lanjut Belajar
+            <Play size={18} className="mr-2 fill-current" /> {t("dashboard.continueLearning")}
           </button>
         ) : (
           <button
             onClick={() => onNavigate("catalog")}
             className="px-6 py-3 bg-white text-digitalcoop-900 rounded-full font-bold text-sm hover:bg-gray-100 shadow-xl flex items-center transform transition hover:-translate-y-1 relative z-10"
           >
-            Lihat Katalog
+            {t("dashboard.viewCatalog")}
           </button>
         )}
       </div>
@@ -207,13 +210,13 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-gray-900 dark:text-white flex items-center">
               <Heart size={18} className="mr-2 text-pink-500 fill-current" />{" "}
-              Wishlist Anda ({wishlistItems.length})
+              {t("dashboard.wishlistTitle", { n: wishlistItems.length })}
             </h3>
             <button
               onClick={() => onNavigate("catalog")}
               className="text-sm text-digitalcoop-600 hover:underline"
             >
-              Lihat Katalog
+              {t("dashboard.viewCatalog")}
             </button>
           </div>
 
@@ -221,13 +224,13 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
             {wishlistItems.length === 0 ? (
               <div className="text-center py-8 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-lg">
                 <p className="text-gray-500 dark:text-slate-400 text-sm">
-                  Belum ada item di wishlist.
+                  {t("dashboard.wishlistEmpty")}
                 </p>
                 <button
                   onClick={() => onNavigate("catalog")}
                   className="mt-2 text-xs font-bold text-digitalcoop-600"
                 >
-                  Jelajahi Kursus
+                  {t("dashboard.exploreCourses")}
                 </button>
               </div>
             ) : (
@@ -246,7 +249,7 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                       {item.title}
                     </h4>
                     <p className="text-xs text-gray-500 mt-1">
-                      Ditambahkan: {item.addedAt}
+                      {t("dashboard.added", { date: item.addedAt })}
                     </p>
                     <p className="text-sm font-bold text-digitalcoop-600 mt-1">
                       {new Intl.NumberFormat("id-ID", {
@@ -260,14 +263,14 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
                     onClick={() => onNavigate("catalog")}
                     className="self-center px-3 py-1.5 border border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400 dark:border-digitalcoop-400 rounded text-xs font-bold hover:bg-digitalcoop-50 dark:hover:bg-digitalcoop-900/20"
                   >
-                    Lihat
+                    {t("dashboard.view")}
                   </button>
                 </div>
               ))
             )}
             {wishlistItems.length > 3 && (
               <button className="w-full text-center text-xs text-gray-500 pt-2 hover:text-gray-700">
-                + {wishlistItems.length - 3} item lainnya
+                {t("dashboard.moreItems", { n: wishlistItems.length - 3 })}
               </button>
             )}
           </div>
@@ -281,16 +284,17 @@ const StudentDashboard: React.FC<StudentDashProps> = ({
 };
 
 const StudentSchedule: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const t = useT();
   const { data, loading, error, reload } = useAsync(() => classesApi.mine());
   const upcoming = (data ?? [])
     .flatMap((c) => c.sessions.map((s) => ({ ...s, className: c.name })))
     .sort((x, y) => x.startsAt.localeCompare(y.startsAt))
     .slice(0, 3);
   return (
-    <Card title="Jadwal Kelas" right={<Calendar size={18} className="text-orange-500" />}>
+    <Card title={t("dashboard.scheduleTitle")} right={<Calendar size={18} className="text-orange-500" />}>
       <StateBox loading={loading} error={error} onRetry={reload}>
         {upcoming.length === 0 ? (
-          <Empty>Belum ada sesi kelas mendatang.</Empty>
+          <Empty>{t("dashboard.scheduleEmpty")}</Empty>
         ) : (
           <div className="space-y-3">
             {upcoming.map((s) => (
@@ -302,36 +306,37 @@ const StudentSchedule: React.FC<{ onNavigate: (view: string) => void }> = ({ onN
                 <p className="text-xs text-gray-500 mt-1">{s.title}</p>
                 {s.meetingUrl && (
                   <a href={s.meetingUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-xs text-blue-600 hover:underline flex items-center">
-                    Buka tautan <ArrowRight size={10} className="ml-1" />
+                    {t("dashboard.openLink")} <ArrowRight size={10} className="ml-1" />
                   </a>
                 )}
               </div>
             ))}
           </div>
         )}
-        <button onClick={() => onNavigate("classes")} className="mt-3 text-xs text-digitalcoop-600 underline">Semua kelas</button>
+        <button onClick={() => onNavigate("classes")} className="mt-3 text-xs text-digitalcoop-600 underline">{t("dashboard.allClasses")}</button>
       </StateBox>
     </Card>
   );
 };
 
 const MentorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+  const t = useT();
   const { data, loading, error, reload } = useAsync(() => classesApi.list());
   const active = (data ?? []).filter((c) => !c.archived);
   return (
     <StateBox loading={loading} error={error} onRetry={reload}>
       <div className="space-y-6">
         <div className="grid md:grid-cols-3 gap-6">
-          <StatCard title="Kelas Aktif" value={num(active.length)} icon={<BookOpen className="text-orange-500" />} change="Tidak diarsipkan" />
-          <StatCard title="Total Siswa" value={num(active.reduce((n, c) => n + c.members, 0))} icon={<Users className="text-blue-500" />} change="Di semua kelas aktif" />
-          <StatCard title="Kelas Berjadwal" value={num(active.filter((c) => c.nextSession).length)} icon={<Calendar className="text-purple-500" />} change="Punya sesi mendatang" />
+          <StatCard title={t("dashboard.activeClasses")} value={num(active.length)} icon={<BookOpen className="text-orange-500" />} change={t("dashboard.notArchived")} />
+          <StatCard title={t("dashboard.totalStudents")} value={num(active.reduce((n, c) => n + c.members, 0))} icon={<Users className="text-blue-500" />} change={t("dashboard.acrossActive")} />
+          <StatCard title={t("dashboard.scheduledClasses")} value={num(active.filter((c) => c.nextSession).length)} icon={<Calendar className="text-purple-500" />} change={t("dashboard.hasUpcoming")} />
         </div>
-        <Card title="Sesi Berikutnya per Kelas" right={<button onClick={() => onNavigate("my-classes")} className="text-xs text-digitalcoop-600 underline">Kelola kelas</button>}>
+        <Card title={t("dashboard.nextPerClass")} right={<button onClick={() => onNavigate("my-classes")} className="text-xs text-digitalcoop-600 underline">{t("dashboard.manageClasses")}</button>}>
           {active.length === 0 ? (
-            <Empty>Belum ada kelas. Buat kelas di menu Rombongan Belajar.</Empty>
+            <Empty>{t("dashboard.mentorEmpty")}</Empty>
           ) : (
             <table className="w-full text-sm text-left">
-              <thead className="text-gray-500"><tr><th className="py-2">Kelas</th><th className="text-right">Siswa</th><th className="text-right">Sesi berikutnya</th></tr></thead>
+              <thead className="text-gray-500"><tr><th className="py-2">{t("dashboard.colClass")}</th><th className="text-right">{t("dashboard.colStudents")}</th><th className="text-right">{t("dashboard.colNext")}</th></tr></thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {active.map((c) => (
                   <tr key={c.id}>
@@ -355,16 +360,12 @@ const STATUS_STYLE: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700",
   REJECTED: "bg-red-100 text-red-700",
 };
-const STATUS_LABEL: Record<string, string> = {
-  PUBLISHED: "TERBIT",
-  PENDING_REVIEW: "MENUNGGU REVIEW",
-  DRAFT: "DRAF",
-  REJECTED: "DITOLAK",
-};
 
 const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
   onNavigate,
 }) => {
+  const t = useT();
+  const stLabel = (st: string) => (({ PUBLISHED: t("dashboard.stPublished"), PENDING_REVIEW: t("dashboard.stPending"), DRAFT: t("dashboard.stDraft"), REJECTED: t("dashboard.stRejected") } as Record<string, string>)[st] ?? st);
   const { data, loading, error, reload } = useAsync(() =>
     reportsApi.creatorSummary(),
   );
@@ -374,45 +375,45 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
         <div className="space-y-6">
           <div className="grid md:grid-cols-4 gap-6">
             <StatCard
-              title="Total Penjualan"
+              title={t("dashboard.totalSales")}
               value={rupiah(data.salesTotal)}
               icon={<TrendingUp className="text-green-500" />}
-              change={`${rupiah(data.salesThisMonth)} bulan ini`}
+              change={t("dashboard.thisMonth", { v: rupiah(data.salesThisMonth) })}
             />
             <StatCard
-              title={`Bagian Anda (${data.sharePercent}%)`}
+              title={t("dashboard.yourShare", { p: data.sharePercent })}
               value={rupiah(data.earningsTotal)}
               icon={<Wallet className="text-digitalcoop-500" />}
-              change={`${rupiah(data.earningsThisMonth)} bulan ini`}
+              change={t("dashboard.thisMonth", { v: rupiah(data.earningsThisMonth) })}
             />
             <StatCard
-              title="Siswa Terdaftar"
+              title={t("dashboard.enrolledStudents")}
               value={num(data.students)}
               icon={<Users className="text-blue-500" />}
-              change="Semua kursus Anda"
+              change={t("dashboard.allYourCourses")}
             />
             <StatCard
-              title="Rating Rata-rata"
+              title={t("dashboard.avgRating")}
               value={data.totalReviews > 0 ? `${data.averageRating.toFixed(1)}/5.0` : "-"}
               icon={<Heart className="text-red-500" />}
-              change={`${num(data.totalReviews)} ulasan`}
+              change={t("dashboard.reviews", { n: num(data.totalReviews) })}
             />
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card title="Status Konten">
+            <Card title={t("dashboard.contentStatus")}>
               {data.content.length === 0 ? (
-                <Empty>Belum ada kursus.</Empty>
+                <Empty>{t("dashboard.creatorEmpty")}</Empty>
               ) : (
                 <div className="space-y-3">
                   {data.content.map((c) => (
                     <div key={c.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
                       <div className="min-w-0">
                         <p className="font-bold text-gray-800 dark:text-white truncate">{c.title}</p>
-                        <p className="text-xs text-gray-500">Diperbarui: {dateId(c.updatedAt)}</p>
+                        <p className="text-xs text-gray-500">{t("dashboard.updated", { date: dateId(c.updatedAt) })}</p>
                       </div>
                       <span className={`px-2 py-1 text-xs font-bold rounded shrink-0 ${STATUS_STYLE[c.status] ?? STATUS_STYLE.DRAFT}`}>
-                        {STATUS_LABEL[c.status] ?? c.status}
+                        {stLabel(c.status)}
                       </span>
                     </div>
                   ))}
@@ -421,13 +422,13 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
             </Card>
 
             <Card
-              title="Penjualan 7 Hari Terakhir"
+              title={t("dashboard.last7days")}
               right={
                 <button
                   onClick={() => onNavigate("my-courses")}
                   className="px-3 py-1 bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-400 border border-digitalcoop-200 dark:border-digitalcoop-700 rounded text-xs font-bold"
                 >
-                  Atur harga dan diskon
+                  {t("dashboard.setPriceDiscount")}
                 </button>
               }
             >
@@ -439,22 +440,22 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
                 }))}
                 height={128}
               />
-              <p className="text-xs text-gray-500 mt-3">Harga ditetapkan Anda per kursus. Diskon dengan jadwal mulai dan berakhir diatur di tab Promo pada tiap kursus.</p>
+              <p className="text-xs text-gray-500 mt-3">{t("dashboard.priceNote")}</p>
             </Card>
 
             <Card
-              title="Dompet"
+              title={t("dashboard.wallet")}
               right={
                 <button
                   onClick={() => onNavigate("wallet")}
                   className="px-3 py-1 bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-400 border border-digitalcoop-200 dark:border-digitalcoop-700 rounded text-xs font-bold flex items-center"
                 >
-                  <Wallet size={12} className="mr-1" /> Dompet Saya
+                  <Wallet size={12} className="mr-1" /> {t("dashboard.myWallet")}
                 </button>
               }
             >
               <p className="text-sm text-gray-600 dark:text-slate-300">
-                Bagian Anda dari penjualan dicatat per pendaftaran dengan persentase yang berlaku saat itu. Pencairan ke Dompet belum tersedia.
+                {t("dashboard.creatorWalletNote")}
               </p>
             </Card>
           </div>
@@ -465,6 +466,7 @@ const CreatorDashboard: React.FC<{ onNavigate: (view: string) => void }> = ({
 };
 
 const AdminDashboard = () => {
+  const t = useT();
   const { data, loading, error, reload } = useAsync(() => reportsApi.stats());
   return (
     <StateBox loading={loading} error={error} onRetry={reload}>
@@ -472,39 +474,39 @@ const AdminDashboard = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Total Pengguna"
+              title={t("dashboard.totalUsers")}
               value={num(data.users.total)}
               icon={<Users className="text-blue-500" />}
-              change={`+${num(data.users.newThisMonth)} bulan ini`}
+              change={t("dashboard.newThisMonth", { n: num(data.users.newThisMonth) })}
             />
             <StatCard
-              title="Pendapatan (Bulan ini)"
+              title={t("dashboard.revenueThisMonth")}
               value={rupiah(data.sales.revenueThisMonth)}
               icon={<TrendingUp className="text-green-500" />}
-              change={`${num(data.sales.enrollmentsThisMonth)} pendaftaran`}
+              change={t("dashboard.enrollments", { n: num(data.sales.enrollmentsThisMonth) })}
             />
             <StatCard
-              title="Menunggu Review"
-              value={`${num(data.courses.pendingReview)} Kursus`}
+              title={t("dashboard.pendingReviewTitle")}
+              value={t("dashboard.pendingReviewVal", { n: num(data.courses.pendingReview) })}
               icon={<Clock className="text-orange-500" />}
-              change={data.courses.pendingReview > 0 ? "Perlu tindakan" : "Tidak ada antrean"}
+              change={data.courses.pendingReview > 0 ? t("dashboard.needAction") : t("dashboard.noQueue")}
             />
             <StatCard
-              title="Server Aktif"
+              title={t("dashboard.serverUp")}
               value={uptimeLabel(data.uptimeSeconds)}
               icon={<AlertCircle className="text-purple-500" />}
-              change="Sejak restart terakhir"
+              change={t("dashboard.sinceRestart")}
             />
           </div>
 
           <ManagementReports canGenerate />
 
-          <Card title="Antrean Operasional">
+          <Card title={t("dashboard.opsQueue")}>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <li>Pembayaran menunggu verifikasi: <b>{num(data.queue.pendingPayments)}</b></li>
-              <li>Permintaan hapus akun: <b>{num(data.queue.openDeletions)}</b></li>
-              <li>Lamaran pengajar: <b>{num(data.queue.pendingApplications)}</b></li>
-              <li>Review kursus: <b>{num(data.queue.pendingReviews)}</b></li>
+              <li>{t("dashboard.qPayments")} <b>{num(data.queue.pendingPayments)}</b></li>
+              <li>{t("dashboard.qDeletions")} <b>{num(data.queue.openDeletions)}</b></li>
+              <li>{t("dashboard.qApplications")} <b>{num(data.queue.pendingApplications)}</b></li>
+              <li>{t("dashboard.qReviews")} <b>{num(data.queue.pendingReviews)}</b></li>
             </ul>
           </Card>
         </div>
