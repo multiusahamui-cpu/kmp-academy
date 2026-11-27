@@ -164,6 +164,7 @@ export const Layout: React.FC<LayoutProps> = ({
           { isDivider: true, sectionTitle: "System Control" },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "system-config", label: "Konfigurasi Sistem", icon: SlidersHorizontal },
+          { id: "node-rules", label: "Aturan Program Node", icon: Coins },
           { id: "settings", label: "Pengangkatan Jabatan", icon: Settings },
           { id: "policy", label: "Dokumen Hukum", icon: ShieldAlert },
           { isDivider: true },

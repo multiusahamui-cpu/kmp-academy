@@ -51,6 +51,29 @@ export interface NodeDailySummary {
   status: string;
 }
 
+export interface NodeRuleVersion {
+  id: string;
+  version: number;
+  status: string;
+  nodePrice: number;
+  sponsorPercent: number;
+  levelPercent: number;
+  maxLevels: number;
+  pairingPercent: number;
+  dailyPointMultiplier: number;
+  effectiveFrom: string | null;
+  createdAt: string;
+}
+
+export interface NodeRuleInput {
+  nodePrice: number;
+  sponsorPercent: number;
+  levelPercent: number;
+  maxLevels: number;
+  pairingPercent: number;
+  dailyPointMultiplier: number;
+}
+
 export const nodeProgramApi = {
   me: () => api.get("/node-program/me"),
   listTopups: () => api.get("/node-program/topups"),
@@ -64,4 +87,7 @@ export const nodeProgramApi = {
   adminListWithdrawals: (status = "REQUESTED", page = 1) => api.get("/admin/node-withdrawals", { params: { status, page } }),
   adminDecideWithdrawal: (id: string, data: { decision: "APPROVE"; reference: string; note?: string } | { decision: "REJECT"; note: string }) =>
     api.post(`/admin/node-withdrawals/${id}/decision`, data),
+  superListRules: () => api.get("/superadmin/node-rules"),
+  superCreateRule: (data: NodeRuleInput) => api.post("/superadmin/node-rules", data),
+  superActivateRule: (id: string) => api.post(`/superadmin/node-rules/${id}/activate`),
 };

@@ -35,6 +35,7 @@ import MyDailyBonus from './views/MyDailyBonus';
 import BonusWithdrawal from './views/BonusWithdrawal';
 import NodeTopupVerification from './views/admin/NodeTopupVerification';
 import NodeBonusWithdrawals from './views/admin/NodeBonusWithdrawals';
+import NodeRuleManager from './views/admin/NodeRuleManager';
 import WalletSettings from './views/settings/WalletSettings';
 import ProfileSettings from './views/settings/ProfileSettings';
 import DirectorDashboard from './views/director/DirectorDashboard'; 
@@ -463,6 +464,8 @@ const App: React.FC = () => {
         return currentRole === UserRole.ADMIN_SYSTEM || currentRole === UserRole.SUPERADMIN ? <NodeTopupVerification /> : <Dashboard role={currentRole} />;
       case 'node-withdrawals':
         return currentRole === UserRole.ADMIN_SYSTEM || currentRole === UserRole.SUPERADMIN ? <NodeBonusWithdrawals /> : <Dashboard role={currentRole} />;
+      case 'node-rules':
+        return currentRole === UserRole.SUPERADMIN ? <NodeRuleManager /> : <Dashboard role={currentRole} />;
 
       default:
         return <Dashboard role={currentRole} />;
