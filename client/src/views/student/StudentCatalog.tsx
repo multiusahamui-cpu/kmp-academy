@@ -10,6 +10,7 @@ import { courseApi, userApi } from '../../services/api';
 import { ApiCourse, mapApiCourse } from '../../services/mappers';
 import { notifyProfileChanged } from '../../services/profile';
 import { CategoryDto, courseAuthoringApi } from '../../services/courses';
+import { useT } from '../../i18n';
 
 interface StudentCatalogProps {
   enrolledOnly?: boolean;
@@ -26,6 +27,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
    wishlistItems = [],
    onToggleWishlist = (_: Course) => {}
 }) => {
+  const t = useT();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeExamCourseId, setActiveExamCourseId] = useState<string | null>(null);
@@ -52,7 +54,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
       }
     } catch {
       setCourses([]);
-      setNotice('Gagal memuat kursus. Coba muat ulang halaman.');
+      setNotice(t('catalog.loadFail'));
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +97,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
     setCheckoutCourse(course);
   };
   const handleEnrolled = (card: string | null) => {
-    setNotice(card ? `Berhasil mengikuti kursus. Kartu Student Anda terbit: ${card}` : 'Berhasil mengikuti kursus.');
+    setNotice(card ? t('catalog.enrolledOkCard', { card }) : t('catalog.enrolledOk'));
     notifyProfileChanged();
     loadCourses();
   };
@@ -114,7 +116,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
      e.preventDefault();
      if (redeemCode.length < 5) return;
      // Simulating redeem process
-     setRedeemSuccessMsg(`Kode "${redeemCode}" berhasil ditukarkan! Kursus telah ditambahkan.`);
+     setRedeemSuccessMsg(t('catalog.redeemSuccess', { code: redeemCode }));
      setTimeout(() => {
         setRedeemSuccessMsg('');
         setIsRedeemOpen(false);
@@ -147,27 +149,27 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
       {notice && (
          <div className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
             <span>{notice}</span>
-            <button onClick={() => setNotice('')} aria-label="Tutup"><X size={16} /></button>
+            <button onClick={() => setNotice('')} aria-label={t('common.close')}><X size={16} /></button>
          </div>
       )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {enrolledOnly ? 'Kursus Saya' : 'Etalase Kursus'}
+            {enrolledOnly ? t('catalog.myCourses') : t('catalog.title')}
          </h2>
          <div className="flex gap-3 w-full md:w-auto">
             <button 
                onClick={() => setIsRedeemOpen(!isRedeemOpen)}
                className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-sm text-sm font-bold transition"
             >
-               <Key size={16} className="mr-2" /> Redeem Access Code
+               <Key size={16} className="mr-2" /> {t('catalog.redeemBtn')}
             </button>
             {!enrolledOnly && (
                <button 
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
                   className="md:hidden flex items-center px-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-sm text-sm font-medium"
                >
-                  <Filter size={16} className="mr-2" /> Filter Kategori
+                  <Filter size={16} className="mr-2" /> {t('catalog.filterCategory')}
                </button>
             )}
          </div>
@@ -177,8 +179,8 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
          <div className="mb-8 bg-gradient-to-r from-yellow-500 to-orange-500 p-6 rounded-lg shadow-md text-white animate-fade-in-down">
             <div className="flex justify-between items-start mb-4">
                <div>
-                  <h3 className="text-lg font-bold">Punya Kode Aktivasi dari Sponsor?</h3>
-                  <p className="text-yellow-100 text-sm">Masukkan kode unik yang diberikan oleh Koperasi atau Instansi Anda untuk mengakses kursus secara gratis.</p>
+                  <h3 className="text-lg font-bold">{t('catalog.redeemTitle')}</h3>
+                  <p className="text-yellow-100 text-sm">{t('catalog.redeemDesc')}</p>
                </div>
                <button onClick={() => setIsRedeemOpen(false)} className="text-white/80 hover:text-white"><X size={24} /></button>
             </div>
@@ -194,11 +196,11 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                      type="text" 
                      value={redeemCode}
                      onChange={(e) => setRedeemCode(e.target.value)}
-                     placeholder="Masukkan Kode (Contoh: KOP-MAKMUR-001)" 
+                     placeholder={t('catalog.redeemPlaceholder')} 
                      className="flex-1 p-3 rounded text-gray-900 font-mono font-bold uppercase placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
                   />
                   <button type="submit" className="px-6 py-3 bg-white text-orange-600 font-bold rounded shadow-lg hover:bg-gray-100">
-                     Tukarkan Kode
+                     {t('catalog.redeemSubmit')}
                   </button>
                </form>
             )}
@@ -211,9 +213,9 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
             <aside className={`w-full md:w-64 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden md:block'}`}>
                <div className="bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 sticky top-6">
                   <div className="flex justify-between items-center mb-4">
-                     <h3 className="font-bold text-gray-900 dark:text-white">Kategori</h3>
+                     <h3 className="font-bold text-gray-900 dark:text-white">{t('catalog.category')}</h3>
                      {selectedCategory && (
-                        <button onClick={() => setSelectedCategory(null)} className="text-xs text-red-500 hover:underline">Reset</button>
+                        <button onClick={() => setSelectedCategory(null)} className="text-xs text-red-500 hover:underline">{t('catalog.reset')}</button>
                      )}
                   </div>
                   <div className="space-y-1">
@@ -221,7 +223,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                         onClick={() => setSelectedCategory(null)}
                         className={`w-full text-left px-3 py-2 rounded text-sm transition ${!selectedCategory ? 'bg-digitalcoop-50 dark:bg-digitalcoop-900/30 text-digitalcoop-700 dark:text-digitalcoop-300 font-bold' : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                      >
-                        Semua Kategori
+                        {t('catalog.allCategories')}
                      </button>
                      {categories.map(cat => (
                         <button
@@ -243,7 +245,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
          <div className="flex-1">
             {enrolledOnly && filteredCourses.length > 0 && (
                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6 text-blue-800 dark:text-blue-300 text-sm">
-                  Selamat datang kembali! Lanjutkan progres belajar Anda hari ini.
+                  {t('catalog.welcomeBack')}
                </div>
             )}
 
@@ -254,10 +256,10 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
             ) : filteredCourses.length === 0 ? (
                <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-lg border border-dashed border-gray-300 dark:border-slate-700">
                   <p className="text-gray-500 dark:text-slate-400">
-                     {enrolledOnly ? 'Anda belum mengikuti kursus apa pun.' : 'Tidak ada kursus ditemukan.'}
+                     {enrolledOnly ? t('catalog.emptyEnrolled') : t('catalog.emptyCatalog')}
                   </p>
                   {selectedCategory && (
-                     <button onClick={() => setSelectedCategory(null)} className="mt-2 text-digitalcoop-600 font-medium hover:underline">Lihat Semua Kursus</button>
+                     <button onClick={() => setSelectedCategory(null)} className="mt-2 text-digitalcoop-600 font-medium hover:underline">{t('catalog.viewAllCourses')}</button>
                   )}
                </div>
             ) : (
@@ -275,7 +277,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                               <img src={course.thumbnail} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" alt="" />
                               {course.type === CourseType.CERTIFICATION && (
                                  <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10">
-                                    Partner Certification
+                                    {t('catalog.partnerCert')}
                                  </div>
                               )}
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
@@ -284,14 +286,14 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                        <button 
                                        onClick={(e) => handleWishlist(e, course)}
                                        className={`p-2 bg-white rounded-full hover:scale-110 transition ${isInWishlist ? 'text-pink-500' : 'text-gray-700 hover:text-pink-500'}`} 
-                                       title="Simpan ke Wishlist"
+                                       title={t('catalog.saveWishlistTitle')}
                                        >
                                           <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
                                        </button>
                                        {course.price === 0 && !enrolledIds.has(course.id) && (
                                           <button 
                                           onClick={(e) => handleEnroll(e, course)}
-                                          className="p-2 bg-digitalcoop-600 rounded-full text-white hover:bg-digitalcoop-700 hover:scale-110 transition" title="Ikuti Kursus Gratis"
+                                          className="p-2 bg-digitalcoop-600 rounded-full text-white hover:bg-digitalcoop-700 hover:scale-110 transition" title={t('catalog.enrollFreeTitle')}
                                           >
                                              <Play size={20} />
                                           </button>
@@ -302,7 +304,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                        onClick={() => onOpenLearning(course.id)}
                                        className="px-4 py-2 bg-white/90 text-gray-900 rounded-full font-bold text-sm hover:bg-white flex items-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition"
                                     >
-                                       <Play size={16} className="mr-1 fill-current" /> Lanjut Belajar
+                                       <Play size={16} className="mr-1 fill-current" /> {t('catalog.continueLearning')}
                                     </button>
                                  )}
                               </div>
@@ -311,7 +313,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                            <div className="p-5 flex-1 flex flex-col">
                               <div className="flex justify-between mb-2">
                                  <span className={`text-xs font-bold uppercase tracking-wider ${course.type === CourseType.CERTIFICATION ? 'text-amber-600' : 'text-gray-500 dark:text-slate-400'}`}>{course.type}</span>
-                                 {enrolledOnly && <span className="text-xs text-green-600 font-bold">Sedang Berjalan</span>}
+                                 {enrolledOnly && <span className="text-xs text-green-600 font-bold">{t('catalog.running')}</span>}
                               </div>
                               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-tight">{course.title}</h3>
                               
@@ -335,7 +337,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                           <div className="bg-digitalcoop-500 h-1.5 rounded-full" style={{width: `${progressById[course.id] ?? 0}%`}}></div>
                                        </div>
                                        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-slate-400">
-                                          <span>{progressById[course.id] ?? 0}% Selesai</span>
+                                          <span>{t('catalog.percentDone', { n: progressById[course.id] ?? 0 })}</span>
                                        </div>
                                     </div>
                                     
@@ -344,14 +346,14 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                           onClick={() => onOpenLearning(course.id)}
                                           className="flex-1 py-2 bg-digitalcoop-600 text-white rounded font-medium text-xs flex items-center justify-center hover:bg-digitalcoop-700 transition shadow-sm"
                                        >
-                                          <Play size={14} className="mr-2" /> Materi
+                                          <Play size={14} className="mr-2" /> {t('catalog.material')}
                                        </button>
                                        {course.examEnabled && course.type !== CourseType.CERTIFICATION && (
                                           <button 
                                             onClick={() => setActiveExamCourseId(course.id)}
                                             className="flex-1 py-2 bg-green-600 text-white rounded font-medium text-xs flex items-center justify-center hover:bg-green-700 shadow-sm transition"
                                           >
-                                             <Award size={14} className="mr-2" /> Ujian Akhir
+                                             <Award size={14} className="mr-2" /> {t('catalog.finalExam')}
                                           </button>
                                        )}
                                     </div>
@@ -360,15 +362,15 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
                                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
                                     <span className="font-bold text-gray-900 dark:text-white">
                                        {course.price === 0
-                                          ? 'Gratis'
+                                          ? t('catalog.free')
                                           : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}
-                                       {course.price > 0 && <span className="ml-2 text-[10px] font-medium text-gray-400">Segera hadir</span>}
+                                       {course.price > 0 && <span className="ml-2 text-[10px] font-medium text-gray-400">{t('catalog.comingSoon')}</span>}
                                     </span>
                                     <button 
                                        onClick={(e) => openDetailModal(e, course)}
                                        className="px-4 py-2 border border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400 dark:border-digitalcoop-400 rounded text-sm font-medium hover:bg-digitalcoop-50 dark:hover:bg-digitalcoop-900/30 transition flex items-center"
                                     >
-                                       <Info size={14} className="mr-2" /> Detail Kursus
+                                       <Info size={14} className="mr-2" /> {t('catalog.courseDetail')}
                                     </button>
                                  </div>
                               )}
