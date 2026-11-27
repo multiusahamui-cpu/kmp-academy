@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UserRole, CartItem, WishlistItem } from "../types";
+import { authApi } from "../services/api";
 import NotificationBell from "./NotificationBell";
 import {
   Receipt,
@@ -84,6 +85,15 @@ export const Layout: React.FC<LayoutProps> = ({
   onRemoveFromWishlist = (_: string) => {},
   onOpenAuth,
 }) => {
+  const [me, setMe] = useState<{ name?: string; avatar?: string | null }>({});
+  useEffect(() => {
+    if (currentRole === UserRole.PUBLIC) { setMe({}); return; }
+    let off = false;
+    authApi.getProfile()
+      .then((res) => { if (!off) setMe({ name: res.data?.data?.name, avatar: res.data?.data?.avatar }); })
+      .catch(() => {});
+    return () => { off = true; };
+  }, [currentRole]);
   // Halaman pengaturan notifikasi tetap menyorot menu Profil.
   const activeView = currentView === "profile-notifications" ? "profile" : currentView;
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -415,12 +425,16 @@ export const Layout: React.FC<LayoutProps> = ({
 
         <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
           <div className="flex items-center gap-3 p-3 bg-white/10 dark:bg-slate-800 rounded-xl mb-6 backdrop-blur-sm border border-white/5">
-            <div className="w-10 h-10 rounded-full bg-digitalcoop-500 flex items-center justify-center font-bold text-white shadow-lg shadow-digitalcoop-500/20">
-              {currentRole[0]}
+            <div className="w-10 h-10 rounded-full bg-digitalcoop-500 flex items-center justify-center font-bold text-white shadow-lg shadow-digitalcoop-500/20 overflow-hidden">
+              {me.avatar ? (
+                <img src={me.avatar} alt={me.name ?? "Foto profil"} className="w-full h-full object-cover" />
+              ) : (
+                (me.name?.[0] ?? currentRole[0]).toUpperCase()
+              )}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold font-sans truncate">
-                User {currentRole}
+                {me.name ?? `User ${currentRole}`}
               </p>
               <p className="text-xs text-digitalcoop-200 truncate capitalize">
                 {currentRole.replace("_", " ").toLowerCase()}

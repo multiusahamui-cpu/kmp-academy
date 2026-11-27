@@ -62,8 +62,12 @@ export const createBridge = (env: NodeJS.ProcessEnv = process.env, fetchImpl: Fe
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: ctrl.signal,
       });
-      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      const ctype = res.headers.get("content-type") ?? "";
+      const isJson = ctype.includes("application/json");
+      const data = (isJson ? await res.json().catch(() => ({})) : {}) as Record<string, unknown>;
       if (!res.ok) throw new BridgeError(res.status, String(data.message ?? "Gagal menghubungi digitalcoop.id."), data.code as string | undefined);
+      // Respons 200 tapi bukan JSON = endpoint tak ada, ditangkap fallback SPA. Jangan dianggap sukses kosong.
+      if (!isJson) throw new BridgeError(502, "Respons digitalcoop.id tidak valid (endpoint bridge belum tersedia).");
       return data as T;
     } catch (err) {
       if (err instanceof BridgeError) throw err;
