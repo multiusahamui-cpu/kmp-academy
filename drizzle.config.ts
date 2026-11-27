@@ -11,5 +11,5 @@ export default defineConfig({
     url: process.env.DATABASE_URL || "",
   },
   // Penting: Kita menggunakan schema kustom 'academy'
-  schemaFilter: ["academy"],
+  schemaFilter: ["academy", "academy_node"],
 });

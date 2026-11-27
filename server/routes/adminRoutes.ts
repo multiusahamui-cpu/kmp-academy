@@ -11,6 +11,8 @@ import * as payAdmin from "../controllers/adminPaymentController";
 import * as report from "../controllers/reportController";
 import * as mgmt from "../controllers/managementController";
 import * as partner from "../controllers/partnerController";
+import * as nodeTopupAdmin from "../controllers/adminNodeTopupController";
+import * as nodeWithdrawalAdmin from "../controllers/adminNodeWithdrawalController";
 
 const router = Router();
 
@@ -31,6 +33,12 @@ router.post("/users/:id/card", requireRole(["ADMIN_SYSTEM", "SUPERADMIN"]), admi
 router.get("/payment-orders", requireRole(["ADMIN_SYSTEM"]), payAdmin.listPaymentOrders);
 router.get("/payment-orders/:id/proof", requireRole(["ADMIN_SYSTEM"]), payAdmin.getPaymentProof);
 router.post("/payment-orders/:id/decision", requireRole(["ADMIN_SYSTEM"]), payAdmin.decidePaymentOrder);
+
+// Antrean terpisah Program Node (tidak dicampur pembayaran kursus/dompet)
+router.get("/node-topups", requireRole(["ADMIN_SYSTEM"]), nodeTopupAdmin.listNodeTopups);
+router.post("/node-topups/:id/decision", requireRole(["ADMIN_SYSTEM"]), nodeTopupAdmin.decideNodeTopup);
+router.get("/node-withdrawals", requireRole(["ADMIN_SYSTEM"]), nodeWithdrawalAdmin.listNodeWithdrawals);
+router.post("/node-withdrawals/:id/decision", requireRole(["ADMIN_SYSTEM"]), nodeWithdrawalAdmin.decideNodeWithdrawal);
 
 // Penghapusan akun individual: diputuskan Admin atau Direktur; saldo diselesaikan Admin; arsip hanya baca
 router.get("/workshop-proposals", requireRole(["ADMIN_SYSTEM", "DIRECTOR"]), workshop.listProposals);

@@ -1,9 +1,12 @@
 
-import { pgSchema, uuid, varchar, timestamp, text, integer, jsonb, boolean, unique, uniqueIndex, date, index } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, timestamp, text, integer, bigint, jsonb, boolean, unique, uniqueIndex, date, index, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // --- 1. Define Custom Schema 'academy' ---
 export const academySchema = pgSchema("academy");
+
+// Program Node: modul MLM/bonus terpisah dari skema academy utama (schema DB sendiri).
+export const nodeProgramSchema = pgSchema("academy_node");
 
 // --- 2. Enums ---
 export const userRoleEnum = academySchema.enum("user_role", [
@@ -808,3 +811,135 @@ export const talentInquiries = academySchema.table("talent_inquiries", {
 }, (t) => ({
   profileIdx: index("talent_inquiries_profile_idx").on(t.profileId, t.createdAt),
 }));
+
+// --- PROGRAM NODE (MODUL TERPISAH) ---
+export const nodeRuleVersions = nodeProgramSchema.table("rule_versions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  version: integer("version").notNull().unique(),
+  status: varchar("status", { length: 10 }).notNull().default("DRAFT"),
+  nodePrice: integer("node_price").notNull().default(50_000),
+  sponsorPercent: integer("sponsor_percent").notNull().default(20),
+  levelPercent: integer("level_percent").notNull().default(1),
+  maxLevels: integer("max_levels").notNull().default(10),
+  pairingPercent: integer("pairing_percent").notNull().default(15),
+  dailyPointMultiplier: integer("daily_point_multiplier").notNull().default(16),
+  effectiveFrom: timestamp("effective_from"),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  check("node_rule_version_positive_ck", sql`${t.version} > 0`),
+  check("node_rule_price_positive_ck", sql`${t.nodePrice} > 0`),
+  check("node_rule_percent_range_ck", sql`${t.sponsorPercent} between 0 and 100 and ${t.levelPercent} between 0 and 100 and ${t.pairingPercent} between 0 and 100`),
+  check("node_rule_limits_positive_ck", sql`${t.maxLevels} >= 0 and ${t.dailyPointMultiplier} > 0`),
+]);
+
+export const nodeAccounts = nodeProgramSchema.table("accounts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull().unique(),
+  sponsorUserId: uuid("sponsor_user_id").references(() => users.id),
+  placementParentUserId: uuid("placement_parent_user_id").references(() => users.id),
+  placementSide: varchar("placement_side", { length: 5 }),
+  referralCode: varchar("referral_code", { length: 24 }).notNull().unique(),
+  status: varchar("status", { length: 10 }).notNull().default("ACTIVE"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const nodeTopupOrders = nodeProgramSchema.table("topup_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  ruleVersionId: uuid("rule_version_id").references(() => nodeRuleVersions.id).notNull(),
+  nodeCount: integer("node_count").notNull(),
+  nodePrice: integer("node_price").notNull(),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  status: varchar("status", { length: 12 }).notNull().default("DRAFT"),
+  paymentReference: varchar("payment_reference", { length: 100 }),
+  decisionNote: text("decision_note"),
+  decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at"),
+  paidAt: timestamp("paid_at"),
+  settledAt: timestamp("settled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  index("node_topup_user_created_idx").on(t.userId, t.createdAt),
+  check("node_topup_positive_ck", sql`${t.nodeCount} > 0 and ${t.nodePrice} > 0 and ${t.amount} > 0`),
+  check("node_topup_amount_ck", sql`${t.amount} = ${t.nodeCount}::bigint * ${t.nodePrice}::bigint`),
+]);
+
+export const nodeLots = nodeProgramSchema.table("node_lots", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  topupOrderId: uuid("topup_order_id").references(() => nodeTopupOrders.id).notNull().unique(),
+  ruleVersionId: uuid("rule_version_id").references(() => nodeRuleVersions.id).notNull(),
+  issuedNodes: integer("issued_nodes").notNull(),
+  activeNodes: integer("active_nodes").notNull(),
+  status: varchar("status", { length: 12 }).notNull().default("ACTIVE"),
+  activatedAt: timestamp("activated_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  index("node_lots_user_status_idx").on(t.userId, t.status),
+  check("node_lots_counts_ck", sql`${t.issuedNodes} > 0 and ${t.activeNodes} >= 0 and ${t.activeNodes} <= ${t.issuedNodes}`),
+]);
+
+export const nodeBonusLedger = nodeProgramSchema.table("bonus_ledger", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  ruleVersionId: uuid("rule_version_id").references(() => nodeRuleVersions.id).notNull(),
+  kind: varchar("kind", { length: 16 }).notNull(),
+  direction: varchar("direction", { length: 8 }).notNull(),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  points: integer("points").notNull().default(0),
+  sourceType: varchar("source_type", { length: 30 }).notNull(),
+  sourceId: uuid("source_id"),
+  idempotencyKey: varchar("idempotency_key", { length: 150 }).notNull().unique(),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  index("node_bonus_user_created_idx").on(t.userId, t.createdAt),
+  check("node_bonus_values_ck", sql`${t.amount} >= 0 and ${t.points} >= 0`),
+  check("node_bonus_direction_ck", sql`${t.direction} in ('CREDIT', 'DEBIT')`),
+]);
+
+// Pengajuan pencairan Bonus Node. Saldo tidak disimpan ulang di tabel ini;
+// saldo selalu dihitung dari bonus_ledger agar jejak debit/kredit dapat diaudit.
+export const nodeBonusWithdrawals = nodeProgramSchema.table("bonus_withdrawals", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  requestedAmount: bigint("requested_amount", { mode: "number" }).notNull(),
+  status: varchar("status", { length: 12 }).notNull().default("REQUESTED"),
+  requestNote: text("request_note"),
+  bankAccountId: uuid("bank_account_id").references(() => bankAccounts.id),
+  bankName: varchar("bank_name", { length: 50 }),
+  accountNumber: varchar("account_number", { length: 50 }),
+  holderName: varchar("holder_name", { length: 100 }),
+  decisionNote: text("decision_note"),
+  transferReference: varchar("transfer_reference", { length: 100 }),
+  decidedBy: uuid("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  index("node_bonus_withdrawal_user_created_idx").on(t.userId, t.createdAt),
+  index("node_bonus_withdrawal_status_created_idx").on(t.status, t.createdAt),
+  check("node_bonus_withdrawal_amount_ck", sql`${t.requestedAmount} > 0`),
+  check("node_bonus_withdrawal_status_ck", sql`${t.status} in ('REQUESTED', 'APPROVED', 'REJECTED')`),
+]);
+
+export const nodeDailySummaries = nodeProgramSchema.table("daily_summaries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  businessDate: date("business_date").notNull(),
+  activeNodes: integer("active_nodes").notNull(),
+  capacityPoints: integer("capacity_points").notNull(),
+  availablePoints: integer("available_points").notNull().default(0),
+  paidPoints: integer("paid_points").notNull().default(0),
+  expiredPoints: integer("expired_points").notNull().default(0),
+  sponsorBonus: bigint("sponsor_bonus", { mode: "number" }).notNull().default(0),
+  levelBonus: bigint("level_bonus", { mode: "number" }).notNull().default(0),
+  pairingBonus: bigint("pairing_bonus", { mode: "number" }).notNull().default(0),
+  totalBonus: bigint("total_bonus", { mode: "number" }).notNull().default(0),
+  status: varchar("status", { length: 12 }).notNull().default("PREVIEW"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("node_daily_summary_user_date_uq").on(t.userId, t.businessDate),
+  index("node_daily_user_date_idx").on(t.userId, t.businessDate),
+  check("node_daily_values_ck", sql`${t.activeNodes} >= 0 and ${t.capacityPoints} >= 0 and ${t.availablePoints} >= 0 and ${t.paidPoints} >= 0 and ${t.expiredPoints} >= 0 and ${t.sponsorBonus} >= 0 and ${t.levelBonus} >= 0 and ${t.pairingBonus} >= 0 and ${t.totalBonus} >= 0`),
+]);

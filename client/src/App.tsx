@@ -30,6 +30,11 @@ import CourseCreator from './views/creator/CourseCreator';
 import ClassRoom from './views/mentor/ClassRoom';
 import ContentExplorer from './views/mentor/ContentExplorer';
 import StudentCatalog from './views/student/StudentCatalog';
+import NodeTopUp from './views/NodeTopUp';
+import MyDailyBonus from './views/MyDailyBonus';
+import BonusWithdrawal from './views/BonusWithdrawal';
+import NodeTopupVerification from './views/admin/NodeTopupVerification';
+import NodeBonusWithdrawals from './views/admin/NodeBonusWithdrawals';
 import WalletSettings from './views/settings/WalletSettings';
 import ProfileSettings from './views/settings/ProfileSettings';
 import DirectorDashboard from './views/director/DirectorDashboard'; 
@@ -445,6 +450,19 @@ const App: React.FC = () => {
                   onToggleWishlist={toggleWishlist}
                   wishlistItems={wishlistItems}
                />;
+
+      // Program Node (anggota)
+      case 'node-topup':
+        return <NodeTopUp />;
+      case 'daily-bonus':
+        return <MyDailyBonus />;
+      case 'bonus-withdrawal':
+        return <BonusWithdrawal />;
+      // Program Node (admin)
+      case 'node-topup-verif':
+        return currentRole === UserRole.ADMIN_SYSTEM || currentRole === UserRole.SUPERADMIN ? <NodeTopupVerification /> : <Dashboard role={currentRole} />;
+      case 'node-withdrawals':
+        return currentRole === UserRole.ADMIN_SYSTEM || currentRole === UserRole.SUPERADMIN ? <NodeBonusWithdrawals /> : <Dashboard role={currentRole} />;
 
       default:
         return <Dashboard role={currentRole} />;

@@ -32,6 +32,8 @@ import {
   SlidersHorizontal,
   UserMinus,
   Archive,
+  Coins,
+  CircleDollarSign,
 } from "lucide-react";
 import { CONTACT_INFO } from "../constants";
 import CartDrawer from "./CartDrawer";
@@ -149,6 +151,10 @@ export const Layout: React.FC<LayoutProps> = ({
       { id: "catalog", label: "Etalase Kursus", icon: GraduationCap },
       { id: "classes", label: "Kelas", icon: Users },
       { id: "wallet", label: "Dompet", icon: Wallet },
+      { isDivider: true, sectionTitle: "Program Node" },
+      { id: "node-topup", label: "Beli / Top Up Node", icon: Coins },
+      { id: "daily-bonus", label: "Bonus Harian Saya", icon: CircleDollarSign },
+      { id: "bonus-withdrawal", label: "Cairkan Bonus", icon: Wallet },
     ];
 
     switch (role) {
@@ -206,6 +212,8 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "proposals", label: "Approval Center", icon: FileCheck },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "payment-verification", label: "Verifikasi Pembayaran", icon: Receipt },
+          { id: "node-topup-verif", label: "Konfirmasi Top Up Node", icon: Coins },
+          { id: "node-withdrawals", label: "Pencairan Bonus Node", icon: CircleDollarSign },
           { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },

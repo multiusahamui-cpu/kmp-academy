@@ -16,6 +16,7 @@ import roleApplicationRoutes from "./roleApplicationRoutes";
 import reviewRoutes from "./reviewRoutes";
 import superadminRoutes from "./superadminRoutes";
 import paymentRoutes from "./paymentRoutes";
+import nodeProgramRoutes from "./nodeProgramRoutes";
 import { midtransNotify } from "../controllers/paymentController";
 import { verifyCertificate } from "../controllers/learningController";
 import { verifyLimiter } from "../lib/security";
@@ -55,5 +56,6 @@ router.use("/helpdesk", helpdeskRoutes); // Tiket bantuan
 router.use("/admin", adminRoutes); // Includes Finance, Helpdesk, Approvals
 router.use("/", reviewRoutes); // Root level for clean /courses/:id/reviews path
 router.use("/superadmin", superadminRoutes); // Restricted IT Ops
+  router.use("/node-program", nodeProgramRoutes); // Program Node: node, bonus harian & pencairan (terpisah dari kursus/dompet)
 
 export default router;

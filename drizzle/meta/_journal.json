@@ -204,6 +204,13 @@
       "when": 1795077513720,
       "tag": "0028_password_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795775907954,
+      "tag": "0029_node_program_import",
+      "breakpoints": true
     }
   ]
 }
