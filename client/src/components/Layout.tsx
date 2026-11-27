@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { UserRole, CartItem, WishlistItem } from "../types";
 import { authApi } from "../services/api";
 import NotificationBell from "./NotificationBell";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useT } from "../i18n";
 import {
   Receipt,
   ClipboardCheck,
@@ -86,6 +88,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onOpenAuth,
 }) => {
   const [me, setMe] = useState<{ name?: string; avatar?: string | null }>({});
+  const t = useT();
   useEffect(() => {
     if (currentRole === UserRole.PUBLIC) { setMe({}); return; }
     let off = false;
@@ -386,6 +389,8 @@ export const Layout: React.FC<LayoutProps> = ({
   }
 
   // --- DASHBOARD LAYOUT (Logged In) ---
+  const slugSec = (x: string) => x.toLowerCase().replace(/\s+/g, "-");
+  const tr = (key: string, fb: string) => { const v = t(key); return v === key ? fb : v; };
   const menuItems = getMenuItems(currentRole);
 
   return (
@@ -450,7 +455,7 @@ export const Layout: React.FC<LayoutProps> = ({
                   <div key={`divider-${index}`} className="py-2 mt-2 mb-1">
                     {item.sectionTitle && (
                       <p className="px-3 text-[10px] font-bold text-digitalcoop-300 uppercase tracking-wider opacity-80 mb-1">
-                        {item.sectionTitle}
+                        {tr(`section.${slugSec(item.sectionTitle)}`, item.sectionTitle)}
                       </p>
                     )}
                     <div className="border-t border-digitalcoop-700 dark:border-slate-700 mx-3 opacity-50"></div>
@@ -478,7 +483,7 @@ export const Layout: React.FC<LayoutProps> = ({
                       className={`mr-3 transition-transform duration-200 ${activeView === item.id ? "scale-110" : "group-hover:scale-110"}`}
                     />
                   )}
-                  {item.label}
+                  {item.id ? tr(`nav.${item.id}`, item.label ?? "") : item.label}
                 </button>
               );
             })}
@@ -491,7 +496,7 @@ export const Layout: React.FC<LayoutProps> = ({
             className="w-full flex items-center justify-center px-4 py-2 text-sm text-red-300 hover:text-red-100 hover:bg-red-900/30 rounded-lg transition font-medium"
           >
             <LogOut size={16} className="mr-2" />
-            Keluar
+            {t("common.logout")}
           </button>
         </div>
       </aside>
@@ -528,6 +533,8 @@ export const Layout: React.FC<LayoutProps> = ({
                 )}
               </button>
             )}
+
+            <LanguageSwitcher />
 
             <NotificationBell onOpenSettings={() => onNavigate("profile-notifications")} />
 
