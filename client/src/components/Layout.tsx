@@ -334,6 +334,7 @@ export const Layout: React.FC<LayoutProps> = ({
               </a>
 
               <div className="flex items-center gap-2 border-l border-gray-200 dark:border-slate-700 pl-4">
+                <LanguageSwitcher />
                 {/* Information Center Button */}
                 <button
                   onClick={() => setInfoModalOpen(true)}
@@ -361,6 +362,7 @@ export const Layout: React.FC<LayoutProps> = ({
             </div>
 
             <div className="flex items-center gap-2 md:hidden">
+              <LanguageSwitcher />
               <button
                 onClick={() => setInfoModalOpen(true)}
                 className="p-2 text-gray-600 dark:text-slate-300"
