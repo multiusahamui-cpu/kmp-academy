@@ -72,7 +72,7 @@ const CourseEditor: React.FC<Props> = ({ courseId, onBack, onCreated }) => {
   const st = course ? STATUS_LABEL[course.status] ?? { label: course.status, cls: 'bg-gray-100 text-gray-700' } : null;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-6 flex items-center gap-4">
         <button onClick={onBack} className="rounded-full p-2 transition hover:bg-gray-100 dark:hover:bg-slate-800"><ArrowLeft size={24} className="text-gray-600 dark:text-slate-300" /></button>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{courseId ? 'Kelola Kursus' : 'Buat Kursus Baru'}</h2>
@@ -80,7 +80,7 @@ const CourseEditor: React.FC<Props> = ({ courseId, onBack, onCreated }) => {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-800">
+        <div className="flex border-b border-gray-200 dark:border-slate-800">
           {tabs.map(([id, label]) => (
             <button key={id} disabled={!courseId && id !== 'DETAILS'} onClick={() => setTab(id)}
               className={`flex-1 whitespace-nowrap px-4 py-3 text-sm font-bold disabled:opacity-40 ${tab === id ? 'border-b-2 border-digitalcoop-600 bg-digitalcoop-50 text-digitalcoop-700 dark:bg-digitalcoop-900/20 dark:text-digitalcoop-300' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>{label}</button>
