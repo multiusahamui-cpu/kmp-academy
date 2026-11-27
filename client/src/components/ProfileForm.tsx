@@ -3,6 +3,7 @@ import { User } from 'lucide-react';
 import { authApi } from '../services/api';
 import { notifyProfileChanged, useProfile } from '../services/profile';
 import { AVATAR_MAX_BYTES, BIO_MAX, NAME_MAX } from '@shared/profile';
+import { useT } from '../i18n';
 
 const inputClass =
   'w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded';
@@ -13,6 +14,7 @@ const errText = (err: unknown, fallback: string): string =>
   (err as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback;
 
 const ProfileForm: React.FC = () => {
+  const t = useT();
   const { profile, reload } = useProfile();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -29,7 +31,7 @@ const ProfileForm: React.FC = () => {
     setBio(profile.bio ?? '');
   }, [profile]);
 
-  if (!profile) return <p className="text-sm text-gray-500">Memuat profil...</p>;
+  if (!profile) return <p className="text-sm text-gray-500">{t('acct.pfLoading')}</p>;
 
   const linked = profile.isMember; // akun tertaut digitalcoop.id: identitas dikelola di sana
 
@@ -39,10 +41,10 @@ const ProfileForm: React.FC = () => {
     setSaving(true);
     try {
       await authApi.updateProfile({ name, bio, phone });
-      setResult({ ok: true, text: 'Perubahan tersimpan.' });
+      setResult({ ok: true, text: t('acct.pfSaved') });
       notifyProfileChanged();
     } catch (err) {
-      setResult({ ok: false, text: errText(err, 'Gagal menyimpan perubahan.') });
+      setResult({ ok: false, text: errText(err, t('acct.pfSaveFail')) });
     } finally {
       setSaving(false);
     }
@@ -54,17 +56,17 @@ const ProfileForm: React.FC = () => {
     if (!file) return;
     setResult(null);
     if (file.size > AVATAR_MAX_BYTES) {
-      setResult({ ok: false, text: 'Ukuran foto maksimal 2 MB.' });
+      setResult({ ok: false, text: t('acct.pfPhotoMax') });
       return;
     }
     setBusyPhoto(true);
     try {
       await authApi.uploadAvatar(file);
-      setResult({ ok: true, text: 'Foto profil diperbarui.' });
+      setResult({ ok: true, text: t('acct.pfPhotoOk') });
       notifyProfileChanged();
       reload();
     } catch (err) {
-      setResult({ ok: false, text: errText(err, 'Gagal mengunggah foto.') });
+      setResult({ ok: false, text: errText(err, t('acct.pfUploadFail')) });
     } finally {
       setBusyPhoto(false);
     }
@@ -75,11 +77,11 @@ const ProfileForm: React.FC = () => {
     setBusyPhoto(true);
     try {
       await authApi.deleteAvatar();
-      setResult({ ok: true, text: 'Foto profil dihapus.' });
+      setResult({ ok: true, text: t('acct.pfPhotoDel') });
       notifyProfileChanged();
       reload();
     } catch (err) {
-      setResult({ ok: false, text: errText(err, 'Gagal menghapus foto.') });
+      setResult({ ok: false, text: errText(err, t('acct.pfDelFail')) });
     } finally {
       setBusyPhoto(false);
     }
@@ -90,7 +92,7 @@ const ProfileForm: React.FC = () => {
       <div className="flex items-center gap-6">
         <div className="w-24 h-24 bg-gray-200 dark:bg-slate-800 rounded-full flex items-center justify-center text-gray-400 overflow-hidden">
           {profile.avatar ? (
-            <img src={profile.avatar} alt="Foto profil" className="w-full h-full object-cover" />
+            <img src={profile.avatar} alt={t('acct.pfPhotoAlt')} className="w-full h-full object-cover" />
           ) : (
             <User size={48} />
           )}
@@ -100,45 +102,45 @@ const ProfileForm: React.FC = () => {
           <div className="flex gap-2">
             <button type="button" disabled={busyPhoto} onClick={() => fileRef.current?.click()}
               className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50">
-              {busyPhoto ? 'Memproses...' : 'Ganti Foto'}
+              {busyPhoto ? t('acct.pfProcessing') : t('acct.pfChangePhoto')}
             </button>
             {profile.avatar && (
               <button type="button" disabled={busyPhoto} onClick={handleRemovePhoto}
                 className="px-4 py-2 text-sm text-red-600 hover:underline disabled:opacity-50">
-                Hapus
+                {t('acct.pfRemove')}
               </button>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">Format JPG, PNG, atau WebP. Maksimal 2 MB.</p>
+          <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">{t('acct.pfPhotoHint')}</p>
         </div>
       </div>
 
       {linked && (
         <p className="text-sm bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded p-3 text-gray-700 dark:text-slate-300">
-          Akun Anda tertaut dengan digitalcoop.id. Nama, email, dan No HP diubah di digitalcoop.id; foto dan bio dapat diubah di sini.
+          {t('acct.pfLinked')}
         </p>
       )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.pfName')}</label>
           <input type="text" value={name} maxLength={NAME_MAX} disabled={linked}
             onChange={(e) => setName(e.target.value)} className={linked ? lockedClass : inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.pfEmail')}</label>
           <input type="email" value={profile.email ?? ''} disabled className={lockedClass} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">No HP</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.pfPhone')}</label>
           <input type="tel" value={phone} placeholder="0812 3456 789" disabled={linked}
             onChange={(e) => setPhone(e.target.value)} className={linked ? lockedClass : inputClass} />
-          <p className="text-xs text-gray-500 mt-1">Dapat dipakai untuk masuk selain email.</p>
+          <p className="text-xs text-gray-500 mt-1">{t('acct.pfPhoneHint')}</p>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Bio Singkat</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.pfBio')}</label>
           <textarea value={bio} maxLength={BIO_MAX} onChange={(e) => setBio(e.target.value)}
-            className={`${inputClass} h-24`} placeholder="Ceritakan sedikit tentang diri Anda..." />
+            className={`${inputClass} h-24`} placeholder={t('acct.pfBioPh')} />
           <p className="text-xs text-gray-500 mt-1">{bio.length}/{BIO_MAX}</p>
         </div>
       </div>
@@ -148,7 +150,7 @@ const ProfileForm: React.FC = () => {
       )}
       <button type="submit" disabled={saving}
         className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
-        {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+        {saving ? t('acct.pfSaving') : t('acct.pfSave')}
       </button>
     </form>
   );

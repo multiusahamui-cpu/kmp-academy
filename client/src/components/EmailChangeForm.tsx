@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { authApi } from '../services/api';
 import { notifyProfileChanged, useProfile } from '../services/profile';
+import { useT } from '../i18n';
 
 const inputClass =
   'w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded';
@@ -10,6 +11,7 @@ const errText = (err: unknown, fallback: string): string =>
 
 /** Ganti email: password saat ini lalu kode 6 digit yang dikirim ke email baru. */
 const EmailChangeForm: React.FC = () => {
+  const t = useT();
   const { profile } = useProfile();
   const [step, setStep] = useState<'form' | 'code'>('form');
   const [newEmail, setNewEmail] = useState('');
@@ -23,9 +25,9 @@ const EmailChangeForm: React.FC = () => {
   if (profile.isMember) {
     return (
       <div className="max-w-md space-y-2">
-        <h3 className="font-bold text-gray-900 dark:text-white">Ganti Email</h3>
+        <h3 className="font-bold text-gray-900 dark:text-white">{t('acct.ecTitle')}</h3>
         <p className="text-sm text-gray-600 dark:text-slate-300">
-          Akun Anda tertaut dengan digitalcoop.id. Email diubah di digitalcoop.id.
+          {t('acct.ecLinked')}
         </p>
       </div>
     );
@@ -39,9 +41,9 @@ const EmailChangeForm: React.FC = () => {
       const res = await authApi.requestEmailChange({ newEmail, password });
       setPassword('');
       setStep('code');
-      setResult({ ok: true, text: res.data?.message || 'Kode verifikasi dikirim.' });
+      setResult({ ok: true, text: res.data?.message || t('acct.ecSent') });
     } catch (err) {
-      setResult({ ok: false, text: errText(err, 'Gagal meminta kode.') });
+      setResult({ ok: false, text: errText(err, t('acct.ecReqFail')) });
     } finally {
       setBusy(false);
     }
@@ -53,13 +55,13 @@ const EmailChangeForm: React.FC = () => {
     setBusy(true);
     try {
       await authApi.confirmEmailChange({ code });
-      setResult({ ok: true, text: 'Email berhasil diganti.' });
+      setResult({ ok: true, text: t('acct.ecOk') });
       setStep('form');
       setNewEmail('');
       setCode('');
       notifyProfileChanged();
     } catch (err) {
-      setResult({ ok: false, text: errText(err, 'Gagal memverifikasi kode.') });
+      setResult({ ok: false, text: errText(err, t('acct.ecVerFail')) });
     } finally {
       setBusy(false);
     }
@@ -67,33 +69,33 @@ const EmailChangeForm: React.FC = () => {
 
   return (
     <div className="max-w-md space-y-4">
-      <h3 className="font-bold text-gray-900 dark:text-white">Ganti Email</h3>
+      <h3 className="font-bold text-gray-900 dark:text-white">{t('acct.ecTitle')}</h3>
       <p className="text-sm text-gray-600 dark:text-slate-300">
-        Email saat ini: <strong>{profile.email || '(belum ada)'}</strong>
+        {t('acct.ecCurrent')} <strong>{profile.email || t('acct.ecNone')}</strong>
       </p>
 
       {step === 'form' ? (
         <form onSubmit={handleRequest} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Email baru</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.ecNew')}</label>
             <input type="email" required autoComplete="email" className={inputClass}
               value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Password saat ini</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('acct.cpCurrent')}</label>
             <input type="password" required autoComplete="current-password" className={inputClass}
               value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <button type="submit" disabled={busy}
             className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
-            {busy ? 'Mengirim...' : 'Kirim Kode Verifikasi'}
+            {busy ? t('acct.ecSending') : t('acct.ecSend')}
           </button>
         </form>
       ) : (
         <form onSubmit={handleConfirm} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-              Kode 6 digit dari email baru
+              {t('acct.ecCode')}
             </label>
             <input type="text" inputMode="numeric" pattern="\d{6}" maxLength={6} required autoComplete="one-time-code"
               className={inputClass} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
@@ -101,11 +103,11 @@ const EmailChangeForm: React.FC = () => {
           <div className="flex gap-3">
             <button type="submit" disabled={busy || code.length !== 6}
               className="px-6 py-2 bg-digitalcoop-600 text-white rounded font-medium hover:bg-digitalcoop-700 disabled:opacity-50">
-              {busy ? 'Memeriksa...' : 'Verifikasi'}
+              {busy ? t('acct.ecChecking') : t('acct.ecVerify')}
             </button>
             <button type="button" onClick={() => { setStep('form'); setCode(''); setResult(null); }}
               className="px-4 py-2 text-sm text-gray-600 hover:underline">
-              Ulangi
+              {t('acct.ecRedo')}
             </button>
           </div>
         </form>
