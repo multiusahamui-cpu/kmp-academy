@@ -288,7 +288,7 @@ export const Layout: React.FC<LayoutProps> = ({
   // --- PUBLIC LAYOUT ---
   if (currentRole === UserRole.PUBLIC) {
     return (
-      <div className="min-h-screen flex flex-col font-sans bg-gray-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col font-sans bg-gray-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
         {/* Info Modal Component */}
         <InformationCenterModal
           isOpen={isInfoModalOpen}
