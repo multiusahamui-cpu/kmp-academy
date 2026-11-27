@@ -42,7 +42,12 @@ const ModulesTab: React.FC<Props> = ({ courseId, editable, modules, onChanged })
       const f = file;
       setFile(null);
       if (fileRef.current) fileRef.current.value = '';
-      await uploadModuleFile(courseId, created.id, f, (pct) => setProgress({ id: created.id, pct }));
+      try {
+        await uploadModuleFile(courseId, created.id, f, (pct) => setProgress({ id: created.id, pct }));
+      } catch (e) {
+        onChanged(); // modul sudah dibuat di server: tampilkan agar bisa diunggah ulang lewat ikon awan
+        throw new Error(`Modul "${created.title}" dibuat, tetapi unggah berkas gagal (${apiMessage(e, 'periksa koneksi/CORS')}). Klik ikon awan pada modul itu untuk mengunggah ulang.`);
+      }
     }
   });
 
