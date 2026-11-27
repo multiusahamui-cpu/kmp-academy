@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, Settings } from "lucide-react";
 import { NotificationItem, notificationsApi } from "../services/notifications";
 import { useI18n } from "../i18n";
+import { translateNotification } from "../i18n/notificationText";
 
 const POLL_MS = 60_000;
 
@@ -146,8 +147,8 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
                 <div className="flex items-start gap-2">
                   {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-digitalcoop-600" aria-label={t("help.nbUnread")} />}
                   <div className="min-w-0">
-                    <p className={`text-sm text-gray-900 dark:text-white ${n.readAt ? "" : "font-semibold"}`}>{n.title}</p>
-                    <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5 break-words">{n.body}</p>
+                    <p className={`text-sm text-gray-900 dark:text-white ${n.readAt ? "" : "font-semibold"}`}>{translateNotification(n, lang).title}</p>
+                    <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5 break-words">{translateNotification(n, lang).body}</p>
                     <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">{timeAgo(n.createdAt, t, lang)}</p>
                   </div>
                 </div>
