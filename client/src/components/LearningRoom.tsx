@@ -7,6 +7,7 @@ import { LearningDetail, LearningModule, findCertificateForCourse, learningApi }
 import { apiMessage } from '../services/payments';
 import CertificateTemplate from './CertificateTemplate';
 import ExamRoom from '../views/student/ExamRoom';
+import { useT } from '../i18n';
 
 interface ApiReview {
   id: string;
@@ -24,9 +25,8 @@ interface LearningRoomProps {
 
 interface ModuleContent { type: 'VIDEO' | 'PDF' | 'TEXT'; text?: string; url?: string }
 
-const MODULE_LABEL: Record<string, string> = { VIDEO: 'VIDEO', PDF: 'PDF', TEXT: 'TEKS' };
-
 const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
+  const t = useT();
   const [detail, setDetail] = useState<LearningDetail | null>(null);
   const [loadError, setLoadError] = useState('');
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
       setLoadError('');
       setActiveId((cur) => cur ?? (d.modules.find((m) => !m.isCompleted) ?? d.modules[0])?.id ?? null);
     } catch (err) {
-      setLoadError(apiMessage(err, 'Gagal memuat ruang belajar.'));
+      setLoadError(apiMessage(err, t('learn.loadFail')));
     }
   }, [courseId]);
 
@@ -67,7 +67,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
     setContent(null); setContentError(''); setContentLoading(true);
     courseAuthoringApi.moduleContent(courseId, activeId)
       .then((res) => { if (!cancelled) setContent(res.data.data as ModuleContent); })
-      .catch((err) => { if (!cancelled) setContentError(apiMessage(err, 'Gagal membuka materi.')); })
+      .catch((err) => { if (!cancelled) setContentError(apiMessage(err, t('learn.contentFail'))); })
       .finally(() => { if (!cancelled) setContentLoading(false); });
     return () => { cancelled = true; };
   }, [courseId, activeId]);
@@ -98,8 +98,8 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
   const openCertificate = async () => {
     try {
       const cert = await findCertificateForCourse(courseId);
-      if (cert) setCertView(cert); else setNotice('Sertifikat belum tersedia.');
-    } catch (err) { setNotice(apiMessage(err, 'Gagal memuat sertifikat.')); }
+      if (cert) setCertView(cert); else setNotice(t('learn.certUnavailable'));
+    } catch (err) { setNotice(apiMessage(err, t('learn.certFail'))); }
   };
 
   const markComplete = async (mod: LearningModule) => {
@@ -113,11 +113,11 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
         completedModules: r.completedModules,
         modules: d.modules.map((m) => (m.id === mod.id ? { ...m, isCompleted: true } : m)),
       });
-      if (r.certificate?.created) setNotice('Selamat! Semua materi selesai dan sertifikat Anda sudah terbit.');
-      else if (r.progress === 100) setNotice('Semua materi selesai.');
+      if (r.certificate?.created) setNotice(t('learn.certIssued'));
+      else if (r.progress === 100) setNotice(t('learn.allDone'));
       await load();
     } catch (err) {
-      setNotice(apiMessage(err, 'Gagal menyimpan progres.'));
+      setNotice(apiMessage(err, t('learn.progressFail')));
     } finally {
       setCompleting(false);
     }
@@ -129,11 +129,11 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
     try {
       await reviewApi.create(courseId, { rating: newRating, comment: newComment });
       setHasReviewed(true);
-      setReviewMessage({ ok: true, text: 'Terima kasih! Ulasan Anda berhasil dikirim.' });
+      setReviewMessage({ ok: true, text: t('learn.reviewThanks') });
       void fetchReviews();
       setNewComment('');
     } catch (err) {
-      setReviewMessage({ ok: false, text: apiMessage(err, 'Gagal mengirim ulasan.') });
+      setReviewMessage({ ok: false, text: apiMessage(err, t('learn.reviewFail')) });
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +145,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-gray-900 text-white">
         <p>{loadError}</p>
-        <button onClick={onBack} className="rounded bg-digitalcoop-600 px-4 py-2 text-sm font-bold">Kembali</button>
+        <button onClick={onBack} className="rounded bg-digitalcoop-600 px-4 py-2 text-sm font-bold">{t('common.back')}</button>
       </div>
     );
   }
@@ -174,7 +174,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
           </div>
         </div>
         <div className="hidden md:flex flex-col items-end">
-          <span className="text-xs text-gray-400 mb-1">Progress Belajar: {detail.progress}%</span>
+          <span className="text-xs text-gray-400 mb-1">{t('learn.progressLabel', { n: detail.progress })}</span>
           <div className="w-40 h-1.5 bg-gray-700 rounded-full"><div className="h-1.5 bg-green-500 rounded-full transition-all" style={{ width: `${detail.progress}%` }} /></div>
         </div>
       </div>
@@ -182,7 +182,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         <div className="flex-1 flex flex-col bg-black relative overflow-y-auto">
           {!active ? (
-            <div className="p-12 text-center text-gray-400">Kursus ini belum memiliki materi.</div>
+            <div className="p-12 text-center text-gray-400">{t('learn.noMaterial')}</div>
           ) : (
             <div className="bg-black">
               {contentLoading && <div className="aspect-video flex items-center justify-center"><Loader2 className="animate-spin text-gray-400" /></div>}
@@ -193,7 +193,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
               {content?.type === 'PDF' && content.url && (
                 <div>
                   <iframe key={active.id} src={content.url} title={active.title} className="w-full h-[70vh] bg-white" />
-                  <a href={content.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 bg-gray-800 py-2 text-xs text-digitalcoop-400 hover:underline"><ExternalLink size={12} /> Buka di tab baru</a>
+                  <a href={content.url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 bg-gray-800 py-2 text-xs text-digitalcoop-400 hover:underline"><ExternalLink size={12} /> {t('learn.openNewTab')}</a>
                 </div>
               )}
               {content?.type === 'TEXT' && (
@@ -209,32 +209,32 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                 <div className="flex gap-2">
                   {!active.isCompleted ? (
                     <button disabled={completing} onClick={() => void markComplete(active)} className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-sm font-bold hover:bg-green-700 disabled:opacity-50">
-                      {completing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} Tandai Selesai
+                      {completing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} {t('learn.markDone')}
                     </button>
                   ) : (
-                    <span className="flex items-center gap-1 text-sm font-bold text-green-400"><CheckCircle size={16} /> Selesai</span>
+                    <span className="flex items-center gap-1 text-sm font-bold text-green-400"><CheckCircle size={16} /> {t('learn.done')}</span>
                   )}
-                  {next && <button onClick={() => setActiveId(next.id)} className="rounded border border-gray-600 px-4 py-2 text-sm font-medium hover:bg-gray-800">Modul Berikutnya</button>}
+                  {next && <button onClick={() => setActiveId(next.id)} className="rounded border border-gray-600 px-4 py-2 text-sm font-medium hover:bg-gray-800">{t('learn.nextModule')}</button>}
                 </div>
               </div>
             )}
             {notice && (
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-green-700 bg-green-900/30 p-3 text-sm text-green-200">
                 <span>{notice}</span>
-                {certificate && <button onClick={() => void openCertificate()} className="font-bold text-green-300 underline">Lihat Sertifikat</button>}
+                {certificate && <button onClick={() => void openCertificate()} className="font-bold text-green-300 underline">{t('learn.viewCert')}</button>}
               </div>
             )}
 
             <div className="flex gap-6 border-b border-gray-700 mb-6">
-              {([['DESCRIPTION', 'Deskripsi'], ['REVIEWS', 'Ulasan & Rating']] as const).map(([id, label]) => (
+              {([['DESCRIPTION', t('learn.tabDescription')], ['REVIEWS', t('learn.tabReviews')]] as const).map(([id, label]) => (
                 <button key={id} onClick={() => setActiveTab(id)} className={`pb-3 border-b-2 font-bold text-sm transition ${activeTab === id ? 'border-digitalcoop-500 text-digitalcoop-400' : 'border-transparent text-gray-400 hover:border-gray-600'}`}>{label}</button>
               ))}
             </div>
 
             {activeTab === 'DESCRIPTION' && (
               <div className="max-w-3xl space-y-6">
-                {active?.description && <div><h3 className="mb-2 font-bold">Tentang Modul Ini</h3><p className="whitespace-pre-line text-sm leading-relaxed text-gray-400">{active.description}</p></div>}
-                {detail.course.description && <div><h3 className="mb-2 font-bold">Tentang Kursus</h3><p className="whitespace-pre-line text-sm leading-relaxed text-gray-400">{detail.course.description}</p></div>}
+                {active?.description && <div><h3 className="mb-2 font-bold">{t('learn.aboutModule')}</h3><p className="whitespace-pre-line text-sm leading-relaxed text-gray-400">{active.description}</p></div>}
+                {detail.course.description && <div><h3 className="mb-2 font-bold">{t('learn.aboutCourse')}</h3><p className="whitespace-pre-line text-sm leading-relaxed text-gray-400">{detail.course.description}</p></div>}
               </div>
             )}
 
@@ -242,28 +242,28 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
               <div className="max-w-2xl">
                 {!hasReviewed && (
                   <div className="bg-gray-800 p-4 rounded-lg mb-8 border border-gray-700">
-                    <h3 className="font-bold text-sm mb-3">Tulis Ulasan Anda</h3>
+                    <h3 className="font-bold text-sm mb-3">{t('learn.writeReview')}</h3>
                     <form onSubmit={handleSubmitReview}>
                       <div className="flex items-center gap-2 mb-3">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button type="button" key={star} onClick={() => setNewRating(star)} className={`transition ${star <= newRating ? 'text-yellow-400' : 'text-gray-600'}`}><Star size={24} fill="currentColor" /></button>
                         ))}
-                        <span className="ml-2 text-sm text-gray-400">{newRating === 5 ? 'Sangat Puas' : newRating === 4 ? 'Puas' : 'Cukup'}</span>
+                        <span className="ml-2 text-sm text-gray-400">{newRating === 5 ? t('learn.ratingVerySatisfied') : newRating === 4 ? t('learn.ratingSatisfied') : t('learn.ratingOk')}</span>
                       </div>
                       <textarea className="w-full bg-gray-900 border border-gray-700 rounded p-3 text-sm text-white focus:ring-1 focus:ring-digitalcoop-500 outline-none mb-3" rows={3}
-                        placeholder="Bagaimana pengalaman belajar Anda? Ceritakan di sini..." value={newComment} onChange={(e) => setNewComment(e.target.value)} required />
+                        placeholder={t('learn.reviewPlaceholder')} value={newComment} onChange={(e) => setNewComment(e.target.value)} required />
                       <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-digitalcoop-600 text-white rounded font-bold text-sm hover:bg-digitalcoop-700 flex items-center disabled:opacity-50">
-                        {isSubmitting ? <Loader2 size={14} className="mr-2 animate-spin" /> : <Send size={14} className="mr-2" />} Kirim Ulasan
+                        {isSubmitting ? <Loader2 size={14} className="mr-2 animate-spin" /> : <Send size={14} className="mr-2" />} {t('learn.sendReview')}
                       </button>
                     </form>
                   </div>
                 )}
                 {reviewMessage && <p className={`mb-4 text-sm ${reviewMessage.ok ? 'text-green-400' : 'text-red-400'}`}>{reviewMessage.text}</p>}
                 {isLoadingReviews ? (
-                  <div className="text-center py-8 text-gray-500"><Loader2 size={24} className="animate-spin mx-auto mb-2" /> Memuat ulasan...</div>
+                  <div className="text-center py-8 text-gray-500"><Loader2 size={24} className="animate-spin mx-auto mb-2" /> {t('learn.loadingReviews')}</div>
                 ) : (
                   <div className="space-y-6">
-                    {courseReviews.length === 0 ? <p className="text-gray-500 text-sm">Belum ada ulasan untuk kursus ini. Jadilah yang pertama!</p> : courseReviews.map((rev) => (
+                    {courseReviews.length === 0 ? <p className="text-gray-500 text-sm">{t('learn.noReviews')}</p> : courseReviews.map((rev) => (
                       <div key={rev.id} className="border-b border-gray-800 pb-6 last:border-0">
                         <div className="flex items-start gap-3 mb-2">
                           <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xs text-gray-300">{rev.userName.charAt(0)}</div>
@@ -278,7 +278,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                         <p className="text-sm text-gray-300 leading-relaxed ml-11">{rev.comment}</p>
                         {rev.reply && (
                           <div className="ml-11 mt-3 bg-gray-800/50 p-3 rounded border-l-2 border-digitalcoop-500">
-                            <p className="text-xs font-bold text-digitalcoop-400 mb-1">Respon Instruktur</p>
+                            <p className="text-xs font-bold text-digitalcoop-400 mb-1">{t('learn.instructorReply')}</p>
                             <p className="text-xs text-gray-400">{rev.reply.comment}</p>
                           </div>
                         )}
@@ -293,8 +293,8 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
 
         <div className="w-full md:w-80 bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 h-1/2 md:h-auto">
           <div className="p-4 border-b border-gray-700 bg-gray-800 sticky top-0 z-10">
-            <h3 className="font-bold text-sm">Konten Kursus</h3>
-            <p className="text-xs text-gray-400">{detail.completedModules} dari {detail.totalModules} modul selesai</p>
+            <h3 className="font-bold text-sm">{t('learn.courseContent')}</h3>
+            <p className="text-xs text-gray-400">{t('learn.modulesDone', { done: detail.completedModules, total: detail.totalModules })}</p>
           </div>
           <div className="flex-1 overflow-y-auto">
             {modules.map((mod, idx) => (
@@ -306,7 +306,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
                   <h4 className={`text-sm font-medium mb-1 ${activeIdx === idx ? 'text-white' : 'text-gray-400'}`}>{idx + 1}. {mod.title}</h4>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     {mod.type === 'VIDEO' ? <PlayCircle size={10} /> : mod.type === 'PDF' ? <FileText size={10} /> : <AlignLeft size={10} />}
-                    <span className="px-1.5 py-0.5 bg-gray-700 rounded text-[10px]">{MODULE_LABEL[mod.type]}</span>
+                    <span className="px-1.5 py-0.5 bg-gray-700 rounded text-[10px]">{t(`learn.kind${mod.type}`)}</span>
                   </div>
                 </div>
               </div>
@@ -317,20 +317,20 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
             <div className="border-t border-gray-700 bg-gray-800 p-4 space-y-3">
               {exam.enabled && (
                 <div>
-                  <h4 className="flex items-center gap-2 text-sm font-bold"><Award size={16} className="text-yellow-400" /> Ujian Akhir</h4>
+                  <h4 className="flex items-center gap-2 text-sm font-bold"><Award size={16} className="text-yellow-400" /> {t('learn.finalExam')}</h4>
                   <p className="mt-1 text-xs text-gray-400">
-                    {exam.questionCount} soal · {exam.durationMinutes} menit · nilai lulus {exam.passingGrade} · kesempatan {exam.attemptsUsed}/{exam.maxAttempts}
+                    {t('learn.examMeta', { q: exam.questionCount, min: exam.durationMinutes, pass: exam.passingGrade, used: exam.attemptsUsed, max: exam.maxAttempts })}
                   </p>
                   {exam.passed ? (
-                    <p className="mt-2 text-xs font-bold text-green-400">Lulus{exam.bestScore !== null ? ` (skor terbaik ${exam.bestScore})` : ''}</p>
+                    <p className="mt-2 text-xs font-bold text-green-400">{t('learn.passedWord')}{exam.bestScore !== null ? t('exam.bestScoreSuffix', { score: exam.bestScore }) : ''}</p>
                   ) : exam.eligible ? (
-                    <button onClick={() => setShowExam(true)} className="mt-2 w-full rounded bg-green-600 py-2 text-sm font-bold hover:bg-green-700">{exam.hasOpenAttempt ? 'Lanjutkan Ujian' : 'Mulai Ujian'}</button>
+                    <button onClick={() => setShowExam(true)} className="mt-2 w-full rounded bg-green-600 py-2 text-sm font-bold hover:bg-green-700">{exam.hasOpenAttempt ? t('exam.continueExam') : t('exam.startExam')}</button>
                   ) : (
                     <p className="mt-2 text-xs text-amber-300">{exam.reason}</p>
                   )}
                 </div>
               )}
-              {certificate && <button onClick={() => void openCertificate()} className="w-full rounded border border-digitalcoop-500 py-2 text-sm font-bold text-digitalcoop-300 hover:bg-digitalcoop-900/30">Lihat Sertifikat</button>}
+              {certificate && <button onClick={() => void openCertificate()} className="w-full rounded border border-digitalcoop-500 py-2 text-sm font-bold text-digitalcoop-300 hover:bg-digitalcoop-900/30">{t('learn.viewCert')}</button>}
             </div>
           )}
         </div>

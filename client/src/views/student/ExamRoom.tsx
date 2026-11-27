@@ -4,6 +4,7 @@ import { Certificate } from "../../types";
 import CertificateTemplate from "../../components/CertificateTemplate";
 import { ExamResult, ExamSession, ExamSummary, findCertificateForCourse, learningApi } from "../../services/learning";
 import { apiMessage } from "../../services/payments";
+import { useT } from "../../i18n";
 
 interface ExamRoomProps {
   courseId: string;
@@ -26,6 +27,7 @@ const clearDraft = (attemptId: string) => { try { sessionStorage.removeItem(draf
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
+  const t = useT();
   const [step, setStep] = useState<"INTRO" | "TEST" | "RESULT">("INTRO");
   const [summary, setSummary] = useState<ExamSummary | null>(null);
   const [title, setTitle] = useState("");
@@ -48,7 +50,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
       setSummary(d.exam as ExamSummary);
       setTitle(d.course.title as string);
       setError("");
-    } catch (err) { setError(apiMessage(err, "Gagal memuat informasi ujian.")); }
+    } catch (err) { setError(apiMessage(err, t("exam.loadFail"))); }
   }, [courseId]);
 
   useEffect(() => { void loadSummary(); }, [loadSummary]);
@@ -63,7 +65,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
       setAnswers(loadDraft(s.attemptId, s.questions.length) ?? new Array(s.questions.length).fill(-1));
       setIdx(0); setConfirming(false);
       setStep("TEST");
-    } catch (err) { setError(apiMessage(err, "Gagal memulai ujian.")); } finally { setBusy(false); }
+    } catch (err) { setError(apiMessage(err, t("exam.startFail"))); } finally { setBusy(false); }
   };
 
   const submit = useCallback(async (finalAnswers: number[]) => {
@@ -76,7 +78,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
       setResult(r); setStep("RESULT");
     } catch (err) {
       submittedRef.current = false;
-      setError(apiMessage(err, "Gagal mengirim jawaban."));
+      setError(apiMessage(err, t("exam.submitFail")));
     } finally { setBusy(false); }
   }, [courseId, session]);
 
@@ -105,7 +107,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
     try {
       const c = await findCertificateForCourse(courseId);
       if (c) setCertView(c);
-    } catch (err) { setError(apiMessage(err, "Gagal memuat sertifikat.")); }
+    } catch (err) { setError(apiMessage(err, t("exam.certFail"))); }
   };
 
   const retry = async () => { setResult(null); setSession(null); await loadSummary(); setStep("INTRO"); };
@@ -117,34 +119,34 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
     return (
       <div className="mx-auto max-w-2xl p-4 md:p-8">
         {certView && <CertificateTemplate data={certView} onClose={() => setCertView(null)} />}
-        <button onClick={onExit} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white"><ArrowLeft size={16} /> Kembali</button>
+        <button onClick={onExit} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-white"><ArrowLeft size={16} /> {t("common.back")}</button>
         <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-digitalcoop-100 text-digitalcoop-700"><Award size={32} /></div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Ujian Akhir</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("exam.title")}</h2>
             <p className="text-sm text-gray-500">{title}</p>
           </div>
           {summary && (
             <>
               <div className="mb-6 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">Jumlah soal</p><p className="font-bold">{summary.questionCount}</p></div>
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">Durasi</p><p className="font-bold">{summary.durationMinutes} menit</p></div>
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">Nilai lulus</p><p className="font-bold">{summary.passingGrade}</p></div>
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">Kesempatan terpakai</p><p className="font-bold">{summary.attemptsUsed} / {summary.maxAttempts}</p></div>
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">{t("exam.qCount")}</p><p className="font-bold">{summary.questionCount}</p></div>
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">{t("exam.duration")}</p><p className="font-bold">{t("exam.durationVal", { n: summary.durationMinutes })}</p></div>
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">{t("exam.passGrade")}</p><p className="font-bold">{summary.passingGrade}</p></div>
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-slate-800"><p className="text-xs text-gray-500">{t("exam.attemptsUsed")}</p><p className="font-bold">{summary.attemptsUsed} / {summary.maxAttempts}</p></div>
               </div>
               <ul className="mb-6 list-disc space-y-1 pl-5 text-xs text-gray-500">
-                <li>Waktu berjalan sejak ujian dimulai dan tidak berhenti walau halaman ditutup.</li>
-                <li>Jawaban yang dikirim setelah waktu habis tidak diterima dan percobaan tetap dihitung.</li>
-                <li>Setiap percobaan, urutan soal diacak. Nilai dihitung oleh server.</li>
+                <li>{t("exam.rule1")}</li>
+                <li>{t("exam.rule2")}</li>
+                <li>{t("exam.rule3")}</li>
               </ul>
               {summary.passed ? (
                 <div className="space-y-3 text-center">
-                  <p className="font-bold text-green-600">Anda sudah lulus{summary.bestScore !== null ? ` (skor terbaik ${summary.bestScore})` : ""}.</p>
-                  <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-6 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Lihat Sertifikat</button>
+                  <p className="font-bold text-green-600">{t("exam.passed")}{summary.bestScore !== null ? t("exam.bestScoreSuffix", { score: summary.bestScore }) : ""}.</p>
+                  <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-6 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">{t("exam.viewCert")}</button>
                 </div>
               ) : summary.eligible ? (
                 <button disabled={busy} onClick={() => void start()} className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 py-3 font-bold text-white hover:bg-green-700 disabled:opacity-50">
-                  {busy && <Loader2 size={16} className="animate-spin" />} {summary.hasOpenAttempt ? "Lanjutkan Ujian" : "Mulai Ujian"}
+                  {busy && <Loader2 size={16} className="animate-spin" />} {summary.hasOpenAttempt ? t("exam.continueExam") : t("exam.startExam")}
                 </button>
               ) : (
                 <p className="flex items-center justify-center gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300"><AlertCircle size={16} /> {summary.reason}</p>
@@ -165,7 +167,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
     return (
       <div className="mx-auto max-w-3xl p-4 md:p-8">
         <div className="mb-4 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div><p className="text-xs text-gray-500">{title}</p><p className="font-bold text-gray-900 dark:text-white">Soal {idx + 1} dari {session.questions.length}</p></div>
+          <div><p className="text-xs text-gray-500">{title}</p><p className="font-bold text-gray-900 dark:text-white">{t("exam.soalOf", { i: idx + 1, n: session.questions.length })}</p></div>
           <div className={`flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-lg font-bold ${remaining <= 60 ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-white"}`}><Clock size={18} /> {fmt(remaining)}</div>
         </div>
 
@@ -180,11 +182,11 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
             ))}
           </div>
           <div className="mt-6 flex items-center justify-between">
-            <button disabled={idx === 0} onClick={() => setIdx(idx - 1)} className="flex items-center gap-1 rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40 dark:border-slate-600"><ArrowLeft size={14} /> Sebelumnya</button>
+            <button disabled={idx === 0} onClick={() => setIdx(idx - 1)} className="flex items-center gap-1 rounded-lg border border-gray-300 px-4 py-2 text-sm disabled:opacity-40 dark:border-slate-600"><ArrowLeft size={14} /> {t("exam.prev")}</button>
             {last ? (
-              <button onClick={() => setConfirming(true)} className="rounded-lg bg-green-600 px-6 py-2 text-sm font-bold text-white hover:bg-green-700">Selesai & Kirim</button>
+              <button onClick={() => setConfirming(true)} className="rounded-lg bg-green-600 px-6 py-2 text-sm font-bold text-white hover:bg-green-700">{t("exam.finishSubmit")}</button>
             ) : (
-              <button onClick={() => setIdx(idx + 1)} className="flex items-center gap-1 rounded-lg bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Berikutnya <ArrowRight size={14} /></button>
+              <button onClick={() => setIdx(idx + 1)} className="flex items-center gap-1 rounded-lg bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">{t("exam.next")} <ArrowRight size={14} /></button>
             )}
           </div>
         </div>
@@ -199,11 +201,11 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
         {confirming && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="w-full max-w-sm rounded-xl bg-white p-6 dark:bg-slate-900">
-              <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">Kirim jawaban?</h3>
-              <p className="mb-4 text-sm text-gray-600 dark:text-slate-300">{unanswered > 0 ? `${unanswered} soal belum dijawab. ` : ""}Setelah dikirim, jawaban tidak dapat diubah dan percobaan ini dihitung.</p>
+              <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">{t("exam.confirmTitle")}</h3>
+              <p className="mb-4 text-sm text-gray-600 dark:text-slate-300">{unanswered > 0 ? t("exam.unansweredPrefix", { n: unanswered }) : ""}{t("exam.confirmDesc")}</p>
               <div className="flex justify-end gap-2">
-                <button onClick={() => setConfirming(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-slate-600">Periksa Lagi</button>
-                <button disabled={busy} onClick={() => { setConfirming(false); void submit(answers); }} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{busy && <Loader2 size={14} className="animate-spin" />} Kirim</button>
+                <button onClick={() => setConfirming(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm dark:border-slate-600">{t("exam.checkAgain")}</button>
+                <button disabled={busy} onClick={() => { setConfirming(false); void submit(answers); }} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{busy && <Loader2 size={14} className="animate-spin" />} {t("exam.submit")}</button>
               </div>
             </div>
           </div>
@@ -219,22 +221,22 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
         {certView && <CertificateTemplate data={certView} onClose={() => setCertView(null)} />}
         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {result.passed ? <CheckCircle size={64} className="mx-auto mb-3 text-green-500" /> : <XCircle size={64} className="mx-auto mb-3 text-red-500" />}
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{result.passed ? "Selamat, Anda lulus!" : "Belum lulus"}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{result.passed ? t("exam.passedTitle") : t("exam.failedTitle")}</h2>
           <p className="mt-4 text-5xl font-extrabold text-digitalcoop-700 dark:text-digitalcoop-300">{result.score}</p>
-          <p className="mt-1 text-sm text-gray-500">{result.correct} dari {result.total} soal benar · nilai lulus {result.passingGrade}</p>
-          {!result.passed && <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">{result.attemptsLeft > 0 ? `Sisa kesempatan: ${result.attemptsLeft}. Pelajari materi lagi lalu coba kembali.` : "Kesempatan ujian sudah habis."}</p>}
+          <p className="mt-1 text-sm text-gray-500">{t("exam.resultDetail", { correct: result.correct, total: result.total, pass: result.passingGrade })}</p>
+          {!result.passed && <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">{result.attemptsLeft > 0 ? t("exam.attemptsLeftMsg", { n: result.attemptsLeft }) : t("exam.attemptsExhausted")}</p>}
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {result.passed && result.certificate && <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-5 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">Lihat Sertifikat</button>}
-            {!result.passed && result.attemptsLeft > 0 && <button onClick={() => void retry()} className="rounded-lg bg-green-600 px-5 py-2 text-sm font-bold text-white hover:bg-green-700">Coba Lagi</button>}
-            <button onClick={onExit} className="rounded-lg border border-gray-300 px-5 py-2 text-sm dark:border-slate-600">Selesai</button>
+            {result.passed && result.certificate && <button onClick={() => void openCertificate()} className="rounded-lg bg-digitalcoop-600 px-5 py-2 text-sm font-bold text-white hover:bg-digitalcoop-700">{t("exam.viewCert")}</button>}
+            {!result.passed && result.attemptsLeft > 0 && <button onClick={() => void retry()} className="rounded-lg bg-green-600 px-5 py-2 text-sm font-bold text-white hover:bg-green-700">{t("exam.retry")}</button>}
+            <button onClick={onExit} className="rounded-lg border border-gray-300 px-5 py-2 text-sm dark:border-slate-600">{t("exam.finish")}</button>
           </div>
         </div>
       </div>
     );
   }
 
-  return <div className="p-8 text-center text-sm text-red-600">{error || "Ujian tidak tersedia."}</div>;
+  return <div className="p-8 text-center text-sm text-red-600">{error || t("exam.unavailable")}</div>;
 };
 
 export default ExamRoom;
