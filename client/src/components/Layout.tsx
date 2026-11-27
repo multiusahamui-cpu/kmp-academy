@@ -277,7 +277,7 @@ export const Layout: React.FC<LayoutProps> = ({
   // --- PUBLIC LAYOUT ---
   if (currentRole === UserRole.PUBLIC) {
     return (
-      <div className="min-h-screen flex flex-col font-mono bg-gray-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="min-h-screen flex flex-col font-sans bg-gray-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
         {/* Info Modal Component */}
         <InformationCenterModal
           isOpen={isInfoModalOpen}
@@ -381,7 +381,7 @@ export const Layout: React.FC<LayoutProps> = ({
   const menuItems = getMenuItems(currentRole);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex font-mono transition-colors duration-300">
+    <div className="flex-1 min-h-0 bg-gray-50 dark:bg-slate-950 flex font-sans transition-colors duration-300">
       {/* Info Modal Component */}
       <InformationCenterModal
         isOpen={isInfoModalOpen}
@@ -539,8 +539,8 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-digitalcoop-50/40 dark:bg-slate-950 scroll-smooth">
-          <div key={currentView} className="max-w-7xl mx-auto animate-in">{children}</div>
+        <main key={currentView} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-digitalcoop-50/40 dark:bg-slate-950 scroll-smooth">
+          <div className="max-w-7xl mx-auto animate-in">{children}</div>
         </main>
       </div>
       {/* Mobile Sidebar Overlay */}

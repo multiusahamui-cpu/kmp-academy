@@ -477,20 +477,21 @@ const App: React.FC = () => {
 
   return (
     <>
-      {showMaintenanceBanner && (
-        <div role="status" className="bg-amber-500 text-amber-950 text-sm font-bold text-center px-4 py-2">
-          {currentRole === UserRole.SUPERADMIN ? 'Mode maintenance AKTIF. Pengguna lain melihat: ' : ''}
-          {publicConfig.maintenanceMessage}
-        </div>
-      )}
-      {showAnnouncement && (
-        <div role="status" className="bg-digitalcoop-700 text-white text-sm text-center px-4 py-2">
-          {publicConfig.announcementText}
-        </div>
-      )}
       {currentView === 'learning-room' ? (
          renderContent()
       ) : (
+        <div className="flex flex-col h-screen overflow-hidden">
+          {showMaintenanceBanner && (
+            <div role="status" className="bg-amber-500 text-amber-950 text-sm font-bold text-center px-4 py-2 shrink-0">
+              {currentRole === UserRole.SUPERADMIN ? 'Mode maintenance AKTIF. Pengguna lain melihat: ' : ''}
+              {publicConfig.maintenanceMessage}
+            </div>
+          )}
+          {showAnnouncement && (
+            <div role="status" className="bg-digitalcoop-700 text-white text-sm text-center px-4 py-2 shrink-0">
+              {publicConfig.announcementText}
+            </div>
+          )}
         <Layout 
           currentRole={currentRole} 
           onRoleChange={handleRoleChange}
@@ -511,6 +512,7 @@ const App: React.FC = () => {
         >
           {renderContent()}
         </Layout>
+        </div>
       )}
       <LegalGate role={currentRole} onLogout={() => handleRoleChange(UserRole.PUBLIC)} />
       {SHOW_ROLE_SWITCHER && (
