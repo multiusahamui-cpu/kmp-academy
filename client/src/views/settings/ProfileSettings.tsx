@@ -94,7 +94,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
   const isStudent = currentRole === UserRole.STUDENT;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       {viewCert && (
         <CertificateTemplate
           data={viewCert}
@@ -107,7 +107,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentRole, initialT
       </h2>
 
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
-        <div className="flex border-b border-gray-200 dark:border-slate-800 overflow-x-auto">
+        <div className="flex flex-wrap border-b border-gray-200 dark:border-slate-800">
           <button
             className={`px-6 py-3 text-sm font-medium whitespace-nowrap ${activeTab === "profile" ? "border-b-2 border-digitalcoop-600 text-digitalcoop-600 dark:text-digitalcoop-400" : "text-gray-500 hover:text-gray-700 dark:text-slate-400"}`}
             onClick={() => setActiveTab("profile")}
