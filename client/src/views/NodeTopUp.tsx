@@ -54,6 +54,42 @@ export default function NodeTopUp() {
   return <div className="mx-auto max-w-3xl space-y-6">
     <div><h1 className="font-sans text-2xl font-bold text-gray-900 dark:text-white">Beli / Top Up Node</h1><p className="text-sm text-gray-500 dark:text-slate-400">Tambah node untuk mengikuti Program Node. Dibayar dari dompet Academy Anda.</p></div>
 
+    <details className="card-surface overflow-hidden group" open>
+      <summary className="flex cursor-pointer items-center justify-between gap-3 p-5 list-none">
+        <span className="flex items-center gap-3">
+          <span className="grid place-items-center w-9 h-9 rounded-xl bg-digitalcoop-gradient text-white shadow-digitalcoop"><Coins size={18} /></span>
+          <span className="font-sans font-bold text-gray-900 dark:text-white">Cara kerja Program Node</span>
+        </span>
+        <span className="text-xs text-gray-400 group-open:hidden">lihat</span>
+        <span className="text-xs text-gray-400 hidden group-open:inline">tutup</span>
+      </summary>
+      <div className="border-t border-gray-100 dark:border-slate-800 p-5 pt-4 space-y-4">
+        <ol className="space-y-3">
+          {[
+            { n: "1", t: "Beli node", d: "Bayar dari dompet Simpanan Sukarela (pakai PIN transaksi). Makin banyak node aktif, makin tinggi tingkatan dan kapasitas harian Anda." },
+            { n: "2", t: "Tingkatan", d: "Ditentukan jumlah node aktif: Bronze (1+), Silver (3+), Gold (7+), Platinum (15+)." },
+            { n: "3", t: "Kapasitas harian", d: "Tiap node aktif memberi kuota poin per hari. Bonus harian dibatasi kapasitas ini — poin melebihi kuota hangus." },
+            { n: "4", t: "Bonus harian", d: "Dihitung otomatis oleh sistem dari transaksi yang memenuhi syarat dan node aktif pada cutoff." },
+            { n: "5", t: "Cairkan bonus", d: "Saldo bonus dicairkan ke dompet Academy, lalu bisa ditarik ke bank lewat menu Dompet." },
+          ].map((s) => (
+            <li key={s.n} className="flex gap-3">
+              <span className="grid place-items-center w-6 h-6 shrink-0 rounded-full bg-digitalcoop-100 text-digitalcoop-700 text-xs font-bold dark:bg-digitalcoop-900/40 dark:text-digitalcoop-200">{s.n}</span>
+              <p className="text-sm text-gray-600 dark:text-slate-300"><b className="text-gray-900 dark:text-white">{s.t}.</b> {s.d}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="rounded-xl bg-digitalcoop-50/60 p-4 dark:bg-slate-800/60">
+          <p className="text-xs font-bold text-gray-700 dark:text-slate-200 mb-2">Tiga jenis bonus</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Sponsor</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Dari anggota yang mendaftar lewat link referral Anda.</p></div>
+            <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Level</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Berjenjang mengikuti kedalaman jaringan sampai batas level.</p></div>
+            <div className="rounded-lg bg-white p-3 text-xs dark:bg-slate-900"><p className="font-bold text-digitalcoop-700 dark:text-digitalcoop-300">Pairing</p><p className="text-gray-500 dark:text-slate-400 mt-0.5">Dari poin yang terpasang, dibatasi kapasitas harian node Anda.</p></div>
+          </div>
+        </div>
+        <p className="text-[11px] text-gray-400">Kapasitas bukan jaminan pendapatan. Bonus aktual mengikuti transaksi yang memenuhi syarat dan versi aturan yang berlaku.</p>
+      </div>
+    </details>
+
     {!active && <div className="rounded-xl border border-gold-300 bg-gold-50 p-4 text-sm text-gold-800 dark:border-gold-900 dark:bg-gold-900/20 dark:text-gold-200">Program Node belum diaktifkan oleh admin. Pembelian sementara ditutup.</div>}
 
     {/* Ringkasan */}
