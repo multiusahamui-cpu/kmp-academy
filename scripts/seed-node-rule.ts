@@ -13,8 +13,7 @@ const run = async () => {
     const existing = await db.select({ id: nodeRuleVersions.id }).from(nodeRuleVersions).limit(1);
     if (existing.length > 0) {
       console.log("ℹ️  Aturan Program Node sudah ada — tidak membuat ulang.");
-      (process as any).exit(0);
-      return;
+      process.exit(0);
     }
     await db.insert(nodeRuleVersions).values({
       version: 1,
@@ -28,10 +27,10 @@ const run = async () => {
       effectiveFrom: sql`now()`,
     });
     console.log("✅ Aturan Program Node v1 (ACTIVE) dibuat dari NODE_RULE_DEFAULTS.");
-    (process as any).exit(0);
+    process.exit(0);
   } catch (error) {
     console.error("❌ Gagal seed aturan Program Node:", error);
-    (process as any).exit(1);
+    process.exit(1);
   }
 };
 
