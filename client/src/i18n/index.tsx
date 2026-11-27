@@ -4,15 +4,22 @@ import { dict, type Lang } from "./translations";
 const STORAGE_KEY = "academy_lang";
 const DEFAULT_LANG: Lang = "en";
 
-const read = (obj: Record<string, unknown>, path: string): string | undefined => {
-  const parts = path.split(".");
-  let cur: unknown = obj;
-  for (const p of parts) {
-    if (cur && typeof cur === "object" && p in (cur as Record<string, unknown>)) cur = (cur as Record<string, unknown>)[p];
-    else return undefined;
+// Mendukung kunci datar bertitik di dalam namespace (mis. "nc.AKUN.label"): coba kunci terpanjang dulu.
+const readParts = (cur: unknown, parts: string[]): string | undefined => {
+  if (parts.length === 0) return typeof cur === "string" ? cur : undefined;
+  if (!cur || typeof cur !== "object") return undefined;
+  const o = cur as Record<string, unknown>;
+  for (let i = parts.length; i >= 1; i--) {
+    const key = parts.slice(0, i).join(".");
+    if (key in o) {
+      const hit = readParts(o[key], parts.slice(i));
+      if (hit !== undefined) return hit;
+    }
   }
-  return typeof cur === "string" ? cur : undefined;
+  return undefined;
 };
+
+const read = (obj: Record<string, unknown>, path: string): string | undefined => readParts(obj, path.split("."));
 
 const interpolate = (s: string, vars?: Record<string, string | number>): string =>
   vars ? s.replace(/\{\{(\w+)\}\}/g, (_, k) => (k in vars ? String(vars[k]) : `{{${k}}}`)) : s;
