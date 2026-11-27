@@ -4,6 +4,7 @@ import { Course } from '../types';
 import { userApi } from '../services/api';
 import { PaymentMethods, PaymentOrder, apiMessage, paymentApi, rupiah } from '../services/payments';
 import OrderPanel from './OrderPanel';
+import { useT } from '../i18n';
 
 interface CheckoutModalProps {
   course: Course;
@@ -16,6 +17,7 @@ type MethodKey = 'WALLET' | 'DC_WALLET' | 'VA' | 'MANUAL';
 const BANKS: { id: string; label: string }[] = [{ id: 'bca', label: 'BCA' }, { id: 'bni', label: 'BNI' }, { id: 'bri', label: 'BRI' }, { id: 'permata', label: 'Permata' }];
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnrolled }) => {
+  const t = useT();
   const [methods, setMethods] = useState<PaymentMethods | null>(null);
   const [balance, setBalance] = useState(0);
   const [dcWallet, setDcWallet] = useState<{ saldo: number; pinSet: boolean } | null>(null);
@@ -43,7 +45,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
         if ((m.data.data as PaymentMethods).dcWallet.enabled) {
           try { const d = await paymentApi.dcWallet(); setDcWallet(d.data.data); } catch { setDcWallet(null); }
         }
-      } catch { setError('Gagal memuat metode pembayaran.'); }
+      } catch { setError(t('shop.methodsLoadFail')); }
     })();
   }, []);
 
@@ -65,7 +67,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
       setPromoApplied({ code: code.toUpperCase(), percent: d.percent, finalPrice: d.finalPrice });
     } catch (err) {
       setPromoApplied(null);
-      setPromoError(apiMessage(err, 'Kode promo tidak valid.'));
+      setPromoError(apiMessage(err, t('shop.promoInvalid')));
     }
   };
 
@@ -90,7 +92,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
       else setOrder(data as PaymentOrder);
     } catch (err) {
       setPin('');
-      setError(apiMessage(err, 'Pembayaran gagal.'));
+      setError(apiMessage(err, t('shop.payFail')));
     } finally {
       setBusy(false);
     }
@@ -108,15 +110,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
         <button onClick={onClose} className="absolute right-4 top-4 text-gray-400 hover:text-red-500"><X size={22} /></button>
-        <h2 className="pr-8 text-lg font-bold text-gray-900 dark:text-white">Pembayaran Kursus</h2>
+        <h2 className="pr-8 text-lg font-bold text-gray-900 dark:text-white">{t('shop.checkoutTitle')}</h2>
         <p className="mb-4 text-sm text-gray-500 dark:text-slate-400">{course.title}</p>
 
         {doneCard ? (
           <div className="space-y-4 text-center">
             <CheckCircle size={48} className="mx-auto text-green-500" />
-            <p className="font-bold text-gray-900 dark:text-white">Berhasil mengikuti kursus</p>
-            {doneCard.card && <p className="text-sm text-gray-600 dark:text-slate-300">Kartu Student Anda terbit: <b>{doneCard.card}</b></p>}
-            <button onClick={onClose} className="w-full rounded-xl bg-digitalcoop-600 py-3 font-bold text-white hover:bg-digitalcoop-700">Tutup</button>
+            <p className="font-bold text-gray-900 dark:text-white">{t('shop.enrolled')}</p>
+            {doneCard.card && <p className="text-sm text-gray-600 dark:text-slate-300">{t('shop.cardIssued')} <b>{doneCard.card}</b></p>}
+            <button onClick={onClose} className="w-full rounded-xl bg-digitalcoop-600 py-3 font-bold text-white hover:bg-digitalcoop-700">{t('shop.close')}</button>
           </div>
         ) : order ? (
           <OrderPanel orderId={order.id} initial={order} onPaid={() => finish(null)} />
@@ -124,31 +126,31 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
           <div className="space-y-4">
             <div className="rounded-xl bg-gray-50 p-4 dark:bg-slate-800/40">
               <div className="flex items-end justify-between">
-                <span className="text-sm text-gray-500">Total</span>
-                <span className="text-2xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{free ? 'Gratis' : rupiah(price)}</span>
+                <span className="text-sm text-gray-500">{t('shop.total')}</span>
+                <span className="text-2xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">{free ? t('shop.free') : rupiah(price)}</span>
               </div>
-              {price < base && <p className="text-right text-xs text-gray-400"><s>{rupiah(base)}</s> {promoApplied ? `Kode ${promoApplied.code}: ${promoApplied.percent}%` : `Diskon ${course.discountPercent}%`}</p>}
+              {price < base && <p className="text-right text-xs text-gray-400"><s>{rupiah(base)}</s> {promoApplied ? t('shop.promoCodeLine', { code: promoApplied.code, percent: promoApplied.percent }) : t('shop.discountLine', { percent: course.discountPercent })}</p>}
             </div>
 
             <div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input value={promo} onChange={(e) => { setPromo(e.target.value.toUpperCase()); setPromoApplied(null); }} placeholder="Kode promo (opsional)" maxLength={20}
+                  <input value={promo} onChange={(e) => { setPromo(e.target.value.toUpperCase()); setPromoApplied(null); }} placeholder={t('shop.promoPlaceholder')} maxLength={20}
                     className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm uppercase dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
                 </div>
-                <button onClick={() => void applyPromo()} disabled={!promo.trim()} className="rounded-lg bg-gray-900 px-4 text-sm font-bold text-white hover:bg-gray-700 disabled:opacity-50 dark:bg-slate-700">Pakai</button>
+                <button onClick={() => void applyPromo()} disabled={!promo.trim()} className="rounded-lg bg-gray-900 px-4 text-sm font-bold text-white hover:bg-gray-700 disabled:opacity-50 dark:bg-slate-700">{t('shop.apply')}</button>
               </div>
               {promoError && <p className="mt-1 text-xs text-red-600">{promoError}</p>}
-              {promoApplied && <p className="mt-1 text-xs text-green-600">Kode berlaku: diskon {promoApplied.percent}%.</p>}
+              {promoApplied && <p className="mt-1 text-xs text-green-600">{t('shop.promoValid', { percent: promoApplied.percent })}</p>}
             </div>
 
             {!free && (
               <div className="space-y-2">
-                {available.includes('WALLET') && row('WALLET', <Wallet size={18} />, 'Dompet Academy', `Saldo ${rupiah(balance)}${balance < price ? ' (kurang)' : ''}`)}
-                {available.includes('DC_WALLET') && row('DC_WALLET', <Landmark size={18} />, 'Dompet digitalcoop.id', dcWallet ? `Simpanan Sukarela ${rupiah(dcWallet.saldo)} • perlu PIN Transaksi` : 'Simpanan Sukarela • perlu PIN Transaksi')}
-                {available.includes('VA') && row('VA', <CreditCard size={18} />, 'Virtual Account', 'BCA, BNI, BRI, Permata • otomatis terkonfirmasi')}
-                {available.includes('MANUAL') && row('MANUAL', <Building2 size={18} />, 'Transfer Manual', 'Unggah bukti • diverifikasi Admin')}
+                {available.includes('WALLET') && row('WALLET', <Wallet size={18} />, t('shop.mWalletTitle'), `${t('shop.balance')} ${rupiah(balance)}${balance < price ? t('shop.insufficient') : ''}`)}
+                {available.includes('DC_WALLET') && row('DC_WALLET', <Landmark size={18} />, t('shop.mDcTitle'), dcWallet ? t('shop.mDcHint', { bal: rupiah(dcWallet.saldo) }) : t('shop.mDcHintNoBal'))}
+                {available.includes('VA') && row('VA', <CreditCard size={18} />, t('shop.mVaTitle'), t('shop.mVaHint'))}
+                {available.includes('MANUAL') && row('MANUAL', <Building2 size={18} />, t('shop.mManualTitle'), t('shop.mManualHint'))}
 
                 {method === 'VA' && (
                   <div className="grid grid-cols-4 gap-2">
@@ -159,9 +161,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
                 )}
                 {method === 'DC_WALLET' && (
                   <div>
-                    <input type="password" inputMode="numeric" autoComplete="off" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} placeholder="PIN Transaksi digitalcoop.id"
+                    <input type="password" inputMode="numeric" autoComplete="off" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 12))} placeholder={t('shop.pinPlaceholder')}
                       className="w-full rounded-lg border border-gray-300 p-2 text-sm tracking-widest dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
-                    {dcWallet && !dcWallet.pinSet && <p className="mt-1 text-xs text-amber-600">PIN Transaksi belum dibuat. Buat dulu di digitalcoop.id (menu Keamanan).</p>}
+                    {dcWallet && !dcWallet.pinSet && <p className="mt-1 text-xs text-amber-600">{t('shop.pinNotSet')}</p>}
                   </div>
                 )}
               </div>
@@ -171,7 +173,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
             <button onClick={() => void pay()} disabled={busy || !methods || (!free && method === 'DC_WALLET' && pin.length < 4)}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-digitalcoop-600 py-3 font-bold text-white shadow-lg hover:bg-digitalcoop-700 disabled:opacity-60">
               {busy && <Loader2 size={16} className="animate-spin" />}
-              {free ? 'Daftar Gratis' : method === 'WALLET' ? `Bayar ${rupiah(price)}` : method === 'DC_WALLET' ? `Bayar ${rupiah(price)} dari dompet digitalcoop.id` : 'Buat Pesanan'}
+              {free ? t('shop.registerFree') : method === 'WALLET' ? t('shop.payAmount', { amt: rupiah(price) }) : method === 'DC_WALLET' ? t('shop.payDcAmount', { amt: rupiah(price) }) : t('shop.createOrder')}
             </button>
           </div>
         )}

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Trash2, ShoppingBag, ArrowRight, Users, Minus, Plus, Heart, ShoppingCart } from 'lucide-react';
 import { CartItem, WishlistItem } from '../types';
+import { useT } from '../i18n';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onMoveToCart = (_: WishlistItem) => {},
   onRemoveFromWishlist = (_: string) => {}
 }) => {
+  const t = useT();
   const [activeTab, setActiveTab] = useState<'CART' | 'WISHLIST'>('CART');
 
   // Calculate Totals
@@ -53,7 +55,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between bg-gray-50 dark:bg-slate-950">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <ShoppingBag size={20} className="text-digitalcoop-600" />
-              Keranjang & Wishlist
+              {t('shop.cartWishlist')}
             </h2>
             <button onClick={onClose} className="text-gray-500 hover:text-red-500 transition">
               <X size={24} />
@@ -66,13 +68,13 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
               onClick={() => setActiveTab('CART')}
               className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'CART' ? 'border-digitalcoop-600 text-digitalcoop-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
             >
-              Keranjang ({items.length})
+              {t('shop.tabCart', { n: items.length })}
             </button>
             <button 
               onClick={() => setActiveTab('WISHLIST')}
               className={`flex-1 py-3 text-sm font-bold border-b-2 transition ${activeTab === 'WISHLIST' ? 'border-digitalcoop-600 text-digitalcoop-600' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200'}`}
             >
-              Wishlist ({wishlistItems.length})
+              {t('shop.tabWishlist', { n: wishlistItems.length })}
             </button>
           </div>
 
@@ -82,7 +84,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="space-y-6">
                 {items.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 dark:text-slate-400">
-                     Keranjang belanja kosong.
+                     {t('shop.cartEmpty')}
                   </div>
                 ) : (
                   items.map(item => (
@@ -136,9 +138,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-3 flex items-start gap-3">
                       <Users className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
                       <div>
-                         <p className="text-xs font-bold text-blue-800 dark:text-blue-300">Paket Koperasi / Komunitas</p>
+                         <p className="text-xs font-bold text-blue-800 dark:text-blue-300">{t('shop.coopPkgTitle')}</p>
                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
-                            Beli minimal <strong>5 item</strong> untuk mendapatkan diskon grosir 10%. Cocok untuk pelatihan tim.
+                            {t('shop.coopDesc1')}<strong>{t('shop.coopItems')}</strong>{t('shop.coopDesc2')}
                          </p>
                       </div>
                    </div>
@@ -151,8 +153,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                  {wishlistItems.length === 0 ? (
                     <div className="text-center py-12 flex flex-col items-center text-gray-500 dark:text-slate-400">
                        <Heart size={48} className="mb-4 text-gray-300" />
-                       <p>Wishlist masih kosong.</p>
-                       <p className="text-xs mt-2">Simpan kursus yang Anda minati di sini.</p>
+                       <p>{t('shop.wishlistEmpty')}</p>
+                       <p className="text-xs mt-2">{t('shop.wishlistHint')}</p>
                     </div>
                  ) : (
                     wishlistItems.map(item => (
@@ -160,7 +162,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                           <img src={item.thumbnail} alt={item.title} className="w-16 h-16 object-cover rounded-md flex-shrink-0" />
                           <div className="flex-1">
                              <h4 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-1">{item.title}</h4>
-                             <p className="text-xs text-gray-500 mt-1 mb-2">Disimpan: {item.addedAt}</p>
+                             <p className="text-xs text-gray-500 mt-1 mb-2">{t('shop.savedOn', { date: item.addedAt })}</p>
                              <div className="flex items-center justify-between">
                                 <span className="font-bold text-digitalcoop-600 dark:text-digitalcoop-400 text-sm">
                                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.price)}
@@ -169,14 +171,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                                    <button 
                                       onClick={() => onRemoveFromWishlist(item.courseId)}
                                       className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition"
-                                      title="Hapus"
+                                      title={t('common.delete')}
                                    >
                                       <Trash2 size={16} />
                                    </button>
                                    <button 
                                       onClick={() => onMoveToCart(item)}
                                       className="p-1.5 bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 transition shadow-sm"
-                                      title="Pindahkan ke Keranjang"
+                                      title={t('shop.moveToCart')}
                                    >
                                       <ShoppingCart size={16} />
                                    </button>
@@ -196,28 +198,28 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
               
               <div className="space-y-2 text-sm">
                  <div className="flex justify-between text-gray-500 dark:text-slate-400">
-                    <span>Subtotal ({totalQty} items)</span>
+                    <span>{t('shop.subtotalItems', { n: totalQty })}</span>
                     <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(subtotal)}</span>
                  </div>
                  {isBulkOrder && (
                    <div className="flex justify-between text-green-600 font-bold">
-                      <span>Diskon Koperasi (10%)</span>
+                      <span>{t('shop.coopDiscount')}</span>
                       <span>- {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(discountAmount)}</span>
                    </div>
                  )}
               </div>
               
               <div className="border-t border-gray-200 dark:border-slate-800 pt-3 flex justify-between items-center mb-4">
-                <span className="text-gray-800 dark:text-white font-bold">Total Pembayaran</span>
+                <span className="text-gray-800 dark:text-white font-bold">{t('shop.totalPayment')}</span>
                 <span className="text-xl font-bold text-digitalcoop-700 dark:text-digitalcoop-400">
                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalAmount)}
                 </span>
               </div>
               
               <button disabled className="w-full py-3 bg-gray-300 dark:bg-slate-700 text-gray-600 dark:text-slate-400 rounded-lg font-bold flex items-center justify-center cursor-not-allowed">
-                Pembayaran segera hadir <ArrowRight size={18} className="ml-2" />
+                {t('shop.payComingSoon')} <ArrowRight size={18} className="ml-2" />
               </button>
-              <p className="text-[11px] text-center text-gray-500 dark:text-slate-400">Kursus berbayar dibayar lewat Virtual Account setelah payment gateway aktif.</p>
+              <p className="text-[11px] text-center text-gray-500 dark:text-slate-400">{t('shop.payVaNote')}</p>
             </div>
           )}
         </div>

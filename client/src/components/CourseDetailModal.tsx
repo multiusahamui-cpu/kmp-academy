@@ -2,6 +2,7 @@
 import React from 'react';
 import { Course, CourseType } from '../types';
 import { X, PlayCircle, Clock, User, Star, ShoppingBag, Heart } from 'lucide-react';
+import { useT } from '../i18n';
 
 interface CourseDetailModalProps {
   course: Course;
@@ -20,6 +21,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
   onToggleWishlist,
   isInWishlist
 }) => {
+  const t = useT();
   if (!isOpen) return null;
 
   return (
@@ -52,12 +54,12 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
            <div className="p-6 flex-1 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                  <div>
-                    <p className="text-sm text-gray-500 dark:text-slate-400">Harga Kursus</p>
+                    <p className="text-sm text-gray-500 dark:text-slate-400">{t('shop.coursePrice')}</p>
                     <h3 className="text-2xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400">
                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.finalPrice ?? course.price)}
                     </h3>
                     {(course.finalPrice ?? course.price) < course.price && (
-                       <p className="text-xs text-gray-400"><s>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}</s> diskon {course.discountPercent}%{course.discountEndsAt ? ` sampai ${new Date(course.discountEndsAt).toLocaleDateString('id-ID')}` : ''}</p>
+                       <p className="text-xs text-gray-400"><s>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(course.price)}</s> {t('shop.discountPct', { percent: course.discountPercent })}{course.discountEndsAt ? t('shop.until', { date: new Date(course.discountEndsAt).toLocaleDateString('id-ID') }) : ''}</p>
                     )}
                  </div>
                  <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded text-yellow-700 dark:text-yellow-500 font-bold text-sm">
@@ -73,14 +75,14 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     }}
                     className="w-full py-3 bg-digitalcoop-600 hover:bg-digitalcoop-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center transition"
                  >
-                    <ShoppingBag size={18} className="mr-2" /> {(course.finalPrice ?? course.price) === 0 ? 'Daftar Gratis' : 'Beli Kursus'}
+                    <ShoppingBag size={18} className="mr-2" /> {(course.finalPrice ?? course.price) === 0 ? t('shop.registerFree') : t('shop.buyCourse')}
                  </button>
                  <button 
                     onClick={() => onToggleWishlist(course)}
                     className={`w-full py-3 border rounded-xl font-bold flex items-center justify-center transition ${isInWishlist ? 'border-pink-500 text-pink-500 bg-pink-50 dark:bg-pink-900/20' : 'border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                  >
                     <Heart size={18} className="mr-2" fill={isInWishlist ? "currentColor" : "none"} /> 
-                    {isInWishlist ? 'Tersimpan di Wishlist' : 'Simpan ke Wishlist'}
+                    {isInWishlist ? t('shop.savedWishlist') : t('shop.saveWishlist')}
                  </button>
               </div>
            </div>
@@ -96,21 +98,21 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
 
            <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
               <div className="mb-8">
-                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">Tentang Kursus</h3>
+                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">{t('shop.aboutCourse')}</h3>
                  <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
                     {course.description}
                  </p>
                  <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-slate-400">
                     <span className="flex items-center"><User size={14} className="mr-1"/> {course.instructor}</span>
-                    <span className="flex items-center"><PlayCircle size={14} className="mr-1"/> {course.sessions} Sesi Pembelajaran</span>
-                    <span className="flex items-center"><Clock size={14} className="mr-1"/> Akses Selamanya</span>
+                    <span className="flex items-center"><PlayCircle size={14} className="mr-1"/> {t('shop.sessionsCount', { n: course.sessions })}</span>
+                    <span className="flex items-center"><Clock size={14} className="mr-1"/> {t('shop.lifetimeAccess')}</span>
                  </div>
               </div>
 
               <div>
                  <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
-                    <span>Kurikulum & Materi</span>
-                    <span className="text-xs font-normal text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">{course.modules?.length || 0} Modul</span>
+                    <span>{t('shop.curriculumMaterials')}</span>
+                    <span className="text-xs font-normal text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">{t('shop.moduleCount', { n: course.modules?.length || 0 })}</span>
                  </h3>
                  
                  <div className="space-y-3">
@@ -131,7 +133,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                        ))
                     ) : (
                        <div className="text-center py-8 border border-dashed border-gray-200 dark:border-slate-700 rounded-lg">
-                          <p className="text-sm text-gray-500">Preview kurikulum belum tersedia.</p>
+                          <p className="text-sm text-gray-500">{t('shop.previewUnavailable')}</p>
                        </div>
                     )}
                  </div>
