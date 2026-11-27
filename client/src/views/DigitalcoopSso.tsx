@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import api from '../services/api';
 import { UserRole, toUserRole } from '../types';
+import { useT } from '../i18n';
 
 const DIGITALCOOP_ACADEMY = 'https://digitalcoop.id/member/academy';
 
@@ -18,7 +19,9 @@ interface Onboarding {
 const pesan = (e: unknown) =>
   (e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Terjadi kesalahan. Coba lagi.';
 
+
 const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () => void }> = ({ onDone, onCancel }) => {
+  const t = useT();
   const [state, setState] = useState<'memuat' | 'onboarding' | 'gagal'>('memuat');
   const [error, setError] = useState('');
   const [ob, setOb] = useState<Onboarding | null>(null);
@@ -37,7 +40,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
     // Tiket langsung dihapus dari alamat (tidak tersimpan di riwayat / tidak terkirim sebagai Referer).
     window.history.replaceState(null, '', '/sso');
     if (!tiket) {
-      setError('Tautan masuk tidak lengkap. Buka lagi dari menu KMP-ADNG Academy di digitalcoop.id.');
+      setError(t('sso.incompleteLink'));
       setState('gagal');
       return;
     }
@@ -80,7 +83,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
   if (state === 'memuat') {
     return (
       <div className="flex min-h-[60vh] items-center justify-center gap-2 text-gray-500">
-        <Loader2 className="animate-spin" size={20} /> Menghubungkan akun digitalcoop.id...
+        <Loader2 className="animate-spin" size={20} /> {t('sso.connecting')}
       </div>
     );
   }
@@ -90,10 +93,10 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
         <p className="mb-4 text-red-600">{error}</p>
         <div className="flex justify-center gap-3">
           <a href={DIGITALCOOP_ACADEMY} className="rounded-lg bg-digitalcoop-600 px-4 py-2 text-sm font-bold text-white">
-            Kembali ke digitalcoop.id
+            {t('sso.backToDc')}
           </a>
           <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2 text-sm">
-            Login di Academy
+            {t('sso.loginAtAcademy')}
           </button>
         </div>
       </div>
@@ -101,26 +104,26 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
   }
 
   const baris: [string, string | null][] = [
-    ['Nama', ob.data.nama],
-    ['Nomor anggota', ob.data.nomorAnggota],
-    ['Email', ob.data.email],
-    ['No HP', ob.data.phone],
-    ['Status KYC', ob.data.kycStatus],
-    ['Wilayah', ob.data.wilayah],
+    [t('sso.rowName'), ob.data.nama],
+    [t('sso.rowMember'), ob.data.nomorAnggota],
+    [t('sso.rowEmail'), ob.data.email],
+    [t('sso.rowPhone'), ob.data.phone],
+    [t('sso.rowKyc'), ob.data.kycStatus],
+    [t('sso.rowRegion'), ob.data.wilayah],
   ];
 
   return (
     <form onSubmit={kirim} className="mx-auto max-w-xl space-y-5 p-6">
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <ShieldCheck className="text-digitalcoop-600" /> Selamat datang di KMP-ADNG Academy
+          <ShieldCheck className="text-digitalcoop-600" /> {t('sso.welcome')}
         </h1>
-        <p className="text-sm text-gray-500">Akun Academy Anda akan dibuat dan ditautkan ke akun digitalcoop.id.</p>
+        <p className="text-sm text-gray-500">{t('sso.welcomeSub')}</p>
       </div>
 
       <section className="rounded-xl border p-4">
-        <p className="mb-2 font-semibold">1. Persetujuan penyalinan data</p>
-        <p className="mb-2 text-sm text-gray-600">Data berikut disalin dari digitalcoop.id dan dipakai untuk profil, kartu identitas, dan sertifikat Anda:</p>
+        <p className="mb-2 font-semibold">{t('sso.step1Title')}</p>
+        <p className="mb-2 text-sm text-gray-600">{t('sso.step1Desc')}</p>
         <table className="mb-3 w-full text-sm">
           <tbody>
             {baris.map(([k, v]) => (
@@ -131,34 +134,33 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
             ))}
           </tbody>
         </table>
-        <p className="mb-2 text-xs text-gray-500">NIK, foto KTP, saldo, dan password digitalcoop.id tidak disalin. Versi persetujuan {ob.consentVersion}.</p>
+        <p className="mb-2 text-xs text-gray-500">{t('sso.notCopied', { v: ob.consentVersion })}</p>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" checked={setuju} onChange={(e) => setSetuju(e.target.checked)} className="mt-1" data-testid="cb-setuju" />
-          Saya menyetujui penyalinan data di atas ke KMP-ADNG Academy.
+          {t('sso.agree')}
         </label>
       </section>
 
       <section className="rounded-xl border p-4">
-        <p className="mb-2 font-semibold">2. Apa tujuan Anda?</p>
+        <p className="mb-2 font-semibold">{t('sso.step2Title')}</p>
         <label className="mb-1 flex items-center gap-2 text-sm">
-          <input type="radio" checked={peran === 'STUDENT'} onChange={() => setPeran('STUDENT')} /> Belajar (mengikuti kursus)
+          <input type="radio" checked={peran === 'STUDENT'} onChange={() => setPeran('STUDENT')} /> {t('sso.goalStudent')}
         </label>
         <label className={`flex items-center gap-2 text-sm ${ob.bolehCreator ? '' : 'text-gray-400'}`}>
-          <input type="radio" disabled={!ob.bolehCreator} checked={peran === 'CREATOR'} onChange={() => setPeran('CREATOR')} /> Menjadi Creator
-          Konten (membuat & menjual kursus)
+          <input type="radio" disabled={!ob.bolehCreator} checked={peran === 'CREATOR'} onChange={() => setPeran('CREATOR')} /> {t('sso.goalCreator')}
         </label>
         {!ob.bolehCreator && (
-          <p className="mt-1 text-xs text-gray-500">Peran Creator khusus pemegang role Content Creator. Ajukan role itu di digitalcoop.id terlebih dahulu.</p>
+          <p className="mt-1 text-xs text-gray-500">{t('sso.creatorNote')}</p>
         )}
       </section>
 
       <section className="rounded-xl border p-4">
-        <p className="mb-2 font-semibold">3. Password Academy</p>
+        <p className="mb-2 font-semibold">{t('sso.step3Title')}</p>
         <label className="mb-1 flex items-center gap-2 text-sm">
-          <input type="radio" checked={modePassword === 'SAMA'} onChange={() => setModePassword('SAMA')} /> Samakan dengan password digitalcoop.id
+          <input type="radio" checked={modePassword === 'SAMA'} onChange={() => setModePassword('SAMA')} /> {t('sso.pwSame')}
         </label>
         <label className="mb-2 flex items-center gap-2 text-sm">
-          <input type="radio" checked={modePassword === 'BARU'} onChange={() => setModePassword('BARU')} /> Buat password baru
+          <input type="radio" checked={modePassword === 'BARU'} onChange={() => setModePassword('BARU')} /> {t('sso.pwNew')}
         </label>
         <input
           type="password"
@@ -167,13 +169,13 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
           minLength={modePassword === 'BARU' ? ob.passwordMinLength : undefined}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder={modePassword === 'SAMA' ? 'Ketik password digitalcoop.id Anda' : `Password baru (min. ${ob.passwordMinLength} karakter)`}
+          placeholder={modePassword === 'SAMA' ? t('sso.pwSamePlaceholder') : t('sso.pwNewPlaceholder', { n: ob.passwordMinLength })}
           className="w-full rounded-lg border px-3 py-2 text-sm"
         />
-        <p className="mt-1 text-xs text-gray-500">Setelah ini password Academy berdiri sendiri; mengganti salah satu tidak mengubah yang lain.</p>
+        <p className="mt-1 text-xs text-gray-500">{t('sso.pwNote')}</p>
         {ob.perluEmail && (
           <div className="mt-3">
-            <label className="text-sm font-medium">Email (wajib, untuk OTP lupa password)</label>
+            <label className="text-sm font-medium">{t('sso.emailReq')}</label>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-lg border px-3 py-2 text-sm" />
           </div>
         )}
@@ -188,10 +190,10 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
           className="flex flex-1 items-center justify-center rounded-lg bg-digitalcoop-600 py-3 font-bold text-white disabled:bg-digitalcoop-400"
           data-testid="btn-onboarding"
         >
-          {busy && <Loader2 size={18} className="mr-2 animate-spin" />} Setuju & buat akun Academy
+          {busy && <Loader2 size={18} className="mr-2 animate-spin" />} {t('sso.submitCreate')}
         </button>
         <a href={DIGITALCOOP_ACADEMY} className="rounded-lg border px-4 py-3 text-sm">
-          Batal
+          {t('common.cancel')}
         </a>
       </div>
     </form>

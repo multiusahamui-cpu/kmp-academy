@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { courseApi } from "../services/api";
+import { useI18n } from "../i18n";
 import { CardSkeleton } from "../components/Skeleton";
 import {
   Users,
@@ -32,6 +33,7 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
+  const { t, lang } = useI18n();
   const [summary, setSummary] = useState<LandingSummary | null>(null);
   const [summaryState, setSummaryState] = useState<"loading" | "ok" | "error">("loading");
 
@@ -52,9 +54,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
 
   const topCourses = summary?.courses ?? [];
   const stats = summary?.stats;
-  const fmtNumber = (n: number | undefined) => (n === undefined ? "–" : new Intl.NumberFormat("id-ID").format(n));
+  const fmtNumber = (n: number | undefined) => (n === undefined ? "–" : new Intl.NumberFormat(lang === "id" ? "id-ID" : "en-US").format(n));
   const rupiah = (n: number) =>
-    n === 0 ? "Gratis" : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+    n === 0 ? t("landing.free") : new Intl.NumberFormat(lang === "id" ? "id-ID" : "en-US", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
   const scrollToCourses = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,41 +79,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
           <div className="max-w-3xl">
             <span className="inline-block px-4 py-1.5 rounded-full bg-digitalcoop-500/20 border border-digitalcoop-400/30 text-digitalcoop-200 text-xs font-bold uppercase tracking-wider mb-6">
-              The Future of Digital Coop
+              {t("landing.heroBadge")}
             </span>
             <h1 className="font-sans text-4xl md:text-6xl font-extrabold mb-6 leading-tight tracking-tight">
-              Tingkatkan Kompetensi{" "}
-              <span className="text-digitalcoop-400">Digital</span> Koperasi & UMKM
-              Anda
+              {t("landing.heroTitlePre")}
+              <span className="text-digitalcoop-400">{t("landing.heroTitleDigital")}</span>{t("landing.heroTitlePost")}
             </h1>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed font-light">
-              Bergabunglah dengan{" "}
+              {t("landing.heroDescPre")}
               <strong className="text-white font-bold">
                 KMP - ADNG ACADEMY
-              </strong>{" "}
-              untuk akses materi eksklusif, workshop interaktif, dan sertifikasi
-              profesional. Belajar mandiri atau dalam rombongan bimbingan mentor
-              ahli.
+              </strong>
+              {t("landing.heroDescPost")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={onRegister}
                 className="btn-gold font-sans text-lg py-3.5 px-8"
               >
-                Mulai Belajar Sekarang
+                {t("landing.ctaStart")}
               </button>
               <a
                 href="#courses"
                 onClick={scrollToCourses}
                 className="bg-white/5 hover:bg-white/10 text-white font-sans font-semibold py-3.5 px-8 rounded-full transition border border-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer"
               >
-                Lihat Katalog Kursus
+                {t("landing.ctaCatalog")}
               </a>
               <a
                 href="/talent"
                 className="text-white/80 hover:text-white font-sans font-semibold py-3.5 px-4 flex items-center justify-center underline underline-offset-4"
               >
-                Perusahaan: Cari Talenta
+                {t("landing.ctaTalent")}
               </a>
             </div>
           </div>
@@ -127,7 +126,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 {fmtNumber(stats?.instructors)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Instruktur
+                {t("landing.statInstructors")}
               </div>
             </div>
             <div>
@@ -135,7 +134,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 {fmtNumber(stats?.courses)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Kursus Tersedia
+                {t("landing.statCourses")}
               </div>
             </div>
             <div>
@@ -143,7 +142,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 {fmtNumber(stats?.students)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                Siswa Terdaftar
+                {t("landing.statStudents")}
               </div>
             </div>
             <div>
@@ -151,7 +150,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 {stats?.satisfactionPercent != null ? `${stats.satisfactionPercent}%` : fmtNumber(stats?.certificates)}
               </div>
               <div className="text-sm text-gray-600 dark:text-slate-400 font-medium uppercase tracking-wide">
-                {stats?.satisfactionPercent != null ? "Kepuasan Peserta" : "Sertifikat Terbit"}
+                {stats?.satisfactionPercent != null ? t("landing.statSatisfaction") : t("landing.statCertificates")}
               </div>
             </div>
           </div>
@@ -164,17 +163,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
             <div className="text-center md:text-left">
               <h2 className="font-sans text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center md:justify-start gap-3">
-                <TrendingUp className="text-red-500" /> Kursus Terpopuler
+                <TrendingUp className="text-red-500" /> {t("landing.popularTitle")}
               </h2>
               <p className="text-gray-500 dark:text-slate-400">
-                Kursus dengan peminat terbanyak.
+                {t("landing.popularSub")}
               </p>
             </div>
             <button
               onClick={onRegister}
               className="text-digitalcoop-600 dark:text-digitalcoop-400 font-bold hover:underline"
             >
-              Lihat Semua &rarr;
+              {t("landing.viewAll")} &rarr;
             </button>
           </div>
 
@@ -185,9 +184,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               ))}
             </div>
           )}
-          {summaryState === "error" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">Katalog kursus belum dapat dimuat. Coba muat ulang halaman.</p>}
+          {summaryState === "error" && <p className="text-center text-gray-500 dark:text-slate-400 py-12">{t("landing.errLoad")}</p>}
           {summaryState === "ok" && topCourses.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-slate-400 py-12">Belum ada kursus yang diterbitkan. Segera hadir.</p>
+            <p className="text-center text-gray-500 dark:text-slate-400 py-12">{t("landing.emptyPublished")}</p>
           )}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {topCourses.map((course, index) => (
@@ -197,7 +196,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               >
                 {/* Ranking Badge */}
                 <div className={`absolute top-0 left-0 font-bold text-xs px-3 py-1 rounded-br-lg z-20 shadow-sm ${course.studentsEnrolled > 0 ? "bg-yellow-400 text-yellow-900" : "bg-digitalcoop-100 text-digitalcoop-800"}`}>
-                  {course.studentsEnrolled > 0 ? `#${index + 1} Best Seller` : "Baru"}
+                  {course.studentsEnrolled > 0 ? t("landing.bestSeller", { n: index + 1 }) : t("landing.badgeNew")}
                 </div>
 
                 <div className="h-48 overflow-hidden relative bg-gray-100 dark:bg-slate-800">
@@ -233,7 +232,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
                     <div className="flex items-center text-xs text-gray-600 dark:text-slate-400 font-medium">
                       <Users size={14} className="mr-1.5 text-digitalcoop-500" />
-                      {fmtNumber(course.studentsEnrolled)} Siswa
+                      {fmtNumber(course.studentsEnrolled)} {t("landing.studentsWord")}
                     </div>
                     <div className="text-right">
                       {course.discountPercent > 0 && (
@@ -261,17 +260,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                 />
               </div>
               <h2 className="font-sans text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                Tentang KMP - ADNG Academy
+                {t("landing.aboutTitle")}
               </h2>
               <p className="text-lg text-gray-600 dark:text-slate-300 mb-6 leading-relaxed">
-                KMP - ADNG Academy adalah ekosistem pembelajaran digital yang
-                dirancang khusus untuk mengakselerasi transformasi digital
-                Koperasi dan UMKM di Indonesia.
+                {t("landing.aboutP1")}
               </p>
               <p className="text-gray-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Kami menggabungkan kurikulum berbasis industri, platform
-                teknologi modern, dan komunitas praktisi untuk mencetak talenta
-                digital yang siap pakai dan kompeten.
+                {t("landing.aboutP2")}
               </p>
 
               <div className="space-y-4">
@@ -279,11 +274,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                   <Target className="text-red-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white">
-                      Misi Kami
+                      {t("landing.missionTitle")}
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-slate-400">
-                      Mendigitalisasi 1.000 Koperasi di tahun 2025 melalui
-                      pendidikan vokasi.
+                      {t("landing.missionDesc")}
                     </p>
                   </div>
                 </div>
@@ -291,11 +285,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                   <Shield className="text-blue-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white">
-                      Sertifikasi Resmi
+                      {t("landing.certTitle")}
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-slate-400">
-                      Bekerjasama dengan lembaga sertifikasi profesi nasional
-                      dan internasional.
+                      {t("landing.certDesc")}
                     </p>
                   </div>
                 </div>
@@ -303,11 +296,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
                   <Zap className="text-yellow-500 mt-1 mr-3 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white">
-                      Teknologi Terkini
+                      {t("landing.techTitle")}
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-slate-400">
-                      Platform LMS berbasis React & Node.js yang cepat, aman,
-                      dan mudah digunakan.
+                      {t("landing.techDesc")}
                     </p>
                   </div>
                 </div>
@@ -317,7 +309,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onRegister }) => {
               <div className="absolute inset-0 bg-digitalcoop-600 rounded-2xl rotate-6 transform opacity-20"></div>
               <img
                 src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
-                alt="Tentang Kami"
+                alt={t("landing.aboutImgAlt")}
                 className="relative rounded-2xl shadow-2xl w-full object-cover h-[500px]"
               />
             </div>

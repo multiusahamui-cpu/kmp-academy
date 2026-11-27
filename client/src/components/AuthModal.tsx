@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserRole, toUserRole } from "../types";
 import { authApi } from "../services/api";
+import { useT } from "../i18n";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 import { usePublicConfig } from "../services/publicConfig";
 import {
@@ -29,6 +30,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
   onAuthSuccess,
   notice,
 }) => {
+  const t = useT();
   const config = usePublicConfig();
   const [activeTab, setActiveTab] = useState<"LOGIN" | "REGISTER">("LOGIN");
   const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +64,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
       const userRole = toUserRole(res.data?.data?.user?.role);
       if (!userRole) {
-        throw new Error("Respons server tidak valid.");
+        throw new Error(t("auth.invalidResp"));
       }
       setPassword("");
       onAuthSuccess(userRole);
@@ -71,7 +73,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
       const serverMsg = (err as { response?: { data?: { message?: string } } })
         .response?.data?.message;
       setErrorMsg(
-        serverMsg || "Tidak dapat terhubung ke server. Coba lagi beberapa saat.",
+        serverMsg || t("auth.connErr"),
       );
     } finally {
       setIsLoading(false);
@@ -108,7 +110,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
               setErrorMsg("");
             }}
           >
-            Masuk (Login)
+            {t("auth.tabLogin")}
           </button>
           {canRegister && (
             <button
@@ -119,7 +121,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 setErrorMsg("");
               }}
             >
-              Daftar Baru
+              {t("auth.tabRegister")}
             </button>
           )}
         </div>
@@ -139,7 +141,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             {mode === "REGISTER" && (
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                  Nama Lengkap
+                  {t("auth.fullName")}
                 </label>
                 <div className="relative">
                   <User
@@ -150,7 +152,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     type="text"
                     required
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
-                    placeholder="Nama Anda"
+                    placeholder={t("auth.namePlaceholder")}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -160,7 +162,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                {mode === "LOGIN" ? "Email atau No HP" : "Email Address"}
+                {mode === "LOGIN" ? t("auth.emailOrPhone") : t("auth.emailAddress")}
               </label>
               <div className="relative">
                 <Mail
@@ -172,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   autoComplete={mode === "LOGIN" ? "username" : "email"}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
-                  placeholder={mode === "LOGIN" ? "email@contoh.com atau 0812..." : "email@contoh.com"}
+                  placeholder={mode === "LOGIN" ? t("auth.emailPlaceholderLogin") : t("auth.emailPlaceholderReg")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -182,13 +184,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
             {mode === "REGISTER" && (
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                  No HP (opsional, bisa untuk login)
+                  {t("auth.phoneLabel")}
                 </label>
                 <input
                   type="tel"
                   autoComplete="tel"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-digitalcoop-500 outline-none"
-                  placeholder="0812 3456 789"
+                  placeholder={t("auth.phonePlaceholder")}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
@@ -197,7 +199,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">
-                Password
+                {t("auth.password")}
               </label>
               <div className="relative">
                 <Lock
@@ -229,7 +231,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             {mode === "LOGIN" && (
               <div className="text-right -mt-3">
                 <button type="button" onClick={() => { setForgot(true); setDoneMsg(""); setErrorMsg(""); }} className="text-xs font-bold text-digitalcoop-600 hover:underline">
-                  Lupa password?
+                  {t("auth.forgotPassword")}
                 </button>
               </div>
             )}
@@ -266,11 +268,11 @@ const AuthModal: React.FC<AuthModalProps> = ({
               {isLoading ? (
                 <>
                   <Loader2 size={18} className="mr-2 animate-spin" />{" "}
-                  Memproses...
+                  {t("auth.processing")}
                 </>
               ) : (
                 <>
-                  {mode === "LOGIN" ? "Masuk Sekarang" : "Buat Akun Baru"}{" "}
+                  {mode === "LOGIN" ? t("auth.loginNow") : t("auth.createAccount")}{" "}
                   <ArrowRight size={18} className="ml-2" />
                 </>
               )}
@@ -283,12 +285,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
               className="mt-4 block w-full rounded-lg border border-digitalcoop-600 py-3 text-center text-sm font-bold text-digitalcoop-600 hover:bg-digitalcoop-50 dark:hover:bg-slate-800"
               data-testid="btn-masuk-digitalcoop"
             >
-              Masuk dengan akun digitalcoop.id
+              {t("auth.ssoLogin")}
             </a>
           )}
 
           <p className="mt-6 text-center text-xs text-gray-500 dark:text-slate-400">
-            Butuh bantuan? {config.supportEmail} · WA {config.supportWhatsapp}
+            {t("auth.needHelp")} {config.supportEmail} · WA {config.supportWhatsapp}
           </p>
 
         </div>
