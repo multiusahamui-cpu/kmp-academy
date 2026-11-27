@@ -57,7 +57,7 @@ const DigitalcoopSso: React.FC<{ onDone: (role: UserRole) => void; onCancel: () 
         setState('gagal');
       }
     })();
-  }, [onDone]);
+  }, [onDone, t]);
 
   const kirim = async (e: React.FormEvent) => {
     e.preventDefault();

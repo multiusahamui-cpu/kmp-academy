@@ -47,7 +47,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ course, onClose, onEnroll
         }
       } catch { setError(t('shop.methodsLoadFail')); }
     })();
-  }, []);
+  }, [t]);
 
   const available = useMemo(() => {
     const list: MethodKey[] = ['WALLET'];

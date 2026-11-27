@@ -58,7 +58,7 @@ const StudentCatalog: React.FC<StudentCatalogProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [enrolledOnly]);
+  }, [enrolledOnly, t]);
 
   useEffect(() => {
     loadCourses();

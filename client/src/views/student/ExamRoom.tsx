@@ -51,7 +51,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
       setTitle(d.course.title as string);
       setError("");
     } catch (err) { setError(apiMessage(err, t("exam.loadFail"))); }
-  }, [courseId]);
+  }, [courseId, t]);
 
   useEffect(() => { void loadSummary(); }, [loadSummary]);
 
@@ -80,7 +80,7 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ courseId, onExit }) => {
       submittedRef.current = false;
       setError(apiMessage(err, t("exam.submitFail")));
     } finally { setBusy(false); }
-  }, [courseId, session]);
+  }, [courseId, session, t]);
 
   // Hitung mundur dari batas waktu server; kirim otomatis saat habis.
   useEffect(() => {

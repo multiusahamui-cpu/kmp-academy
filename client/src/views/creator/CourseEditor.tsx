@@ -40,7 +40,7 @@ const CourseEditor: React.FC<Props> = ({ courseId, onBack, onCreated }) => {
       setCourse(c);
       setTitle(c.title); setDescription(c.description ?? ''); setPrice(String(c.price)); setType(c.type); setCats(c.categoryIds ?? []);
     } catch (err) { setError(apiMessage(err, t('courseEditor.msgLoadFail'))); }
-  }, [courseId]);
+  }, [courseId, t]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { void (async () => { try { setCategories((await courseAuthoringApi.categories()).data.data as CategoryDto[]); } catch { setCategories([]); } })(); }, []);

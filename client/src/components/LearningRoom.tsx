@@ -56,7 +56,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
     } catch (err) {
       setLoadError(apiMessage(err, t('learn.loadFail')));
     }
-  }, [courseId]);
+  }, [courseId, t]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -70,7 +70,7 @@ const LearningRoom: React.FC<LearningRoomProps> = ({ courseId, onBack }) => {
       .catch((err) => { if (!cancelled) setContentError(apiMessage(err, t('learn.contentFail'))); })
       .finally(() => { if (!cancelled) setContentLoading(false); });
     return () => { cancelled = true; };
-  }, [courseId, activeId]);
+  }, [courseId, activeId, t]);
 
   const fetchReviews = useCallback(async () => {
     setIsLoadingReviews(true);
