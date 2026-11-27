@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { authenticateToken } from "../middleware/auth";
-import { createNodeTopupSimulation, getMyNodeSummary, getMyNodeWithdrawals, listMyNodeTopups, previewNodeTopup, requestNodeWithdrawal } from "../controllers/nodeProgramController";
+import { createNodeTopup, getMyNodeSummary, getMyBonusWallet, listMyNodeTopups, previewNodeTopup, claimBonusToWallet } from "../controllers/nodeProgramController";
 
 const router = Router();
 router.use(authenticateToken);
 router.get("/me", getMyNodeSummary);
 router.get("/topups", listMyNodeTopups);
 router.post("/topups/preview", previewNodeTopup);
-router.post("/topups", createNodeTopupSimulation);
-router.get("/withdrawals", getMyNodeWithdrawals);
-router.post("/withdrawals", requestNodeWithdrawal);
+router.post("/topups", createNodeTopup);
+router.get("/withdrawals", getMyBonusWallet);
+router.post("/withdrawals", claimBonusToWallet);
 
 export default router;

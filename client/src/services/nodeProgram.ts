@@ -2,7 +2,9 @@ import api from "./api";
 
 export interface NodeSummary {
   programStatus: "DRAFT" | "ACTIVE";
-  simulationMode: boolean;
+  walletBalance: number;
+  pinSet: boolean;
+  isMember: boolean;
   activeNodes: number;
   tier: "NONE" | "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
   capacityPoints: number;
@@ -78,9 +80,9 @@ export const nodeProgramApi = {
   me: () => api.get("/node-program/me"),
   listTopups: () => api.get("/node-program/topups"),
   previewTopup: (nodeCount: number) => api.post("/node-program/topups/preview", { nodeCount }),
-  createTopup: (nodeCount: number) => api.post("/node-program/topups", { nodeCount }),
+  createTopup: (nodeCount: number, pin: string) => api.post("/node-program/topups", { nodeCount, pin }),
   myWithdrawals: () => api.get("/node-program/withdrawals"),
-  requestWithdrawal: (amount: number, bankAccountId: string, note?: string) => api.post("/node-program/withdrawals", { amount, bankAccountId, note }),
+  claimBonus: (amount: number) => api.post("/node-program/withdrawals", { amount }),
   adminListTopups: (status = "VERIFYING", page = 1) => api.get("/admin/node-topups", { params: { status, page } }),
   adminDecideTopup: (id: string, data: { decision: "APPROVE"; reference: string; note?: string } | { decision: "REJECT"; note: string }) =>
     api.post(`/admin/node-topups/${id}/decision`, data),

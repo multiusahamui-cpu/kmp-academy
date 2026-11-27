@@ -213,8 +213,6 @@ export const Layout: React.FC<LayoutProps> = ({
           { id: "proposals", label: "Approval Center", icon: FileCheck },
           { id: "users", label: "Manajemen User", icon: Users },
           { id: "payment-verification", label: "Verifikasi Pembayaran", icon: Receipt },
-          { id: "node-topup-verif", label: "Konfirmasi Top Up Node", icon: Coins },
-          { id: "node-withdrawals", label: "Pencairan Bonus Node", icon: CircleDollarSign },
           { id: "course-reviews", label: "Review Kursus", icon: ClipboardCheck },
           { id: "account-deletions", label: "Penghapusan Akun", icon: UserMinus },
           { id: "archived-accounts", label: "Daftar Akun Archived", icon: Archive },
