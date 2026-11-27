@@ -154,6 +154,15 @@ export const contentRule = (type: ModuleType): ContentRule | null => {
   return null; // TEXT tidak punya berkas
 };
 
+// PPT/PPTX diterima pada modul PDF lalu dikonversi ke PDF di server (LibreOffice).
+export const PPT_MIMES = [
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+export const PPT_MAX_BYTES = PDF_MAX_BYTES;
+export const isPptMime = (mime: string): boolean => PPT_MIMES.includes(mime);
+export const isPptName = (name: string): boolean => /\.(ppt|pptx)$/i.test(name);
+
 export type DetectedContent = { ext: "mp4" | "webm" | "pdf"; mime: string };
 
 /** Mengenali berkas materi dari beberapa byte pertama (bukan dari nama atau Content-Type kiriman klien). */

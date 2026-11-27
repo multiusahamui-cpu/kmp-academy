@@ -23,6 +23,9 @@ import {
   contentRule,
   courseReadinessProblems,
   detectContentType,
+  isPptMime,
+  isPptName,
+  PPT_MAX_BYTES,
   isEditableStatus,
   slugify,
   validateCourseInput,
@@ -30,6 +33,7 @@ import {
   validateModuleInput,
   validateQuestionInput,
 } from "@shared/course";
+import { convertToPdf } from "../lib/office-convert";
 
 const isUuid = (v: unknown): v is string => z.string().uuid().safeParse(v).success;
 const REVIEW_ROLES = ["ADMIN_SYSTEM", "DIRECTOR", "SUPERADMIN"];
@@ -310,6 +314,11 @@ export const uploadInit = async (req: any, res: any) => {
     if (!rule) return errorResponse(res, "Modul teks tidak memiliki berkas.", 400);
     const p = initSchema.safeParse(req.body);
     if (!p.success) return errorResponse(res, "Data berkas tidak valid.", 400);
+    // PPT/PPTX pada modul PDF: unggah lewat server (mode server) agar dapat dikonversi ke PDF.
+    if (mod.type === "PDF" && isPptMime(p.data.mime)) {
+      if (p.data.size > PPT_MAX_BYTES) return errorResponse(res, `Ukuran PPT maksimal ${Math.round(PPT_MAX_BYTES / 1024 / 1024)} MB.`, 400);
+      return successResponse(res, { mode: "server", key: "", maxBytes: PPT_MAX_BYTES, url: `/api/courses/${course.id}/modules/${mod.id}/upload` }, "Siap diunggah — PPT akan dikonversi ke PDF.");
+    }
     if (!rule.mimes.includes(p.data.mime)) return errorResponse(res, `Format harus ${rule.mimes.map(extOfMime).join(" atau ").toUpperCase()}.`, 400);
 
     const key = `courses/${course.id}/${mod.id}-${crypto.randomBytes(8).toString("hex")}.${extOfMime(p.data.mime)}`;
@@ -378,12 +387,21 @@ export const uploadModuleFile = async (req: any, res: any) => {
     if (!mod) return errorResponse(res, "Modul tidak ditemukan", 404);
     const rule = contentRule(mod.type as ModuleType);
     if (!rule) return errorResponse(res, "Modul teks tidak memiliki berkas.", 400);
-    const file = req.file as { buffer: Buffer } | undefined;
+    const file = req.file as { buffer: Buffer; originalname?: string; mimetype?: string } | undefined;
     if (!file || file.buffer.length === 0) return errorResponse(res, "Pilih berkas terlebih dahulu.", 400);
-    const detected = detectContentType(file.buffer);
+    let buffer = file.buffer;
+    // Modul PDF menerima PPT/PPTX: konversi ke PDF di server sebelum disimpan.
+    if (mod.type === "PDF" && (isPptMime(file.mimetype ?? "") || isPptName(file.originalname ?? ""))) {
+      try {
+        buffer = await convertToPdf(file.buffer, file.originalname ?? "slide.pptx");
+      } catch (e) {
+        return errorResponse(res, "Gagal mengonversi PPT ke PDF. Pastikan LibreOffice terpasang di server.", 400, e);
+      }
+    }
+    const detected = detectContentType(buffer);
     if (!detected || !contentMatchesModule(mod.type as ModuleType, detected)) return errorResponse(res, "Isi berkas tidak sesuai jenis modul.", 400);
     const key = `courses/${course.id}/${mod.id}-${crypto.randomBytes(8).toString("hex")}.${detected.ext}`;
-    await putPrivate(key, file.buffer, detected.mime);
+    await putPrivate(key, buffer, detected.mime);
     if (await attachContent(mod, key, res)) successResponse(res, null, "Berkas modul tersimpan");
   } catch (error) {
     errorResponse(res, "Gagal menyimpan berkas modul", 500, error);

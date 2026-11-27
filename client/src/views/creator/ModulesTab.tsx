@@ -11,8 +11,8 @@ interface Props {
   onChanged: () => void;
 }
 
-const KIND_LABEL: Record<ModuleKind, string> = { VIDEO: 'Video', PDF: 'PDF', TEXT: 'Teks' };
-const ACCEPT: Record<ModuleKind, string> = { VIDEO: 'video/mp4,video/webm', PDF: 'application/pdf', TEXT: '' };
+const KIND_LABEL: Record<ModuleKind, string> = { VIDEO: 'Video', PDF: 'PDF / PPT', TEXT: 'Teks' };
+const ACCEPT: Record<ModuleKind, string> = { VIDEO: 'video/mp4,video/webm', PDF: 'application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,.ppt,.pptx', TEXT: '' };
 
 const ModulesTab: React.FC<Props> = ({ courseId, editable, modules, onChanged }) => {
   const [type, setType] = useState<ModuleKind>('VIDEO');

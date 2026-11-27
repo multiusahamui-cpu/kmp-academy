@@ -102,7 +102,7 @@ export const courseReviewApi = {
   decide: (id: string, decision: 'APPROVE' | 'REJECT', note: string) => api.post(`/courses/reviews/${id}/decision`, { decision, note }),
 };
 
-const MIME_BY_EXT: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', pdf: 'application/pdf' };
+const MIME_BY_EXT: Record<string, string> = { mp4: 'video/mp4', webm: 'video/webm', pdf: 'application/pdf', ppt: 'application/vnd.ms-powerpoint', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
 const guessMime = (file: File): string => file.type || MIME_BY_EXT[file.name.split('.').pop()?.toLowerCase() ?? ''] || '';
 
 const putWithProgress = (url: string, file: File, headers: Record<string, string>, onProgress: (pct: number) => void): Promise<void> =>
