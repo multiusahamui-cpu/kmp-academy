@@ -2,9 +2,32 @@ import React, { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { useI18n, type Lang } from "../i18n";
 
-const OPTIONS: { code: Lang; flag: string; label: string }[] = [
-  { code: "en", flag: "🇬🇧", label: "English" },
-  { code: "id", flag: "🇮🇩", label: "Bahasa Indonesia" },
+/** Bendera SVG inline (bukan emoji) agar tampil sebagai gambar di semua OS, termasuk Windows. */
+const Flag: React.FC<{ code: Lang; className?: string }> = ({ code, className }) => {
+  const common = { viewBox: "0 0 60 30", className, preserveAspectRatio: "xMidYMid slice" as const, "aria-hidden": true };
+  if (code === "id") {
+    return (
+      <svg {...common}>
+        <rect width="60" height="15" fill="#CE1126" />
+        <rect y="15" width="60" height="15" fill="#fff" />
+      </svg>
+    );
+  }
+  // English → Union Jack (GB)
+  return (
+    <svg {...common}>
+      <rect width="60" height="30" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="4" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6" />
+    </svg>
+  );
+};
+
+const OPTIONS: { code: Lang; label: string }[] = [
+  { code: "en", label: "English" },
+  { code: "id", label: "Bahasa Indonesia" },
 ];
 
 /** Pemilih bahasa berbentuk dropdown bendera, ditaruh di navbar dekat lonceng. */
@@ -28,13 +51,13 @@ const LanguageSwitcher: React.FC = () => {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        title={t("common.language")}
+        title={`${t("common.language")}: ${current.label}`}
         aria-label={t("common.language")}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-1 rounded-full px-2 py-1.5 text-gray-600 transition hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-gray-600 transition hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-800"
       >
-        <span className="text-base leading-none" aria-hidden>{current.flag}</span>
+        <Flag code={current.code} className="h-4 w-6 rounded-sm shadow-sm ring-1 ring-black/10" />
         <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
@@ -55,7 +78,7 @@ const LanguageSwitcher: React.FC = () => {
                 lang === o.code ? "font-bold text-digitalcoop-700 dark:text-digitalcoop-300" : "text-gray-700 dark:text-slate-300"
               }`}
             >
-              <span className="text-lg leading-none" aria-hidden>{o.flag}</span>
+              <Flag code={o.code} className="h-4 w-6 shrink-0 rounded-sm shadow-sm ring-1 ring-black/10" />
               <span className="flex-1">{o.label}</span>
               {lang === o.code && <Check size={16} className="text-digitalcoop-600 dark:text-digitalcoop-400" />}
             </button>
