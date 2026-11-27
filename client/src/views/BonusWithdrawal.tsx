@@ -15,7 +15,7 @@ export default function BonusWithdrawal() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => { const r = await nodeProgramApi.myWithdrawals(); setData(r.data.data); }, []);
-  useEffect(() => { void load().catch(() => toast.error(t('wal.bwLoadFail'))); }, [load]);
+  useEffect(() => { void load().catch(() => toast.error(t('wal.bwLoadFail'))); }, [load, t]);
 
   const submit = async () => {
     const value = Number(amount.replace(/\D/g, ""));

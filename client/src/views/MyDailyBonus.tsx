@@ -9,7 +9,7 @@ export default function MyDailyBonus() {
   const t = useT();
   const [data, setData] = useState<NodeSummary | null>(null);
   const [error, setError] = useState("");
-  useEffect(() => { void nodeProgramApi.me().then((r) => setData(r.data.data)).catch(() => setError(t('wal.dbLoadFail'))); }, []);
+  useEffect(() => { void nodeProgramApi.me().then((r) => setData(r.data.data)).catch(() => setError(t('wal.dbLoadFail'))); }, [t]);
   if (!data && !error) return <div className="p-8 text-center text-gray-500"><Loader2 className="mx-auto animate-spin" /></div>;
   const today = data?.today;
   return <div className="space-y-6">

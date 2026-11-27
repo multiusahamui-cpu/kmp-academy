@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Eye, EyeOff, Globe, Lock } from 'lucide-react';
 import { apiMessage } from '../services/classes';
 import { talentApi, type MyTalent, type TalentForm } from '../services/talent';
@@ -16,14 +16,14 @@ const TalentProfileEditor: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const d = await talentApi.mine();
       setData(d);
       if (d.profile) setForm({ headline: d.profile.headline, bio: d.profile.bio, city: d.profile.city, skills: d.profile.skills.join(', '), linkedinUrl: d.profile.linkedinUrl, portfolioUrl: d.profile.portfolioUrl });
     } catch { setMsg(t('acct.tpLoadFail')); }
-  };
-  useEffect(() => { void load(); }, []);
+  }, [t]);
+  useEffect(() => { void load(); }, [load]);
 
   const save = async (publish: boolean) => {
     setBusy(true);

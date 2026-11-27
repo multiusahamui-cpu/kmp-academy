@@ -23,7 +23,7 @@ export default function NodeTopUp() {
 
   useEffect(() => {
     void reload().catch(() => toast.error(t('wal.nuLoadFail'))).finally(() => setBusy(false));
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
