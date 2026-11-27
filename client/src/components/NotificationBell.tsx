@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, Settings } from "lucide-react";
 import { NotificationItem, notificationsApi } from "../services/notifications";
+import { useI18n } from "../i18n";
 
 const POLL_MS = 60_000;
 
-const timeAgo = (iso: string): string => {
+const timeAgo = (iso: string, t: (k: string, v?: Record<string, string | number>) => string, lang: string): string => {
   const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
-  if (s < 60) return "baru saja";
-  if (s < 3600) return `${Math.floor(s / 60)} menit lalu`;
-  if (s < 86400) return `${Math.floor(s / 3600)} jam lalu`;
-  return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  if (s < 60) return t("help.nbJustNow");
+  if (s < 3600) return t("help.nbMin", { n: Math.floor(s / 60) });
+  if (s < 86400) return t("help.nbHour", { n: Math.floor(s / 3600) });
+  return new Date(iso).toLocaleDateString(lang === "en" ? "en-US" : "id-ID", { day: "numeric", month: "short", year: "numeric" });
 };
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
+  const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -46,10 +48,10 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
 
   useEffect(() => {
     void refreshCount();
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       if (document.visibilityState === "visible") void refreshCount();
     }, POLL_MS);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [refreshCount]);
 
   useEffect(() => {
@@ -94,8 +96,8 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
       <button
         onClick={() => setOpen((v) => !v)}
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-300 transition"
-        title="Notifikasi"
-        aria-label={unread > 0 ? `Notifikasi, ${unread} belum dibaca` : "Notifikasi"}
+        title={t("help.nbTitle")}
+        aria-label={unread > 0 ? t("help.nbUnreadAria", { n: unread }) : t("help.nbTitle")}
         aria-expanded={open}
       >
         <Bell size={20} />
@@ -109,11 +111,11 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
       {open && (
         <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-800">
-            <span className="font-semibold text-sm text-gray-900 dark:text-white">Notifikasi</span>
+            <span className="font-semibold text-sm text-gray-900 dark:text-white">{t("help.nbTitle")}</span>
             <div className="flex items-center gap-3">
               {unread > 0 && (
                 <button onClick={readAll} className="text-xs text-digitalcoop-600 dark:text-digitalcoop-400 hover:underline">
-                  Tandai semua dibaca
+                  {t("help.nbMarkAll")}
                 </button>
               )}
               <button
@@ -122,18 +124,18 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
                   onOpenSettings();
                 }}
                 className="text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
-                title="Pengaturan notifikasi"
-                aria-label="Pengaturan notifikasi"
+                title={t("help.nbSettings")}
+                aria-label={t("help.nbSettings")}
               >
                 <Settings size={16} />
               </button>
             </div>
           </div>
           <div className="max-h-96 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-800">
-            {loading && items.length === 0 && <p className="p-6 text-center text-sm text-gray-500 dark:text-slate-400">Memuat...</p>}
-            {failed && <p className="p-6 text-center text-sm text-red-600">Gagal memuat notifikasi.</p>}
+            {loading && items.length === 0 && <p className="p-6 text-center text-sm text-gray-500 dark:text-slate-400">{t("help.nbLoading")}</p>}
+            {failed && <p className="p-6 text-center text-sm text-red-600">{t("help.nbFail")}</p>}
             {!loading && !failed && items.length === 0 && (
-              <p className="p-6 text-center text-sm text-gray-500 dark:text-slate-400">Belum ada notifikasi.</p>
+              <p className="p-6 text-center text-sm text-gray-500 dark:text-slate-400">{t("help.nbNone")}</p>
             )}
             {items.map((n) => (
               <button
@@ -142,11 +144,11 @@ const NotificationBell: React.FC<Props> = ({ onOpenSettings }) => {
                 className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition ${n.readAt ? "" : "bg-digitalcoop-50/60 dark:bg-slate-800/60"}`}
               >
                 <div className="flex items-start gap-2">
-                  {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-digitalcoop-600" aria-label="Belum dibaca" />}
+                  {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-digitalcoop-600" aria-label={t("help.nbUnread")} />}
                   <div className="min-w-0">
                     <p className={`text-sm text-gray-900 dark:text-white ${n.readAt ? "" : "font-semibold"}`}>{n.title}</p>
                     <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5 break-words">{n.body}</p>
-                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">{timeAgo(n.createdAt)}</p>
+                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">{timeAgo(n.createdAt, t, lang)}</p>
                   </div>
                 </div>
               </button>
