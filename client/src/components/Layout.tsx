@@ -316,21 +316,21 @@ export const Layout: React.FC<LayoutProps> = ({
                 onClick={(e) => handleScroll(e, "home")}
                 className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
-                Beranda
+                {t("shell.navHome")}
               </a>
               <a
                 href="#courses"
                 onClick={(e) => handleScroll(e, "courses")}
                 className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
-                Kursus
+                {t("shell.navCourses")}
               </a>
               <a
                 href="#about"
                 onClick={(e) => handleScroll(e, "about")}
                 className="hover:text-digitalcoop-600 dark:hover:text-digitalcoop-400 transition cursor-pointer"
               >
-                Tentang Kami
+                {t("shell.navAbout")}
               </a>
 
               <div className="flex items-center gap-2 border-l border-gray-200 dark:border-slate-700 pl-4">
@@ -338,7 +338,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 <button
                   onClick={() => setInfoModalOpen(true)}
                   className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-300 transition"
-                  title="Pusat Informasi"
+                  title={t("shell.infoCenter")}
                 >
                   <Info size={20} />
                 </button>
@@ -356,7 +356,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 onClick={onOpenAuth}
                 className="px-5 py-2.5 bg-digitalcoop-600 hover:bg-digitalcoop-700 text-white font-bold rounded-full text-sm shadow-lg hover:shadow-digitalcoop-500/30 transition transform hover:-translate-y-0.5 flex items-center"
               >
-                <LogIn size={16} className="mr-2" /> Masuk / Daftar
+                <LogIn size={16} className="mr-2" /> {t("shell.loginRegister")}
               </button>
             </div>
 
@@ -544,7 +544,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <button
               onClick={() => setInfoModalOpen(true)}
               className="p-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
-              title="Pusat Informasi"
+              title={t("shell.infoCenter")}
             >
               <Info size={18} />
             </button>
@@ -574,6 +574,7 @@ export const Layout: React.FC<LayoutProps> = ({
 };
 
 const Footer = () => {
+  const t = useT();
   const publicConfig = usePublicConfig();
   return (
   <footer className="bg-digitalcoop-900 dark:bg-slate-900 text-white pt-16 pb-8 border-t border-digitalcoop-800 dark:border-slate-800">
@@ -586,19 +587,18 @@ const Footer = () => {
           </span>
         </div>
         <p className="text-digitalcoop-100 dark:text-slate-400 text-sm leading-relaxed mb-6 max-w-sm">
-          Platform pembelajaran digital terdepan untuk pengembangan Koperasi dan
-          UMKM di Indonesia dengan kurikulum berbasis teknologi modern.
+          {t("shell.footerTagline")}
         </p>
       </div>
 
       <div>
         <h3 className="font-sans font-bold text-lg mb-6 text-digitalcoop-50">
-          Hubungi Kami
+          {t("shell.contactUs")}
         </h3>
         <ul className="space-y-4 text-sm text-digitalcoop-100 dark:text-slate-400">
           <li>
             <span className="block text-digitalcoop-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
-              Project Lead
+              {t("shell.projectLead")}
             </span>
             {CONTACT_INFO.lead}
           </li>
@@ -610,7 +610,7 @@ const Footer = () => {
           </li>
           <li>
             <span className="block text-digitalcoop-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
-              Email Support
+              {t("shell.emailSupport")}
             </span>
             {publicConfig.supportEmail}
           </li>
@@ -619,7 +619,7 @@ const Footer = () => {
 
       <div>
         <h3 className="font-sans font-bold text-lg mb-6 text-digitalcoop-50">
-          Lokasi
+          {t("shell.location")}
         </h3>
         <p className="text-sm text-digitalcoop-100 dark:text-slate-400 leading-relaxed">
           {CONTACT_INFO.address}
