@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../db";
 import { nodeAccounts, nodeBonusLedger, nodeDailySummaries, nodeLots, nodeRuleVersions, nodeTopupOrders, transactions, users } from "../schema/schema";
@@ -19,9 +19,10 @@ const ledgerBalance = async (tx: any, userId: string): Promise<number> => {
 };
 
 const currentRule = async () => {
-  const now = new Date();
+  // Aturan ber-status ACTIVE langsung berlaku (aktivasi via panel/seed sudah eksplisit).
+  // Tidak memakai gerbang effective_from <= now agar bebas dari selisih zona waktu timestamp.
   const [active] = await db.select().from(nodeRuleVersions)
-    .where(and(eq(nodeRuleVersions.status, "ACTIVE"), or(isNull(nodeRuleVersions.effectiveFrom), lte(nodeRuleVersions.effectiveFrom, now))))
+    .where(eq(nodeRuleVersions.status, "ACTIVE"))
     .orderBy(desc(nodeRuleVersions.version)).limit(1);
   if (active) return { rule: active, active: true };
   const [draft] = await db.select().from(nodeRuleVersions).orderBy(desc(nodeRuleVersions.version)).limit(1);
