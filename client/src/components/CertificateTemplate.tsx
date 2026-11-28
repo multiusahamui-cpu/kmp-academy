@@ -1,6 +1,7 @@
 import React from "react";
 import { Certificate, CourseType } from "../types";
 import { Award, GraduationCap } from "lucide-react";
+import { useT } from "../i18n";
 
 interface CertificateTemplateProps {
   data: Certificate;
@@ -11,6 +12,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   data,
   onClose,
 }) => {
+  const t = useT();
   const handlePrint = () => {
     const printContent = document.getElementById("certificate-area");
     if (printContent) {
@@ -23,28 +25,26 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
     }
   };
 
-  const signer = data.signerName ?? "Direktur";
+  const signer = data.signerName ?? t("misc.ceDirector");
   const isWorkshop = data.courseType === CourseType.WORKSHOP;
   const isCertification = data.courseType === CourseType.CERTIFICATION;
 
   // Logic Judul Sertifikat
   const isCompletion = data.kind === "COMPLETION";
-  let titleText = "Sertifikat Kompetensi";
-  if (isCertification) titleText = "Sertifikat Keikutsertaan";
-  else if (isCompletion) titleText = "Sertifikat Penyelesaian";
+  let titleText = t("misc.ceTitleComp");
+  if (isCertification) titleText = t("misc.ceTitlePart");
+  else if (isCompletion) titleText = t("misc.ceTitleDone");
 
   // Logic Body Text
   let bodyText = "";
   if (isCertification) {
-    bodyText =
-      "Telah mengikuti pelatihan persiapan sertifikasi profesi (Exam Preparation Course) yang diselenggarakan oleh KMP - ADNG Academy bekerjasama dengan Partner Resmi pada materi:";
+    bodyText = t("misc.ceBodyCert");
   } else if (isCompletion) {
-    bodyText =
-      "Telah menyelesaikan seluruh materi pembelajaran pada KMP - ADNG Academy untuk kursus:";
+    bodyText = t("misc.ceBodyDone");
   } else if (isWorkshop) {
-    bodyText = `Telah berhasil menyelesaikan Program Bootcamp / Workshop dan memenuhi standar penilaian akademik dengan predikat LULUS (Grade: ${data.grade}) pada materi:`;
+    bodyText = t("misc.ceBodyWs", { g: data.grade });
   } else {
-    bodyText = `Telah berhasil menyelesaikan Kursus Mandiri dan memenuhi standar penilaian akademik dengan predikat LULUS (Grade: ${data.grade}) pada materi:`;
+    bodyText = t("misc.ceBodySelf", { g: data.grade });
   }
 
   return (
@@ -53,20 +53,20 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
         {/* Toolbar */}
         <div className="bg-gray-800 text-white p-4 flex justify-between items-center no-print">
           <h3 className="font-bold flex items-center">
-            <Award className="mr-2" /> Preview Sertifikat
+            <Award className="mr-2" /> {t("misc.cePreview")}
           </h3>
           <div className="flex gap-2">
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm hover:text-gray-300"
             >
-              Tutup
+              {t("misc.ceClose")}
             </button>
             <button
               onClick={handlePrint}
               className="px-6 py-2 bg-digitalcoop-600 hover:bg-digitalcoop-700 rounded font-bold text-sm"
             >
-              Download / Cetak PDF
+              {t("misc.cePrint")}
             </button>
           </div>
         </div>
@@ -96,7 +96,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
               {titleText}
             </h1>
 
-            <p className="text-gray-500 text-lg mb-2">Diberikan kepada:</p>
+            <p className="text-gray-500 text-lg mb-2">{t("misc.ceGiven")}</p>
             <h2 className="font-serif text-4xl font-bold text-gray-900 mb-8 border-b-2 border-gray-300 inline-block px-12 pb-2">
               {data.studentName}
             </h2>
@@ -128,7 +128,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
                   {signer}
                 </div>
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">
-                  Direktur KMP-ADNG Academy
+                  {t("misc.ceDirOf")}
                 </p>
               </div>
 
@@ -139,7 +139,7 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
                 {isCertification ? (
                   <div className="mb-2 h-16 flex items-end justify-center">
                     <div className="px-4 py-2 border-2 border-gray-800 rounded font-bold text-xl uppercase tracking-widest opacity-60 rotate-[-5deg]">
-                      PARTNER RESMI
+                      {t("misc.cePartner")}
                     </div>
                   </div>
                 ) : (
@@ -154,25 +154,22 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
                 </div>
                 <p className="text-xs text-gray-500 uppercase font-bold tracking-wider">
                   {isCertification
-                    ? "Training Provider"
+                    ? t("misc.ceProvider")
                     : isWorkshop
-                      ? "Mentor / Pengajar"
-                      : "Content Creator"}
+                      ? t("misc.ceMentor")
+                      : t("misc.ceCreator")}
                 </p>
               </div>
             </div>
 
             {isCertification && (
               <div className="mt-8 text-xs text-gray-400 italic">
-                Catatan: Sertifikat Kompetensi Asli diterbitkan terpisah oleh
-                Lembaga Sertifikasi Profesi (LSP) terkait setelah lulus ujian
-                resmi.
+                {t("misc.ceNote")}
               </div>
             )}
 
             <div className="absolute bottom-4 right-4 text-[10px] text-gray-400 font-mono">
-              No. Sertifikat: {data.serial ?? data.id} • Type: {data.courseType} • Verifikasi di
-              academy.digitalcoop.id/verify{data.serial ? `?no=${data.serial}` : ""}
+              {t("misc.ceFoot", { n: data.serial ?? data.id, t: data.courseType, q: data.serial ? `?no=${data.serial}` : "" })}
             </div>
           </div>
         </div>

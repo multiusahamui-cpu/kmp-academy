@@ -2,7 +2,8 @@ import React from 'react';
 import { UserRole } from '../types';
 import { GraduationCap, Volume2, ShieldCheck, Star } from 'lucide-react';
 import { APP_NAME } from '../constants';
-import { CARD_PENDING_TOOLTIP, cardPrefixFor, shadowCardNumber } from '@shared/card';
+import { cardPrefixFor, shadowCardNumber } from '@shared/card';
+import { useT } from '../i18n';
 
 interface IdentityCardProps {
   role: UserRole;
@@ -19,6 +20,7 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
   cardNumber,
   issuedAt
 }) => {
+  const t = useT();
 
   // 2. Style & Prefix Configuration based on A, C, M, S Requirement
   const getCardStyle = () => {
@@ -98,8 +100,8 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
     ? `${(issued.getMonth() + 1).toString().padStart(2, '0')}/${issued.getFullYear().toString().slice(-2)}`
     : '--/--';
   const pendingHint = role === UserRole.STUDENT
-    ? CARD_PENDING_TOOLTIP
-    : 'Kartu Anda belum tersedia. Kartu diterbitkan oleh Admin setelah pengajuan Anda disetujui.';
+    ? t('misc.cardPendS')
+    : t('misc.cardPendO');
 
   return (
     <div className="relative w-full max-w-[420px] mx-auto group">
@@ -160,7 +162,7 @@ const IdentityCard: React.FC<IdentityCardProps> = ({
              </div>
 
              <div className="text-right flex flex-col items-end">
-                <p className="text-[7px] uppercase font-bold opacity-75 mb-0.5">Terbit</p>
+                <p className="text-[7px] uppercase font-bold opacity-75 mb-0.5">{t('misc.cardIssued')}</p>
                 <p className="font-mono text-sm font-bold tracking-wide">{sinceLabel}</p>
              </div>
           </div>

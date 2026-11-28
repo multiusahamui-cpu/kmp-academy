@@ -92,8 +92,11 @@ export interface VerifiedCertificate {
   issuedAt: string;
 }
 
-export const formatLongDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+export const formatLongDate = (iso: string): string => {
+  let loc = 'en-US';
+  try { if (localStorage.getItem('academy_lang') === 'id') loc = 'id-ID'; } catch { /* storage tidak tersedia */ }
+  return new Date(iso).toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' });
+};
 
 export const mapCertificate = (c: CertificateDto): Certificate => ({
   id: c.id,
