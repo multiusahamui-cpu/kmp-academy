@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, Edit, Search, Tag, X } from 'lucide-react';
 import { CATEGORY_DESCRIPTION_MAX, slugify } from '@shared/categories';
+import { useI18n } from '../../i18n';
 import { CategoryDto, courseAuthoringApi } from '../../services/courses';
 
 interface FormState {
@@ -14,6 +15,7 @@ interface FormState {
 const EMPTY: FormState = { id: null, name: '', slug: '', slugTouched: false, description: '' };
 
 const CategoryManager: React.FC = () => {
+  const { t } = useI18n();
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -58,25 +60,25 @@ const CategoryManager: React.FC = () => {
     try {
       if (form.id) await courseAuthoringApi.updateCategory(form.id, body);
       else await courseAuthoringApi.createCategory(body);
-      setNotice(form.id ? 'Kategori diperbarui.' : 'Kategori ditambahkan.');
+      setNotice(form.id ? t('adm4.cmUpdated') : t('adm4.cmAdded'));
       setForm(null);
       await load();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Gagal menyimpan kategori.');
+      setError(err?.response?.data?.message ?? t('adm4.cmSaveFail'));
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (c: CategoryDto) => {
-    if (!confirm(`Hapus kategori "${c.name}"?`)) return;
+    if (!confirm(t('adm4.cmDelAsk', { n: c.name }))) return;
     setNotice('');
     try {
       await courseAuthoringApi.deleteCategory(c.id);
-      setNotice('Kategori dihapus.');
+      setNotice(t('adm4.cmDeleted'));
       await load();
     } catch (err: any) {
-      setNotice(err?.response?.data?.message ?? 'Gagal menghapus kategori.');
+      setNotice(err?.response?.data?.message ?? t('adm4.cmDelFail'));
     }
   };
 
@@ -87,28 +89,28 @@ const CategoryManager: React.FC = () => {
     <div className="max-w-4xl">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Kategori</h2>
-          <p className="text-gray-500 dark:text-slate-400">Atur taksonomi kursus untuk memudahkan pencarian.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('adm4.cmTitle')}</h2>
+          <p className="text-gray-500 dark:text-slate-400">{t('adm4.cmSub')}</p>
         </div>
         <button onClick={openNew} className="flex items-center px-4 py-2 bg-digitalcoop-600 text-white rounded-lg hover:bg-digitalcoop-700 font-bold text-sm shadow-sm">
-          <Plus size={18} className="mr-2" /> Tambah Kategori
+          <Plus size={18} className="mr-2" /> {t('adm4.cmAdd')}
         </button>
       </div>
 
       {notice && (
         <div role="status" className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-digitalcoop-200 dark:border-digitalcoop-800 bg-digitalcoop-50 dark:bg-digitalcoop-900/20 px-4 py-2 text-sm text-digitalcoop-800 dark:text-digitalcoop-200">
           <span>{notice}</span>
-          <button onClick={() => setNotice('')} aria-label="Tutup"><X size={14} /></button>
+          <button onClick={() => setNotice('')} aria-label={t('adm4.close')}><X size={14} /></button>
         </div>
       )}
 
       {form && (
         <div className="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-digitalcoop-200 dark:border-digitalcoop-800 mb-6">
-          <h3 className="font-bold text-gray-800 dark:text-white mb-4">{form.id ? 'Ubah Kategori' : 'Input Kategori Baru'}</h3>
+          <h3 className="font-bold text-gray-800 dark:text-white mb-4">{form.id ? t('adm4.cmEdit') : t('adm4.cmNew')}</h3>
           <form onSubmit={submit} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Kategori</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('adm4.cmName')}</label>
                 <input
                   type="text"
                   required
@@ -116,11 +118,11 @@ const CategoryManager: React.FC = () => {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value, slug: form.slugTouched ? form.slug : slugify(e.target.value) })}
                   className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded focus:ring-2 focus:ring-digitalcoop-500"
-                  placeholder="Contoh: Digital Marketing"
+                  placeholder={t('adm4.cmNamePh')}
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Slug URL</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('adm4.cmSlug')}</label>
                 <input
                   type="text"
                   required
@@ -133,23 +135,23 @@ const CategoryManager: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Deskripsi <span className="font-normal text-gray-400">(opsional)</span></label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t('adm4.cmDesc')} <span className="font-normal text-gray-400">{t('adm4.cmOpt')}</span></label>
               <textarea
                 rows={2}
                 maxLength={CATEGORY_DESCRIPTION_MAX}
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full p-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded text-sm focus:ring-2 focus:ring-digitalcoop-500"
-                placeholder="Penjelasan singkat isi kategori ini."
+                placeholder={t('adm4.cmDescPh')}
               />
-              <p className="text-xs text-gray-400 mt-1">Tampil sebagai keterangan saat kursor di atas kategori di katalog; tidak ikut pencarian. {form.description.length}/{CATEGORY_DESCRIPTION_MAX}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('adm4.cmDescHint', { n: form.description.length, m: CATEGORY_DESCRIPTION_MAX })}</p>
             </div>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <div className="flex gap-3">
               <button type="submit" disabled={saving} className="px-4 py-2 bg-digitalcoop-600 text-white rounded-lg hover:bg-digitalcoop-700 font-bold text-sm disabled:opacity-50">
-                {saving ? 'Menyimpan...' : 'Simpan'}
+                {saving ? t('adm4.cmSaving') : t('adm4.cmSave')}
               </button>
-              <button type="button" onClick={() => setForm(null)} className="px-4 py-2 text-sm text-gray-600 dark:text-slate-300 hover:underline">Batal</button>
+              <button type="button" onClick={() => setForm(null)} className="px-4 py-2 text-sm text-gray-600 dark:text-slate-300 hover:underline">{t('adm4.cmCancel')}</button>
             </div>
           </form>
         </div>
@@ -163,7 +165,7 @@ const CategoryManager: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Cari kategori..."
+              placeholder={t('adm4.cmSearchPh')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-digitalcoop-500"
             />
           </div>
@@ -173,16 +175,16 @@ const CategoryManager: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
             <thead className="bg-gray-50 dark:bg-slate-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Kategori</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t('adm4.cmThName')}</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Slug</th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jumlah Kursus</th>
-                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
+                <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t('adm4.cmThCount')}</th>
+                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t('adm4.umThAct')}</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-800">
-              {loading && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-slate-400">Memuat...</td></tr>}
-              {loadError && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-red-600">Gagal memuat kategori.</td></tr>}
-              {!loading && !loadError && filtered.length === 0 && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-slate-400">Tidak ada kategori.</td></tr>}
+              {loading && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-slate-400">{t('adm4.cmLoading')}</td></tr>}
+              {loadError && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-red-600">{t('adm4.cmLoadFail')}</td></tr>}
+              {!loading && !loadError && filtered.length === 0 && <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-slate-400">{t('adm4.cmNone')}</td></tr>}
               {filtered.map((cat) => (
                 <tr key={cat.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
                   <td className="px-6 py-4">
@@ -199,15 +201,15 @@ const CategoryManager: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400 font-mono">/{cat.slug}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span
-                      title={`${cat.count} terbit dari ${cat.totalCourses} kursus`}
+                      title={t('adm4.cmTip', { a: cat.count, b: cat.totalCourses })}
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-slate-300"
                     >
-                      {cat.totalCourses} Kursus
+                      {t('adm4.cmCourses', { n: cat.totalCourses })}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => openEdit(cat)} className="text-digitalcoop-600 dark:text-digitalcoop-400 hover:text-digitalcoop-900 mx-2" aria-label={`Ubah ${cat.name}`}><Edit size={16} /></button>
-                    <button onClick={() => remove(cat)} className="text-red-600 hover:text-red-900" aria-label={`Hapus ${cat.name}`}><Trash2 size={16} /></button>
+                    <button onClick={() => openEdit(cat)} className="text-digitalcoop-600 dark:text-digitalcoop-400 hover:text-digitalcoop-900 mx-2" aria-label={t('adm4.cmEditL', { n: cat.name })}><Edit size={16} /></button>
+                    <button onClick={() => remove(cat)} className="text-red-600 hover:text-red-900" aria-label={t('adm4.cmDelL', { n: cat.name })}><Trash2 size={16} /></button>
                   </td>
                 </tr>
               ))}

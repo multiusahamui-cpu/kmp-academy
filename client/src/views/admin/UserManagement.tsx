@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { adminApi } from '../../services/api';
 import { useProfile } from '../../services/profile';
+import { useI18n } from '../../i18n';
 import RoleApplications from './RoleApplications';
 import { Search, Shield, User as UserIcon, Star, GraduationCap, Plus, Loader2 } from 'lucide-react';
 
@@ -27,13 +28,14 @@ interface Page {
   items: Row[];
 }
 
-const STATUS_LABEL: Record<string, string> = { ACTIVE: 'Aktif', SUSPENDED: 'Ditangguhkan', BANNED: 'Diblokir', ARCHIVED: 'Archived' };
+const KNOWN_STATUS = ['ACTIVE', 'SUSPENDED', 'BANNED', 'ARCHIVED'];
 const CARD_ISSUERS = ['SUPERADMIN', 'ADMIN_SYSTEM']; // yang boleh menerbitkan kartu manual
 
 const errText = (err: unknown, fallback: string): string =>
   (err as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback;
 
 const UserManagement: React.FC = () => {
+  const { t } = useI18n();
   const { profile } = useProfile();
   // Pengajuan naik peran diputuskan Direktur (penilai kompetensi); Admin hanya mengurus pekerjaan rutin.
   const isDirector = profile?.role === 'DIRECTOR';
@@ -49,11 +51,11 @@ const UserManagement: React.FC = () => {
 
   // Pencarian ditunda 300 ms agar tidak memanggil server pada setiap ketikan.
   useEffect(() => {
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       setQuery(searchTerm.trim());
       setPageNo(1);
     }, 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const load = useCallback(async () => {
@@ -63,11 +65,11 @@ const UserManagement: React.FC = () => {
       const res = await adminApi.listUsers(activeTab, query, pageNo);
       setData(res.data?.data ?? { total: 0, page: 1, size: 15, items: [] });
     } catch (err) {
-      setMessage({ ok: false, text: errText(err, 'Gagal memuat daftar pengguna.') });
+      setMessage({ ok: false, text: errText(err, t('adm4.umLoadFail')) });
     } finally {
       setLoading(false);
     }
-  }, [activeTab, query, pageNo]);
+  }, [activeTab, query, pageNo, t]);
 
   useEffect(() => {
     load();
@@ -84,10 +86,10 @@ const UserManagement: React.FC = () => {
     setMessage(null);
     try {
       const res = await adminApi.issueCard(u.id);
-      setMessage({ ok: true, text: `Kartu ${u.name} terbit: ${res.data?.data?.cardNumber ?? ''}` });
+      setMessage({ ok: true, text: t('adm4.umCardOk', { n: u.name, c: res.data?.data?.cardNumber ?? '' }) });
       await load();
     } catch (err) {
-      setMessage({ ok: false, text: errText(err, 'Gagal menerbitkan kartu.') });
+      setMessage({ ok: false, text: errText(err, t('adm4.umCardFail')) });
     } finally {
       setBusyId(null);
     }
@@ -101,13 +103,13 @@ const UserManagement: React.FC = () => {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Pengguna</h2>
-           <p className="text-gray-500 dark:text-slate-400 text-sm">Kelola data pengguna berdasarkan peran (Role) di ekosistem.</p>
+           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('adm4.umTitle')}</h2>
+           <p className="text-gray-500 dark:text-slate-400 text-sm">{t('adm4.umSub')}</p>
         </div>
         <div className="flex gap-2">
           {activeTab === 'INTERNAL' && (
              <button className="px-4 py-2 bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 text-sm font-medium flex items-center">
-                <Plus size={16} className="mr-2" /> Tambah Staff (Via Settings)
+                <Plus size={16} className="mr-2" /> {t('adm4.umAddStaff')}
              </button>
           )}
         </div>
@@ -143,7 +145,7 @@ const UserManagement: React.FC = () => {
               onClick={() => switchTab('DAFTAR_TUNGGU')}
               className={`py-2 rounded-md text-sm font-bold flex items-center justify-center transition ${activeTab === 'DAFTAR_TUNGGU' ? 'bg-white dark:bg-slate-700 shadow-sm text-green-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
            >
-              Daftar Tunggu
+              {t('adm4.umWaitlist')}
            </button>)}
       </div>
 
@@ -161,7 +163,7 @@ const UserManagement: React.FC = () => {
              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
              <input
                type="text"
-               placeholder="Cari nama, email, No HP, atau nomor kartu..."
+               placeholder={t('adm4.umSearchPh')}
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-md text-sm focus:ring-1 focus:ring-digitalcoop-500"
@@ -174,11 +176,11 @@ const UserManagement: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
             <thead className="bg-gray-50 dark:bg-slate-950">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nomor Kartu</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nama User</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Role Spesifik</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('adm4.umThCard')}</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('adm4.umThName')}</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('adm4.umThRole')}</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{t('adm4.umThStatus')}</th>
+                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">{t('adm4.umThAct')}</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-800">
@@ -190,7 +192,7 @@ const UserManagement: React.FC = () => {
               {!loading && data.items.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
                   <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-gray-500 dark:text-slate-400">
-                     {user.cardNumber ?? <span className="font-sans italic">Belum terbit</span>}
+                     {user.cardNumber ?? <span className="font-sans italic">{t('adm4.umNoCard')}</span>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -218,12 +220,12 @@ const UserManagement: React.FC = () => {
                       {user.role.replace('_', ' ')}
                     </span>
                     {user.role === 'STUDENT' && (
-                      <div className="text-xs text-gray-500 mt-1">{user.enrolledCount > 0 ? `${user.enrolledCount} kursus` : 'Calon student'}</div>
+                      <div className="text-xs text-gray-500 mt-1">{user.enrolledCount > 0 ? t('adm4.umCourses', { n: user.enrolledCount }) : t('adm4.umProspect')}</div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`text-sm font-bold ${user.status === 'ACTIVE' ? 'text-green-600' : 'text-red-500'}`}>
-                      {STATUS_LABEL[user.status] ?? user.status}
+                      {KNOWN_STATUS.includes(user.status) ? t(`adm4.um${user.status}`) : user.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -233,7 +235,7 @@ const UserManagement: React.FC = () => {
                         disabled={busyId === user.id}
                         className="px-3 py-1 text-xs bg-digitalcoop-600 text-white rounded hover:bg-digitalcoop-700 disabled:opacity-50"
                       >
-                        {busyId === user.id ? 'Memproses...' : 'Terbitkan Kartu'}
+                        {busyId === user.id ? t('adm4.umBusy') : t('adm4.umIssue')}
                       </button>
                     )}
                   </td>
@@ -242,7 +244,7 @@ const UserManagement: React.FC = () => {
               {!loading && data.items.length === 0 && (
                  <tr>
                     <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-slate-400">
-                       Tidak ada data pengguna ditemukan di kategori ini.
+                       {t('adm4.umNone')}
                     </td>
                  </tr>
               )}
@@ -252,13 +254,13 @@ const UserManagement: React.FC = () => {
 
         {/* Paginasi: 15 data per halaman */}
         <div className="p-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm border-t border-gray-200 dark:border-slate-800 text-gray-600 dark:text-slate-300">
-          <span>{data.total === 0 ? 'Tidak ada data' : `Menampilkan ${from}-${to} dari ${data.total}`}</span>
+          <span>{data.total === 0 ? t('adm4.umNoData') : t('adm4.umShowing', { a: from, b: to, n: data.total })}</span>
           <div className="flex items-center gap-2">
             <button type="button" disabled={pageNo <= 1 || loading} onClick={() => setPageNo((p) => p - 1)}
-              className="px-3 py-1 border border-gray-300 dark:border-slate-700 rounded disabled:opacity-40">Sebelumnya</button>
-            <span>Halaman {data.page} dari {pages}</span>
+              className="px-3 py-1 border border-gray-300 dark:border-slate-700 rounded disabled:opacity-40">{t('adm4.umPrev')}</button>
+            <span>{t('adm4.umPage', { p: data.page, n: pages })}</span>
             <button type="button" disabled={pageNo >= pages || loading} onClick={() => setPageNo((p) => p + 1)}
-              className="px-3 py-1 border border-gray-300 dark:border-slate-700 rounded disabled:opacity-40">Berikutnya</button>
+              className="px-3 py-1 border border-gray-300 dark:border-slate-700 rounded disabled:opacity-40">{t('adm4.umNext')}</button>
           </div>
         </div>
       </div>
