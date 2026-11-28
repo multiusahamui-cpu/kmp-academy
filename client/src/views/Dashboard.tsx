@@ -493,7 +493,7 @@ const AdminDashboard = () => {
             />
             <StatCard
               title={t("dashboard.serverUp")}
-              value={uptimeLabel(data.uptimeSeconds)}
+              value={uptimeLabel(data.uptimeSeconds, t)}
               icon={<AlertCircle className="text-purple-500" />}
               change={t("dashboard.sinceRestart")}
             />

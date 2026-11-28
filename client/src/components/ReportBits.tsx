@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Inbox, AlertTriangle, RotateCw } from 'lucide-react';
 import { Skeleton } from './Skeleton';
+import { useT } from '../i18n';
+
+const loc = (): string => { try { return localStorage.getItem('academy_lang') === 'id' ? 'id-ID' : 'en-US'; } catch { return 'en-US'; } };
 
 export const rupiah = (n: number): string =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -8,16 +11,16 @@ export const rupiah = (n: number): string =>
 export const num = (n: number): string => new Intl.NumberFormat('id-ID').format(n);
 
 export const dateId = (iso: string | null | undefined): string =>
-  iso ? new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  iso ? new Date(iso).toLocaleDateString(loc(), { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
 export const dateTimeId = (iso: string | null | undefined): string =>
-  iso ? new Date(iso).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+  iso ? new Date(iso).toLocaleString(loc(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
 
-export const uptimeLabel = (seconds: number): string => {
+export const uptimeLabel = (seconds: number, t: (k: string, v?: Record<string, string | number>) => string): string => {
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  return d > 0 ? `${d} hari ${h} jam` : h > 0 ? `${h} jam ${m} menit` : `${m} menit`;
+  return d > 0 ? t('dir.upDH', { d, h }) : h > 0 ? t('dir.upHM', { h, m }) : t('dir.upM', { m });
 };
 
 /** Memuat data async dengan status memuat dan galat; `reload` untuk memuat ulang. */
@@ -45,6 +48,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: React.DependencyList = [
 }
 
 export const StateBox: React.FC<{ loading: boolean; error: boolean; onRetry?: () => void; rows?: number; children: React.ReactNode }> = ({ loading, error, onRetry, rows = 4, children }) => {
+  const t = useT();
   if (loading)
     return (
       <div className="py-4 space-y-3" aria-busy="true" aria-live="polite">
@@ -63,10 +67,10 @@ export const StateBox: React.FC<{ loading: boolean; error: boolean; onRetry?: ()
         <span className="grid place-items-center w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500">
           <AlertTriangle size={22} />
         </span>
-        <p className="text-sm text-gray-600 dark:text-slate-300">Gagal memuat data.</p>
+        <p className="text-sm text-gray-600 dark:text-slate-300">{t('dir.rbLoadFail')}</p>
         {onRetry && (
           <button onClick={onRetry} className="btn-ghost text-sm">
-            <RotateCw size={15} /> Coba lagi
+            <RotateCw size={15} /> {t('dir.rbRetry')}
           </button>
         )}
       </div>
@@ -107,9 +111,10 @@ export interface BarItem {
 
 /** Diagram batang sederhana (tanpa pustaka). Tinggi dinormalisasi ke nilai terbesar; semua nol tetap tampil sebagai garis dasar. */
 export const Bars: React.FC<{ items: BarItem[]; height?: number; color?: string }> = ({ items, height = 160, color = 'bg-digitalcoop-500' }) => {
+  const t = useT();
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
-    <div className="flex items-end gap-2" style={{ height }} role="img" aria-label="Diagram batang">
+    <div className="flex items-end gap-2" style={{ height }} role="img" aria-label={t('dir.rbChart')}>
       {items.map((i) => (
         <div key={i.label} className="flex-1 flex flex-col justify-end h-full group relative min-w-0" title={i.title ?? `${i.label}: ${i.value}`}>
           <div className={`${color} rounded-t-sm w-full transition-all`} style={{ height: `${Math.max(2, (i.value / max) * 100)}%` }} />
@@ -129,12 +134,15 @@ export const Empty: React.FC<{ children: React.ReactNode; icon?: React.ReactNode
   </div>
 );
 
-export const ComingSoon: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+export const ComingSoon: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+  const t = useT();
+  return (
   <div className="max-w-2xl">
     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{title}</h2>
     <div className="p-6 rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-gray-600 dark:text-slate-300 space-y-2">
-      <p className="font-bold text-gray-800 dark:text-white">Fitur ini belum aktif.</p>
+      <p className="font-bold text-gray-800 dark:text-white">{t('dir.rbSoon')}</p>
       {children}
     </div>
   </div>
-);
+  );
+};
