@@ -14,6 +14,13 @@ import {
   Code2,
   Heart,
 } from "lucide-react";
+import { useT } from "../i18n";
+
+// Teks kaya: **tebal** dan *miring*.
+const rich = (s: string): React.ReactNode[] =>
+  s.split(/(\*\*.+?\*\*|\*.+?\*)/g).map((p, i) =>
+    p.startsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : p.length > 2 && p.startsWith("*") ? <em key={i}>{p.slice(1, -1)}</em> : p,
+  );
 
 interface InformationCenterModalProps {
   isOpen: boolean;
@@ -24,22 +31,24 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const t = useT();
+  const I = (k: string) => t(`info.${k}`);
   const [activeTab, setActiveTab] = useState("OBJECTIVE");
 
   if (!isOpen) return null;
 
   const MENU_ITEMS = [
-    { id: "OBJECTIVE", label: "Objektif Platform", icon: Target },
-    { id: "ADVANTAGES", label: "Keunggulan", icon: Zap },
-    { id: "ARCHITECTURE", label: "Arsitektur Sistem", icon: Server },
-    { id: "WORKFLOW", label: "Alur Kerja (Workflow)", icon: GitMerge },
-    { id: "ROLES", label: "Panduan Role", icon: Users },
-    { id: "FAQ", label: "FAQ", icon: HelpCircle },
-    { id: "PRIVACY", label: "Kebijakan Privasi", icon: Shield },
-    { id: "TERMS", label: "Syarat & Ketentuan", icon: FileText },
-    { id: "GLOSSARY", label: "Glosarium Istilah", icon: Book },
-    { id: "DISCLAIMER", label: "Penafian (Disclaimer)", icon: AlertTriangle },
-    { id: "TECH", label: "Tech Stack & Credits", icon: Code2 },
+    { id: "OBJECTIVE", label: I('mObjective'), icon: Target },
+    { id: "ADVANTAGES", label: I('mAdvantages'), icon: Zap },
+    { id: "ARCHITECTURE", label: I('mArchitecture'), icon: Server },
+    { id: "WORKFLOW", label: I('mWorkflow'), icon: GitMerge },
+    { id: "ROLES", label: I('mRoles'), icon: Users },
+    { id: "FAQ", label: I('mFaq'), icon: HelpCircle },
+    { id: "PRIVACY", label: I('mPrivacy'), icon: Shield },
+    { id: "TERMS", label: I('mTerms'), icon: FileText },
+    { id: "GLOSSARY", label: I('mGlossary'), icon: Book },
+    { id: "DISCLAIMER", label: I('mDisclaimer'), icon: AlertTriangle },
+    { id: "TECH", label: I('mTech'), icon: Code2 },
   ];
 
   const renderContent = () => {
@@ -47,79 +56,36 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "OBJECTIVE":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              1. Objektif Platform KMP - ADNG Academy
-            </h3>
-            <p className="text-gray-700 dark:text-slate-300 leading-relaxed">
-              KMP - ADNG Academy dibangun dengan visi utama untuk{" "}
-              <strong>mendigitalisasi Koperasi dan UMKM di Indonesia</strong>{" "}
-              melalui pendidikan vokasi yang terstruktur dan terukur.
-            </p>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('o1')}</h3>
+            <p className="text-gray-700 dark:text-slate-300 leading-relaxed">{rich(I('o2'))}</p>
             <ul className="list-disc pl-5 space-y-3 text-gray-600 dark:text-slate-400">
               <li className="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border-l-4 border-digitalcoop-500 shadow-sm">
-                <strong className="text-digitalcoop-700 dark:text-digitalcoop-300 block mb-1 text-base">
-                  Transformasi Siswa (Good to Great)
-                </strong>
-                <span className="text-sm">
-                  Mendorong proses <em>Upskilling</em> yang berkelanjutan untuk
-                  meningkatkan level kompetensi anggota secara radikal. Kami
-                  memfasilitasi perjalanan transformasi dari kemampuan standar
-                  menjadi tenaga ahli luar biasa (High Impact Talent) yang siap
-                  memimpin perubahan industri.
-                </span>
+                <strong className="text-digitalcoop-700 dark:text-digitalcoop-300 block mb-1 text-base">{I('o3')}</strong>
+                <span className="text-sm">{rich(I('o4'))}</span>
               </li>
-              <li>
-                Mencetak talenta digital yang siap kerja di lingkungan industri
-                Koperasi modern.
-              </li>
-              <li>
-                Menyediakan platform monetisasi bagi para ahli (Mentor/Creator)
-                untuk berbagi ilmu.
-              </li>
-              <li>
-                Menstandarisasi kurikulum pelatihan berbasis kompetensi industri
-                (SKKNI).
-              </li>
-              <li>
-                Menciptakan ekosistem belajar yang transparan dengan sistem
-                royalti otomatis.
-              </li>
+              <li>{I('o5')}</li>
+              <li>{I('o6')}</li>
+              <li>{I('o7')}</li>
+              <li>{I('o8')}</li>
             </ul>
           </div>
         );
       case "ADVANTAGES":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              2. Keunggulan Platform
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('a1')}</h3>
             <div className="grid gap-4">
               <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-100 dark:border-slate-700">
-                <h4 className="font-bold text-gray-900 dark:text-white mb-1">
-                  Multi-Role Ecosystem
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-slate-400">
-                  Satu akun dapat bertransformasi. Student hari ini bisa menjadi
-                  Mentor atau Creator esok hari.
-                </p>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-1">{I('a2')}</h4>
+                <p className="text-sm text-gray-600 dark:text-slate-400">{I('a3')}</p>
               </div>
               <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-100 dark:border-slate-700">
-                <h4 className="font-bold text-gray-900 dark:text-white mb-1">
-                  Automated Royalty Settlement
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-slate-400">
-                  Sistem keuangan transparan yang membagi hasil penjualan antara
-                  Platform, Creator, dan Mentor secara otomatis.
-                </p>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-1">{I('a4')}</h4>
+                <p className="text-sm text-gray-600 dark:text-slate-400">{I('a5')}</p>
               </div>
               <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-100 dark:border-slate-700">
-                <h4 className="font-bold text-gray-900 dark:text-white mb-1">
-                  B2B Integration
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-slate-400">
-                  Fitur khusus untuk Koperasi/Perusahaan yang ingin mendaftarkan
-                  anggotanya secara massal (Bulk Voucher).
-                </p>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-1">{I('a6')}</h4>
+                <p className="text-sm text-gray-600 dark:text-slate-400">{I('a7')}</p>
               </div>
             </div>
           </div>
@@ -127,14 +93,8 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "ARCHITECTURE":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              3. Arsitektur Sistem
-            </h3>
-            <p className="text-gray-700 dark:text-slate-300">
-              Sistem ini dibangun dengan pendekatan{" "}
-              <strong>Monolithic Modular</strong> untuk memastikan performa
-              tinggi namun tetap mudah dikelola.
-            </p>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('r1')}</h3>
+            <p className="text-gray-700 dark:text-slate-300">{rich(I('r2'))}</p>
             <div className="p-4 bg-slate-900 text-white rounded-lg font-mono text-xs overflow-x-auto">
               <p>USER (Browser) &lt;--&gt; [LOAD BALANCER]</p>
               <p className="pl-8">|</p>
@@ -154,67 +114,43 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "WORKFLOW":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              4. Alur Kerja Sistem (Workflow)
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('w1')}</h3>
             <ul className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
               <li className="flex gap-3">
                 <span className="font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded h-fit">
                   1
                 </span>
-                <div>
-                  <strong>Registrasi:</strong> User mendaftar dan otomatis masuk
-                  sebagai <strong>Student</strong>. Ini adalah satu-satunya
-                  titik masuk yang tersedia untuk pengguna umum.
-                </div>
+                <div>{rich(I('w2'))}</div>
               </li>
               <li className="flex gap-3">
                 <span className="font-bold bg-orange-100 text-orange-700 px-2 py-0.5 rounded h-fit">
                   2
                 </span>
-                <div>
-                  <strong>Upgrade Peran (Opsional):</strong> Student yang ingin
-                  menjadi Creator atau Mentor mengajukan proposal via menu{" "}
-                  <em>Settings &gt; Profil &amp; Role</em>. Admin akan mereview
-                  dan menyetujui atau menolak pengajuan tersebut.
-                </div>
+                <div>{rich(I('w3'))}</div>
               </li>
               <li className="flex gap-3">
                 <span className="font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded h-fit">
                   3
                 </span>
-                <div>
-                  <strong>Produksi Konten:</strong> Creator mengunggah materi
-                  (Video/PDF). Materi masuk status <em>Draft</em> lalu{" "}
-                  <em>Pending Review</em>.
-                </div>
+                <div>{rich(I('w4'))}</div>
               </li>
               <li className="flex gap-3">
                 <span className="font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded h-fit">
                   4
                 </span>
-                <div>
-                  <strong>Moderasi:</strong> Admin Sistem mereview konten. Jika
-                  lolos, status menjadi <em>Published</em>.
-                </div>
+                <div>{rich(I('w5'))}</div>
               </li>
               <li className="flex gap-3">
                 <span className="font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded h-fit">
                   5
                 </span>
-                <div>
-                  <strong>Pembelajaran:</strong> Student membeli akses kursus
-                  (Mandiri) atau mendaftar Workshop (Live).
-                </div>
+                <div>{rich(I('w6'))}</div>
               </li>
               <li className="flex gap-3">
                 <span className="font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded h-fit">
                   6
                 </span>
-                <div>
-                  <strong>Penyelesaian:</strong> Student mengerjakan kuis/ujian.
-                  Jika lulus passing grade, Sertifikat diterbitkan otomatis.
-                </div>
+                <div>{rich(I('w7'))}</div>
               </li>
             </ul>
           </div>
@@ -222,21 +158,12 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "ROLES":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              5. Panduan Role / Pemakai
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('l1')}</h3>
 
             {/* Mandatory Path Banner */}
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-4">
-              <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">
-                ⚠ Jalur Wajib (Mandatory Path)
-              </p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                Semua pengguna <strong>wajib memulai sebagai Student</strong>.
-                Tidak ada pendaftaran langsung sebagai Creator atau Mentor.
-                Upgrade peran hanya dapat diajukan setelah akun Student aktif
-                dan memenuhi syarat yang ditetapkan platform.
-              </p>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">{I('l2')}</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">{rich(I('l3'))}</p>
               <div className="mt-3 flex items-center gap-2 text-xs font-mono text-amber-800 dark:text-amber-300">
                 <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-bold">
                   Student
@@ -245,11 +172,11 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
                 <span className="bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded font-bold">
                   Creator
                 </span>
-                <span className="text-amber-600">atau</span>
+                <span className="text-amber-600">{I('l4')}</span>
                 <span className="bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded font-bold">
                   Mentor
                 </span>
-                <span className="text-amber-600">atau keduanya</span>
+                <span className="text-amber-600">{I('l5')}</span>
               </div>
             </div>
 
@@ -258,68 +185,38 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
               <div className="border-l-4 border-blue-500 pl-3">
                 <h4 className="font-bold">
                   Student{" "}
-                  <span className="text-xs font-normal text-blue-600 dark:text-blue-400 ml-1">
-                    (Titik Masuk Wajib)
-                  </span>
+                  <span className="text-xs font-normal text-blue-600 dark:text-blue-400 ml-1">{I('l6')}</span>
                 </h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Pengguna umum. Bisa membeli kursus, mengakses materi, ujian,
-                  dan mendapat sertifikat. Semua akun baru dimulai dari sini.
-                </p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l7')}</p>
               </div>
               <div className="border-l-4 border-orange-500 pl-3">
                 <h4 className="font-bold">
                   Content Creator{" "}
-                  <span className="text-xs font-normal text-orange-600 dark:text-orange-400 ml-1">
-                    (Upgrade dari Student)
-                  </span>
+                  <span className="text-xs font-normal text-orange-600 dark:text-orange-400 ml-1">{I('l8')}</span>
                 </h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Pembuat aset digital. Tidak wajib mengajar live. Mendapat
-                  royalti pasif dari penggunaan materinya. Tetap memiliki akses
-                  area Student untuk mengikuti kursus lain.
-                </p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l9')}</p>
               </div>
               <div className="border-l-4 border-purple-500 pl-3">
                 <h4 className="font-bold">
                   Mentor{" "}
-                  <span className="text-xs font-normal text-purple-600 dark:text-purple-400 ml-1">
-                    (Upgrade dari Student)
-                  </span>
+                  <span className="text-xs font-normal text-purple-600 dark:text-purple-400 ml-1">{I('l8')}</span>
                 </h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Pengajar aktif. Membuka kelas Workshop/Bootcamp, membimbing
-                  siswa, dan memberi nilai tugas. Tetap memiliki akses area
-                  Student untuk mengikuti kursus lain.
-                </p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l10')}</p>
               </div>
               <div className="border-l-4 border-green-500 pl-3">
                 <h4 className="font-bold">
                   Creator + Mentor{" "}
-                  <span className="text-xs font-normal text-green-600 dark:text-green-400 ml-1">
-                    (Peran Ganda)
-                  </span>
+                  <span className="text-xs font-normal text-green-600 dark:text-green-400 ml-1">{I('l11')}</span>
                 </h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Dimungkinkan memiliki kedua peran sekaligus. Sidebar akan
-                  menampilkan area Creator, area Mentor, dan area Student dalam
-                  satu tampilan terintegrasi.
-                </p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l12')}</p>
               </div>
               <div className="border-l-4 border-yellow-500 pl-3">
-                <h4 className="font-bold">Direktur Lembaga</h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Pemegang keputusan tertinggi. Memantau laporan strategis dan
-                  governance partner. Ditunjuk langsung oleh Superadmin, bukan
-                  jalur upgrade.
-                </p>
+                <h4 className="font-bold">{I('l13')}</h4>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l14')}</p>
               </div>
               <div className="border-l-4 border-red-500 pl-3">
-                <h4 className="font-bold">Admin Sistem / Superadmin</h4>
-                <p className="text-xs text-gray-600 dark:text-slate-400">
-                  Pengelola operasional dan sistem platform. Ditunjuk internal,
-                  tidak tersedia via jalur pendaftaran umum.
-                </p>
+                <h4 className="font-bold">{I('l15')}</h4>
+                <p className="text-xs text-gray-600 dark:text-slate-400">{I('l16')}</p>
               </div>
             </div>
           </div>
@@ -327,130 +224,69 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
       case "FAQ":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              6. Frequently Asked Questions
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('f1')}</h3>
             <details className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg cursor-pointer">
-              <summary className="font-bold text-gray-900 dark:text-white text-sm">
-                Apakah sertifikat diakui industri?
-              </summary>
-              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">
-                Ya, untuk kategori Certification, kami bekerjasama dengan
-                partner resmi seperti BNSP dan lembaga internasional.
-              </p>
+              <summary className="font-bold text-gray-900 dark:text-white text-sm">{I('f2')}</summary>
+              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">{I('f3')}</p>
             </details>
             <details className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg cursor-pointer">
-              <summary className="font-bold text-gray-900 dark:text-white text-sm">
-                Bagaimana cara mencairkan saldo?
-              </summary>
-              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">
-                Saldo dapat dicairkan (Withdraw) ke rekening bank yang terdaftar
-                di menu Settings &gt; Wallet. Proses maksimal 2x24 jam kerja.
-              </p>
+              <summary className="font-bold text-gray-900 dark:text-white text-sm">{I('f4')}</summary>
+              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">{I('f5')}</p>
             </details>
             <details className="bg-gray-50 dark:bg-slate-800 p-3 rounded-lg cursor-pointer">
-              <summary className="font-bold text-gray-900 dark:text-white text-sm">
-                Bisakah saya menjadi Mentor dan Creator sekaligus?
-              </summary>
-              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">
-                Bisa. Sistem mendukung peran ganda. Anda akan mendapatkan
-                dashboard gabungan untuk memantau performa kedua peran tersebut.
-              </p>
+              <summary className="font-bold text-gray-900 dark:text-white text-sm">{I('f6')}</summary>
+              <p className="mt-2 text-xs text-gray-600 dark:text-slate-400">{I('f7')}</p>
             </details>
           </div>
         );
       case "PRIVACY":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              7. Kebijakan Privasi
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-slate-300">
-              Kami menghargai privasi data Anda. KMP - ADNG Academy mengumpulkan
-              data (Nama, Email, NIK untuk sertifikat) semata-mata untuk
-              keperluan operasional akademik dan legalitas sertifikasi.
-            </p>
-            <p className="text-sm text-gray-700 dark:text-slate-300 mt-2">
-              Data KTP (KYC) disimpan dalam server terenkripsi dan tidak
-              dibagikan kepada pihak ketiga selain untuk keperluan verifikasi
-              hukum jika diperlukan.
-            </p>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('p1')}</h3>
+            <p className="text-sm text-gray-700 dark:text-slate-300">{I('p2')}</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300 mt-2">{I('p3')}</p>
           </div>
         );
       case "TERMS":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              8. Syarat & Ketentuan
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('t1')}</h3>
             <ul className="list-decimal pl-5 space-y-2 text-sm text-gray-700 dark:text-slate-300">
-              <li>User wajib memberikan data yang valid saat pendaftaran.</li>
-              <li>
-                Dilarang keras membagikan akun (Account Sharing) atau membajak
-                materi kursus.
-              </li>
-              <li>
-                Refund hanya dapat diajukan maksimal 24 jam setelah pembelian
-                jika materi belum diakses lebih dari 10%.
-              </li>
-              <li>
-                Platform berhak membekukan akun yang terindikasi melakukan
-                pelanggaran tanpa pemberitahuan sebelumnya.
-              </li>
+              <li>{I('t2')}</li>
+              <li>{I('t3')}</li>
+              <li>{I('t4')}</li>
+              <li>{I('t5')}</li>
             </ul>
           </div>
         );
       case "GLOSSARY":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              9. Glosarium Istilah
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('g1')}</h3>
             <div className="grid grid-cols-1 gap-3">
               <div className="text-sm">
-                <strong className="text-digitalcoop-600">LMS:</strong> Learning
-                Management System.
-              </div>
+                <strong className="text-digitalcoop-600">LMS:</strong> {I('g2')}</div>
               <div className="text-sm">
-                <strong className="text-digitalcoop-600">KYC:</strong> Know Your
-                Customer (Verifikasi Identitas KTP).
-              </div>
+                <strong className="text-digitalcoop-600">KYC:</strong> {I('g3')}</div>
               <div className="text-sm">
-                <strong className="text-digitalcoop-600">Settlement:</strong> Proses
-                pencairan dana dari sistem ke pengguna.
-              </div>
+                <strong className="text-digitalcoop-600">Settlement:</strong> {I('g4')}</div>
               <div className="text-sm">
-                <strong className="text-digitalcoop-600">Assembling:</strong> Proses
-                Mentor menggunakan materi Creator lain untuk kelas Workshop.
-              </div>
+                <strong className="text-digitalcoop-600">Assembling:</strong> {I('g5')}</div>
             </div>
           </div>
         );
       case "DISCLAIMER":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              A. Penafian (Disclaimer)
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-slate-300 border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50 dark:bg-yellow-900/10">
-              Platform ini disediakan &quot;sebagaimana adanya&quot;. KMP - ADNG
-              Academy tidak menjamin kelulusan kerja atau kesuksesan bisnis
-              instan setelah mengikuti pelatihan. Hasil tergantung pada
-              ketekunan masing-masing peserta.
-            </p>
-            <p className="text-sm text-gray-700 dark:text-slate-300 mt-2">
-              Materi investasi atau keuangan bukan merupakan saran finansial
-              profesional. Segala keputusan investasi adalah tanggung jawab
-              pribadi.
-            </p>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('d1')}</h3>
+            <p className="text-sm text-gray-700 dark:text-slate-300 border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50 dark:bg-yellow-900/10">{I('d2')}</p>
+            <p className="text-sm text-gray-700 dark:text-slate-300 mt-2">{I('d3')}</p>
           </div>
         );
       case "TECH":
         return (
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">
-              B. Technology Stack & Credits
-            </h3>
+            <h3 className="text-xl font-bold text-digitalcoop-600 dark:text-digitalcoop-400 mb-4">{I('x1')}</h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -479,9 +315,9 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
 
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
               <p className="text-xs text-gray-500">
-                Developed by <strong>Ulpermadi Ibrahim</strong> & Team.
+                {rich(I('x2'))}
                 <br />
-                &copy; {new Date().getFullYear()} All Rights Reserved.
+                &copy; {new Date().getFullYear()} {I('x3')}
               </p>
             </div>
           </div>
@@ -508,12 +344,8 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
               <div className="bg-digitalcoop-600 text-white p-1.5 rounded-lg mr-2">
                 <Heart size={18} fill="currentColor" />
-              </div>
-              Pusat Informasi
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-              Dokumentasi & Panduan Sistem
-            </p>
+              </div>{I('hTitle')}</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{I('hSub')}</p>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -562,9 +394,7 @@ const InformationCenterModal: React.FC<InformationCenterModalProps> = ({
                 <Heart
                   size={12}
                   className="text-red-500 fill-current animate-pulse"
-                />
-                Made with Love for Quality Education for Indonesian People
-              </p>
+                />{I('hMade')}</p>
             </div>
           </div>
         </div>
